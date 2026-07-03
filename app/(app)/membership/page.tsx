@@ -109,7 +109,7 @@ export default function MembershipPage() {
                   />
                 </div>
                 <p className="text-[11px] text-slate-400 mt-2">
-                  {t.membership.minSpent.replace("{amount}", formatCurrency(Number(nextLevel.min_spent_sar) - spent, language))} -> {nextLevel.level_name}
+                  {t.membership.minSpent.replace("{amount}", formatCurrency(Number(nextLevel.min_spent_sar) - spent, language))} -{">"} {nextLevel.level_name}
                 </p>
               </div>
             ) : (

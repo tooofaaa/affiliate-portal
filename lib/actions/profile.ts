@@ -26,6 +26,7 @@ export async function getCustomerProfile(): Promise<{ data: CustomerProfile | nu
       .from("customers")
       .insert({
         portal_user_id: user.id,
+        name: user.user_metadata?.name || user.email?.split("@")[0] || "New Customer",
         company_name: user.user_metadata?.company_name || user.email?.split("@")[0] || "New Company",
         contact_email: user.email,
         is_verified: false,

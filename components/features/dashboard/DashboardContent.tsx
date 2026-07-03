@@ -241,7 +241,7 @@ export default function DashboardContent() {
                             {formatCurrency(order.totalCost, language)}
                           </td>
                           <td className="px-6 py-4" style={{ color: "#475569" }}>
-                            {formatDate(order.expectedDelivery, false, language)}
+                            {formatDate(order.expectedDelivery, language)}
                           </td>
                         </tr>
                       );

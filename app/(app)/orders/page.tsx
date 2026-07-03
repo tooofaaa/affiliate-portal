@@ -200,7 +200,7 @@ export default function OrdersPage() {
                             {order.poCode}
                           </div>
                           <div className="text-[10px] text-gray-400 mt-1">
-                            {formatDate(order.createdAt, false, language)}
+                            {formatDate(order.createdAt, language)}
                           </div>
                         </td>
                         <td className="px-6 py-4 font-semibold text-slate-800">
