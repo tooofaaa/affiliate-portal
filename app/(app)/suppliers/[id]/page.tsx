@@ -8,12 +8,15 @@ import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Supplier, Product } from "@/lib/types";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface DBProduct {
   id: number;
   supplier_id: number;
   product_name: string;
+  product_name_ar: string | null;
   description: string | null;
+  description_ar: string | null;
   sell_price: number | null;
   unit_of_measure: string | null;
   product_image: string | null;
@@ -25,6 +28,8 @@ interface DBProduct {
 export default function SupplierDetailsPage() {
   const { id } = useParams() as { id: string };
   const { addToCart } = useCart();
+  const { t, language } = useLanguage();
+  const isAr = language === "ar";
   
   const [supplier, setSupplier] = useState<Supplier | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
@@ -49,10 +54,12 @@ export default function SupplierDetailsPage() {
       ]);
 
       if (supplierRes.data) {
+        const sName = (isAr && supplierRes.data.supplier_name_ar) ? supplierRes.data.supplier_name_ar : supplierRes.data.supplier_name;
+        const sDesc = (isAr && supplierRes.data.description_ar) ? supplierRes.data.description_ar : (supplierRes.data.description || t.supplierDetail.trustedSupplier);
         setSupplier({
           id: supplierRes.data.id,
-          name: supplierRes.data.supplier_name,
-          description: supplierRes.data.description || "A trusted supplier for our business.",
+          name: sName,
+          description: sDesc,
           logoUrl: supplierRes.data.logo_url || "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=300&q=80",
           categories: supplierRes.data.categories || ["General"],
           rating: supplierRes.data.rating || 5.0,
@@ -62,19 +69,24 @@ export default function SupplierDetailsPage() {
       }
 
       if (productsRes.data) {
-        const mappedProducts = (productsRes.data as DBProduct[]).map((p) => ({
-          id: p.id,
-          supplierId: p.supplier_id,
-          supplierName: supplierRes.data?.supplier_name || 'Unknown',
-          name: p.product_name,
-          description: p.description || "High quality product.",
-          price: p.sell_price || 0,
-          unit: p.unit_of_measure || "pcs",
-          imageUrl: p.product_image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
-          category: p.product_category || "General",
-          inStock: p.amount_stock > 0,
-          minOrderQty: p.min_order_qty || 1
-        })) as Product[];
+        const mappedProducts = (productsRes.data as DBProduct[]).map((p) => {
+          const pName = (isAr && p.product_name_ar) ? p.product_name_ar : p.product_name;
+          const pDesc = (isAr && p.description_ar) ? p.description_ar : (p.description || t.supplierDetail.highQuality);
+          const sName = supplierRes.data ? ((isAr && supplierRes.data.supplier_name_ar) ? supplierRes.data.supplier_name_ar : supplierRes.data.supplier_name) : t.supplierDetail.unknown;
+          return {
+            id: p.id,
+            supplierId: p.supplier_id,
+            supplierName: sName,
+            name: pName,
+            description: pDesc,
+            price: p.sell_price || 0,
+            unit: p.unit_of_measure || "pcs",
+            imageUrl: p.product_image || "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500&q=80",
+            category: p.product_category || "General",
+            inStock: p.amount_stock > 0,
+            minOrderQty: p.min_order_qty || 1
+          };
+        }) as Product[];
         setProducts(mappedProducts);
         setFilteredProducts(mappedProducts);
       }
@@ -83,7 +95,7 @@ export default function SupplierDetailsPage() {
     }
     
     loadData();
-  }, [id]);
+  }, [id, isAr]);
 
   // Apply frontend search filters dynamically
   useEffect(() => {
@@ -114,7 +126,7 @@ export default function SupplierDetailsPage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-gray-500">Loading supplier details...</p>
+        <p className="text-gray-500">{t.supplierDetail.loading}</p>
       </div>
     );
   }
@@ -122,10 +134,10 @@ export default function SupplierDetailsPage() {
   if (!supplier) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Supplier Not Found</h2>
-        <p className="text-gray-500 mb-6">The supplier you are looking for does not exist.</p>
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">{t.supplierDetail.notFound}</h2>
+        <p className="text-gray-500 mb-6">{t.supplierDetail.notFoundDesc}</p>
         <Link href="/suppliers">
-          <Button variant="primary">Back to Suppliers</Button>
+          <Button variant="primary" className="cursor-pointer">{t.supplierDetail.backButton}</Button>
         </Link>
       </div>
     );
@@ -141,10 +153,10 @@ export default function SupplierDetailsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8 pb-10 font-poppins">
+    <div className="flex flex-col gap-8 pb-10">
       {/* Back link */}
-      <Link href="/suppliers" className="text-sm font-semibold text-indigo-500 hover:text-indigo-600 inline-flex items-center gap-1 w-fit">
-        ← Back to Suppliers
+      <Link href="/suppliers" className="text-sm font-semibold text-indigo-500 hover:text-indigo-600 inline-flex items-center gap-1 w-fit cursor-pointer">
+        {t.supplierDetail.back}
       </Link>
 
       {/* Supplier Header */}
@@ -165,7 +177,7 @@ export default function SupplierDetailsPage() {
               ★ {supplier.rating}
             </span>
           </div>
-          <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-3xl">
+          <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-3xl font-light">
             {supplier.description}
           </p>
           <div className="flex flex-wrap items-center gap-4 mt-4 text-sm font-medium text-gray-300">
@@ -173,7 +185,7 @@ export default function SupplierDetailsPage() {
               <span className="text-indigo-400">📍</span> {supplier.location}
             </div>
             <div className="flex items-center gap-1.5">
-              <span className="text-indigo-400">⏱</span> {supplier.deliveryTime} delivery
+              <span className="text-indigo-400">⏱</span> {supplier.deliveryTime} {t.supplierDetail.delivery}
             </div>
           </div>
         </div>
@@ -189,7 +201,7 @@ export default function SupplierDetailsPage() {
               : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
           }`}
         >
-          All Products
+          {t.supplierDetail.allProducts}
         </button>
         {supplier.categories.map(cat => (
           <button
@@ -218,7 +230,7 @@ export default function SupplierDetailsPage() {
         <div className="w-full md:w-72">
           <input
             type="text"
-            placeholder="Search products..."
+            placeholder={t.supplierDetail.searchPlaceholder}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-3 py-2 border border-gray-200 rounded-xl text-sm outline-none focus:border-indigo-500"
@@ -234,13 +246,13 @@ export default function SupplierDetailsPage() {
               onChange={(e) => setInStockOnly(e.target.checked)}
               className="w-4 h-4 rounded text-indigo-600 focus:ring-indigo-500 border-gray-300"
             />
-            <label htmlFor="instock" className="text-xs font-semibold text-gray-600 cursor-pointer">In stock only</label>
+            <label htmlFor="instock" className="text-xs font-semibold text-gray-600 cursor-pointer">{t.supplierDetail.inStockOnly}</label>
           </div>
           
-          <div className="w-32">
+          <div className="w-38">
             <input
               type="number"
-              placeholder="Max Price (SAR)"
+              placeholder={t.supplierDetail.maxPrice}
               value={maxPrice}
               onChange={(e) => setMaxPrice(e.target.value ? parseFloat(e.target.value) : "")}
               className="w-full px-3 py-1.5 border border-gray-200 rounded-xl text-xs outline-none focus:border-indigo-500"
@@ -265,7 +277,7 @@ export default function SupplierDetailsPage() {
               {!product.inStock && (
                 <div className="absolute inset-0 bg-white/60 backdrop-blur-sm flex items-center justify-center">
                   <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full font-bold text-sm border border-red-200">
-                     Out of Stock
+                     {t.supplierDetail.outOfStock}
                   </span>
                 </div>
               )}
@@ -273,7 +285,7 @@ export default function SupplierDetailsPage() {
             <div className="p-5 flex flex-col flex-1">
               <div className="flex justify-between items-start mb-1">
                 <span className="text-xs font-bold text-indigo-500 uppercase tracking-wider">{product.category}</span>
-                <span className="text-lg font-bold text-gray-900">{formatCurrency(product.price)}</span>
+                <span className="text-lg font-bold text-gray-900">{formatCurrency(product.price, language)}</span>
               </div>
               <h3 className="font-bold text-gray-900 text-lg mb-2">{product.name}</h3>
               <p className="text-sm text-gray-500 line-clamp-2 mb-4 flex-1">
@@ -282,7 +294,7 @@ export default function SupplierDetailsPage() {
               
               <div className="pt-4 border-t border-gray-100 flex items-center gap-3">
                 <div className="flex items-center gap-2">
-                  <label className="text-xs font-semibold text-gray-500">Qty:</label>
+                  <label className="text-xs font-semibold text-gray-500">{t.supplierDetail.qty}</label>
                   <input
                     type="number"
                     min={product.minOrderQty}
@@ -298,18 +310,18 @@ export default function SupplierDetailsPage() {
                   disabled={!product.inStock}
                   onClick={() => handleAdd(product.id)}
                 >
-                  Add to Cart
+                  {t.supplierDetail.addToCart}
                 </Button>
               </div>
               <p className="text-[10px] text-center mt-2 text-gray-400 font-medium">
-                Min. order: {product.minOrderQty} {product.unit}(s)
+                {t.supplierDetail.minOrder.replace('{qty}', String(product.minOrderQty)).replace('{unit}', product.unit)}
               </p>
             </div>
           </div>
         ))}
         {filteredProducts.length === 0 && (
           <div className="col-span-full py-12 text-center text-gray-500 bg-gray-50 rounded-2xl border border-gray-200 border-dashed">
-            No products match the selected criteria.
+            {t.supplierDetail.noProducts}
           </div>
         )}
       </div>

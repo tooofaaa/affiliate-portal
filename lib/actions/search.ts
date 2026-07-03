@@ -68,7 +68,7 @@ export async function searchProducts(
     description: p.description || "",
     price: p.sell_price,
     unit: p.product_type || "Unit",
-    imageUrl: p.product_image || "/placeholder-product.png",
+    imageUrl: p.product_image || null,
     category: p.product_category,
     inStock: p.amount_stock > 0,
     minOrderQty: p.moq || 1,

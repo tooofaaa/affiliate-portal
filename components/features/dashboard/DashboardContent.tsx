@@ -19,8 +19,9 @@ const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
 };
 
 export default function DashboardContent() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const d = t.dashboard;
+  const isAr = language === "ar";
 
   const [orders, setOrders] = useState<Order[]>([]);
   const [totalSuppliers, setTotalSuppliers] = useState(0);
@@ -34,25 +35,28 @@ export default function DashboardContent() {
       const supabase = createClient();
       
       const [ordersRes, suppliersRes, walletRes, membershipRes, productsRes] = await Promise.all([
-        supabase.from('orders').select('*, suppliers(supplier_name)').order('created_at', { ascending: false }),
+        supabase.from('orders').select('*, suppliers(supplier_name, supplier_name_ar)').order('created_at', { ascending: false }),
         supabase.from('suppliers').select('id', { count: 'exact', head: true }),
         getCustomerWallet(),
         getCustomerMembership(),
-        supabase.from('products').select('*, suppliers(supplier_name)').limit(3)
+        supabase.from('products').select('*, suppliers(supplier_name, supplier_name_ar)').limit(3)
       ]);
 
       if (ordersRes.data) {
-        setOrders(ordersRes.data.map(o => ({
-          id: o.id,
-          poCode: o.po_code,
-          supplierId: o.supplier_id,
-          supplierName: o.suppliers?.supplier_name || 'Unknown',
-          status: o.status,
-          items: [],
-          totalCost: o.total_cost,
-          createdAt: o.created_at,
-          expectedDelivery: o.expected_delivery_date
-        })) as Order[]);
+        setOrders(ordersRes.data.map(o => {
+          const sName = o.suppliers ? ((isAr && o.suppliers.supplier_name_ar) ? o.suppliers.supplier_name_ar : o.suppliers.supplier_name) : t.supplierDetail.unknown;
+          return {
+            id: o.id,
+            poCode: o.po_code,
+            supplierId: o.supplier_id,
+            supplierName: sName,
+            status: o.status,
+            items: [],
+            totalCost: o.total_cost,
+            createdAt: o.created_at,
+            expectedDelivery: o.expected_delivery_date
+          };
+        }) as Order[]);
       }
       
       if (suppliersRes.count !== null) {
@@ -68,26 +72,30 @@ export default function DashboardContent() {
       }
 
       if (productsRes.data) {
-        setRecommendations(productsRes.data.map(p => ({
-          id: p.id,
-          supplierId: p.supplier_id,
-          supplierName: p.suppliers?.supplier_name || 'Unknown',
-          name: p.product_name,
-          description: p.description || '',
-          price: p.sell_price,
-          unit: p.product_type || 'Unit',
-          imageUrl: p.product_image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80',
-          category: p.product_category,
-          inStock: p.amount_stock > 0,
-          minOrderQty: p.moq || 1
-        })));
+        setRecommendations(productsRes.data.map(p => {
+          const sName = p.suppliers ? ((isAr && p.suppliers.supplier_name_ar) ? p.suppliers.supplier_name_ar : p.suppliers.supplier_name) : t.supplierDetail.unknown;
+          const pName = (isAr && p.product_name_ar) ? p.product_name_ar : p.product_name;
+          return {
+            id: p.id,
+            supplierId: p.supplier_id,
+            supplierName: sName,
+            name: pName,
+            description: p.description || '',
+            price: p.sell_price,
+            unit: p.product_type || 'pcs',
+            imageUrl: p.product_image || 'https://images.unsplash.com/photo-1542838132-92c53300491e?w=300&q=80',
+            category: p.product_category,
+            inStock: p.amount_stock > 0,
+            minOrderQty: p.moq || 1
+          };
+        }));
       }
       
       setIsLoading(false);
     }
     
     fetchData();
-  }, []);
+  }, [isAr]);
 
   const totalSpent = orders.reduce((sum, o) => sum + Number(o.totalCost), 0);
   const activeOrders = orders.filter((o) => o.status !== "Delivered" && o.status !== "Cancelled").length;
@@ -95,31 +103,31 @@ export default function DashboardContent() {
   const statCards = [
     {
       title: d.totalSpent,
-      value: formatCurrency(totalSpent),
+      value: formatCurrency(totalSpent, language),
       accent: "#6366f1",
       icon: <OrdersIcon className="w-4 h-4" />,
-      description: "All time purchases",
+      description: d.allTimePurchases,
     },
     {
       title: d.activeOrders,
       value: activeOrders,
       accent: "#f59e0b",
       icon: <ClockIcon className="w-4 h-4" />,
-      description: "In progress shipments",
+      description: d.inProgressShipments,
     },
     {
-      title: "Wallet Balance",
-      value: formatCurrency(walletBalance),
+      title: t.wallet.title,
+      value: formatCurrency(walletBalance, language),
       accent: "#10b981",
       icon: <WalletIcon className="w-4 h-4" />,
-      description: "Available credit",
+      description: d.availableCredit,
     },
     {
-      title: "Membership Status",
+      title: t.membership.title,
       value: membershipTier,
       accent: "#ec4899",
       icon: <ActivityIcon className="w-4 h-4" />,
-      description: "Active reward tier",
+      description: d.activeRewardTier,
     },
   ];
 
@@ -131,7 +139,7 @@ export default function DashboardContent() {
           {d.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          {d.welcome} 👋 — here&apos;s your purchasing overview
+          {d.welcome} 👋 — {d.purchasingOverview}
         </p>
       </div>
 
@@ -154,9 +162,8 @@ export default function DashboardContent() {
         
         {/* Recent Orders */}
         <div
-          className="xl:col-span-2 rounded-2xl overflow-hidden flex flex-col justify-between"
+          className="xl:col-span-2 rounded-2xl overflow-hidden flex flex-col justify-between bg-white"
           style={{
-            background: "rgba(255,255,255,0.95)",
             border: "1px solid rgba(99,102,241,0.1)",
             boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
           }}
@@ -171,10 +178,10 @@ export default function DashboardContent() {
               </h2>
               <Link
                 href="/orders"
-                className="text-xs font-semibold transition-colors duration-200"
+                className="text-xs font-semibold transition-colors duration-200 cursor-pointer"
                 style={{ color: "#6366f1" }}
               >
-                View all →
+                {d.viewAll}
               </Link>
             </div>
 
@@ -185,7 +192,7 @@ export default function DashboardContent() {
                     {[t.orders.poCode, t.orders.supplier, t.orders.status, t.orders.totalCost, t.orders.expectedDelivery].map((h) => (
                       <th
                         key={h}
-                        className="px-6 py-3 text-left text-xs font-semibold uppercase tracking-widest"
+                        className="px-6 py-3 text-start text-xs font-semibold uppercase tracking-widest"
                         style={{ color: "#94a3b8" }}
                       >
                         {h}
@@ -197,13 +204,13 @@ export default function DashboardContent() {
                   {isLoading ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                        Loading orders...
+                        {d.loadingOrders}
                       </td>
                     </tr>
                   ) : orders.length === 0 ? (
                     <tr>
                       <td colSpan={5} className="px-6 py-8 text-center text-gray-500">
-                        No orders found.
+                        {d.noOrdersFound}
                       </td>
                     </tr>
                   ) : (
@@ -231,10 +238,10 @@ export default function DashboardContent() {
                             </span>
                           </td>
                           <td className="px-6 py-4 font-semibold" style={{ color: "#0f172a" }}>
-                            {formatCurrency(order.totalCost)}
+                            {formatCurrency(order.totalCost, language)}
                           </td>
                           <td className="px-6 py-4" style={{ color: "#475569" }}>
-                            {formatDate(order.expectedDelivery)}
+                            {formatDate(order.expectedDelivery, false, language)}
                           </td>
                         </tr>
                       );
@@ -251,21 +258,20 @@ export default function DashboardContent() {
           
           {/* Recommended Products */}
           <div
-            className="rounded-2xl p-6"
+            className="rounded-2xl p-6 bg-white"
             style={{
-              background: "rgba(255,255,255,0.95)",
               border: "1px solid rgba(99,102,241,0.1)",
               boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
             }}
           >
             <h3 className="font-semibold text-base mb-4" style={{ color: "#0f172a" }}>
-              Recommended Products
+              {d.recommendedProducts}
             </h3>
             <div className="flex flex-col gap-4">
               {isLoading ? (
-                <p className="text-sm text-gray-500">Loading recommendations...</p>
+                <p className="text-sm text-gray-500">{d.loadingRecommendations}</p>
               ) : recommendations.length === 0 ? (
-                <p className="text-sm text-gray-500">No products recommended yet.</p>
+                <p className="text-sm text-gray-500">{d.noRecommendations}</p>
               ) : (
                 recommendations.map((prod) => (
                   <div key={prod.id} className="flex items-center gap-3 pb-3 border-b border-gray-100 last:border-0 last:pb-0">
@@ -274,10 +280,10 @@ export default function DashboardContent() {
                       <p className="text-sm font-semibold truncate text-slate-800">{prod.name}</p>
                       <p className="text-xs text-indigo-500 truncate">{prod.supplierName}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-slate-800">{formatCurrency(prod.price)}</p>
-                      <Link href={`/suppliers/${prod.supplierId}`} className="text-[10px] font-semibold text-indigo-600 hover:underline">
-                        Buy
+                    <div className="text-end">
+                      <p className="text-sm font-bold text-slate-800">{formatCurrency(prod.price, language)}</p>
+                      <Link href={`/suppliers/${prod.supplierId}`} className="text-[10px] font-semibold text-indigo-600 hover:underline cursor-pointer">
+                        {d.buy}
                       </Link>
                     </div>
                   </div>
@@ -288,24 +294,23 @@ export default function DashboardContent() {
 
           {/* Quick Actions */}
           <div
-            className="rounded-2xl p-6"
+            className="rounded-2xl p-6 bg-white"
             style={{
-              background: "rgba(255,255,255,0.95)",
               border: "1px solid rgba(99,102,241,0.1)",
               boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
             }}
           >
             <h3 className="font-semibold text-base mb-4" style={{ color: "#0f172a" }}>
-              Quick Actions
+              {d.quickActions}
             </h3>
             <div className="grid grid-cols-2 gap-3">
-              <Link href="/wallet" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 hover:bg-slate-50 transition-colors">
+              <Link href="/wallet" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 hover:bg-slate-50 transition-colors cursor-pointer">
                 <span className="text-xl">💳</span>
-                <span className="text-xs font-semibold mt-2 text-slate-700">Wallet</span>
+                <span className="text-xs font-semibold mt-2 text-slate-700">{t.nav.wallet}</span>
               </Link>
-              <Link href="/membership" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 hover:bg-slate-50 transition-colors">
+              <Link href="/membership" className="flex flex-col items-center justify-center p-4 rounded-xl border border-gray-100 hover:bg-slate-50 transition-colors cursor-pointer">
                 <span className="text-xl">🏆</span>
-                <span className="text-xs font-semibold mt-2 text-slate-700">Membership</span>
+                <span className="text-xs font-semibold mt-2 text-slate-700">{t.nav.membership}</span>
               </Link>
             </div>
           </div>

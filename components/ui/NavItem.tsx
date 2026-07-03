@@ -49,7 +49,7 @@ const NavItem: React.FC<NavItemProps> = ({ href, icon, label }) => {
       {/* Active indicator */}
       {isActive && (
         <span
-          className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-r-full"
+          className="absolute start-0 top-1/2 -translate-y-1/2 w-1 h-5 rounded-e-full"
           style={{ background: "#6366f1" }}
         />
       )}

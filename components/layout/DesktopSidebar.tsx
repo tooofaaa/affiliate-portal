@@ -24,10 +24,10 @@ export default function DesktopSidebar() {
 
   return (
     <aside
-      className="py-6 px-4 h-screen w-60 fixed flex flex-col justify-between overflow-hidden"
+      className="py-6 px-4 h-screen w-60 fixed inset-y-0 start-0 flex flex-col justify-between overflow-hidden hidden md:flex"
       style={{
         background: "linear-gradient(180deg, #0f1117 0%, #131720 100%)",
-        borderRight: "1px solid rgba(99,102,241,0.12)",
+        borderInlineEnd: "1px solid rgba(99,102,241,0.12)",
       }}
     >
       {/* Top: Logo + Nav */}

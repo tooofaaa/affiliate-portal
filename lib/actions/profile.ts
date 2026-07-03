@@ -203,7 +203,7 @@ export async function addCustomerDocument(doc: Omit<CustomerDocument, "id" | "cu
     customer_id: profile.id,
     document_type: doc.document_type,
     document_name: doc.document_name,
-    file_url: doc.file_url || "https://placeholder-document.pdf",
+    file_url: doc.file_url || "",
     expiry_date: doc.expiry_date,
     is_verified: false,
   });

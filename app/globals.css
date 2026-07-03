@@ -13,6 +13,10 @@ body {
   color: var(--foreground);
 }
 
+html[dir="rtl"] body {
+  font-family: var(--font-cairo), sans-serif;
+}
+
 /* Scrollbar */
 ::-webkit-scrollbar {
   width: 5px;

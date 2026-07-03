@@ -124,7 +124,7 @@ export async function depositFunds(amount: number): Promise<{ success: boolean; 
     wallet_id: wallet.id,
     amount: amount,
     transaction_type: "Deposit",
-    description: "Mock Funds Deposit via Credit Card",
+    description: "Funds Deposit",
   });
 
   revalidatePath("/wallet");

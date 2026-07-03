@@ -8,7 +8,7 @@ import { CustomerProfile, CustomerBranch, CustomerDocument } from "@/lib/types";
 import { formatDate } from "@/lib/utils/formatters";
 
 export default function ProfilePage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   
   const [activeTab, setActiveTab] = useState<"personal" | "branches" | "documents">("personal");
   const [isLoading, setIsLoading] = useState(true);
@@ -81,10 +81,10 @@ export default function ProfilePage() {
     });
 
     if (res.success) {
-      setMessage({ type: "success", text: "Profile updated successfully!" });
+      setMessage({ type: "success", text: t.common.success });
       await loadData();
     } else {
-      setMessage({ type: "error", text: res.error || "Failed to update profile." });
+      setMessage({ type: "error", text: res.error || t.common.failed });
     }
     setIsSaving(false);
   };
@@ -114,7 +114,7 @@ export default function ProfilePage() {
   };
 
   const handleDeleteBranch = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this branch?")) return;
+    if (!confirm(language === "en" ? "Are you sure?" : "هل أنت متأكد؟")) return;
     const res = await deleteCustomerBranch(id);
     if (res.success) {
       await loadData();
@@ -147,19 +147,25 @@ export default function ProfilePage() {
   if (isLoading) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-center">
-        <p className="text-gray-500">Loading your business profile...</p>
+        <p className="text-gray-500">{t.common.loading}</p>
       </div>
     );
   }
+
+  const tabLabels = {
+    personal: t.profile.businessInfo,
+    branches: t.profile.branches,
+    documents: t.profile.documents
+  };
 
   return (
     <div className="flex flex-col gap-6 max-w-5xl pb-10 font-poppins">
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-          Business Profile
+          {t.profile.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          Manage your organizational settings, branches, certificates, and compliance documentation.
+          {t.profile.subtitle}
         </p>
       </div>
 
@@ -187,7 +193,7 @@ export default function ProfilePage() {
                 : "border-transparent text-gray-500 hover:text-slate-700"
             }`}
           >
-            {tab}
+            {tabLabels[tab]}
           </button>
         ))}
       </div>
@@ -212,8 +218,8 @@ export default function ProfilePage() {
               {(companyName || "C").charAt(0).toUpperCase()}
             </div>
             <h2 className="text-base font-bold text-gray-900">{companyName}</h2>
-            <p className="text-xs text-indigo-500 font-medium">Verified Customer Account</p>
-            <p className="text-xs text-gray-400 mt-1">Tax No: {taxNumber || "Not configured"}</p>
+            <p className="text-xs text-indigo-500 font-medium">{t.profile.verified}</p>
+            <p className="text-xs text-gray-400 mt-1">{t.profile.taxNumber}: {taxNumber || "-"}</p>
           </div>
         </div>
 
@@ -229,10 +235,10 @@ export default function ProfilePage() {
                 boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
               }}
             >
-              <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3">Company Details</h3>
+              <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3">{t.profile.businessInfo}</h3>
               <form onSubmit={handleSaveProfile} className="flex flex-col gap-5">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-500">Company Legal Name</label>
+                  <label className="text-xs font-semibold text-gray-500">{t.profile.companyName}</label>
                   <input
                     type="text"
                     required
@@ -243,46 +249,46 @@ export default function ProfilePage() {
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Tax Number (VAT)</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.taxNumber}</label>
                     <input
                       type="text"
                       value={taxNumber}
                       onChange={(e) => setTaxNumber(e.target.value)}
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Commercial Register (CR)</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.crNumber}</label>
                     <input
                       type="text"
                       value={commercialRegister}
                       onChange={(e) => setCommercialRegister(e.target.value)}
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-500">Website URL</label>
+                  <label className="text-xs font-semibold text-gray-500">{t.profile.website}</label>
                   <input
                     type="url"
                     value={website}
                     onChange={(e) => setWebsite(e.target.value)}
-                    className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                    className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-500">Contact Phone Number</label>
+                  <label className="text-xs font-semibold text-gray-500">{t.profile.phone}</label>
                   <input
                     type="tel"
                     value={contactPhone}
                     onChange={(e) => setContactPhone(e.target.value)}
-                    className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                    className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                   />
                 </div>
 
                 <div className="mt-4 flex justify-end">
                   <Button type="submit" variant="primary" isLoading={isSaving} className="cursor-pointer">
-                    Save Details
+                    {t.common.save}
                   </Button>
                 </div>
               </form>
@@ -300,51 +306,51 @@ export default function ProfilePage() {
                   boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
                 }}
               >
-                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">Add Branch</h3>
+                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">{t.profile.addBranch}</h3>
                 <form onSubmit={handleAddBranch} className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5 col-span-2">
-                    <label className="text-xs font-semibold text-gray-500">Branch Name</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.branchName}</label>
                     <input
                       type="text"
                       required
                       value={newBranchName}
                       onChange={(e) => setNewBranchName(e.target.value)}
                       placeholder="e.g. Riyadh Central Office..."
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5 col-span-2">
-                    <label className="text-xs font-semibold text-gray-500">Physical Address</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.address}</label>
                     <input
                       type="text"
                       required
                       value={newBranchAddress}
                       onChange={(e) => setNewBranchAddress(e.target.value)}
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">City</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.city}</label>
                     <input
                       type="text"
                       required
                       value={newBranchCity}
                       onChange={(e) => setNewBranchCity(e.target.value)}
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Phone</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.phone}</label>
                     <input
                       type="tel"
                       value={newBranchPhone}
                       onChange={(e) => setNewBranchPhone(e.target.value)}
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="col-span-2 mt-2 flex justify-end">
                     <Button type="submit" variant="primary" className="cursor-pointer">
-                      Create Branch
+                      {t.profile.addBranch}
                     </Button>
                   </div>
                 </form>
@@ -358,9 +364,9 @@ export default function ProfilePage() {
                   boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
                 }}
               >
-                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">Branch Directory</h3>
+                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">{t.profile.branches}</h3>
                 {branches.length === 0 ? (
-                  <p className="text-xs text-gray-400 italic">No branch locations configured yet.</p>
+                  <p className="text-xs text-gray-400 italic">{t.profile.noBranches}</p>
                 ) : (
                   <div className="flex flex-col gap-4">
                     {branches.map((b) => (
@@ -369,18 +375,18 @@ export default function ProfilePage() {
                           <p className="text-sm font-semibold text-slate-800 flex items-center gap-2">
                             {b.branch_name}
                             {b.is_primary && (
-                              <span className="text-[9px] bg-indigo-50 text-indigo-600 font-bold px-1.5 py-0.5 rounded">Primary</span>
+                              <span className="text-[9px] bg-indigo-50 text-indigo-600 font-bold px-1.5 py-0.5 rounded">{t.profile.primary}</span>
                             )}
                           </p>
                           <p className="text-xs text-slate-500 mt-1">{b.address}, {b.city}</p>
-                          <p className="text-[10px] text-slate-400 mt-0.5">{b.contact_phone || "No phone configured"}</p>
+                          <p className="text-[10px] text-slate-400 mt-0.5">{b.contact_phone || "-"}</p>
                         </div>
                         <Button 
                           variant="ghost" 
                           onClick={() => handleDeleteBranch(b.id)}
                           className="text-red-500 hover:text-red-700 hover:bg-red-50 px-2 py-1 text-xs cursor-pointer"
                         >
-                          Delete
+                          {t.common.delete}
                         </Button>
                       </div>
                     ))}
@@ -401,14 +407,14 @@ export default function ProfilePage() {
                   boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
                 }}
               >
-                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">Register New Document</h3>
+                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">{t.profile.uploadDoc}</h3>
                 <form onSubmit={handleAddDoc} className="grid grid-cols-2 gap-4">
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Document Type</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.docType}</label>
                     <select
                       value={newDocType}
                       onChange={(e) => setNewDocType(e.target.value as any)}
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none bg-white"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none bg-white focus:border-indigo-500"
                     >
                       <option value="CommercialRegistration">Commercial Registration (CR)</option>
                       <option value="TaxCertificate">Tax/VAT Certificate</option>
@@ -417,39 +423,39 @@ export default function ProfilePage() {
                     </select>
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Document Friendly Name</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.docName}</label>
                     <input
                       type="text"
                       required
                       value={newDocName}
                       onChange={(e) => setNewDocName(e.target.value)}
                       placeholder="e.g. CR Certificate 2026..."
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Expiry Date</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.expiryDate}</label>
                     <input
                       type="date"
                       value={newDocExpiry}
                       onChange={(e) => setNewDocExpiry(e.target.value)}
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold text-gray-500">Mock File URL</label>
+                    <label className="text-xs font-semibold text-gray-500">{t.profile.fileUrl}</label>
                     <input
                       type="url"
                       required
                       value={newDocUrl}
                       onChange={(e) => setNewDocUrl(e.target.value)}
                       placeholder="https://example.com/cr.pdf..."
-                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none"
+                      className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
                     />
                   </div>
                   <div className="col-span-2 mt-2 flex justify-end">
                     <Button type="submit" variant="primary" className="cursor-pointer">
-                      Register Document
+                      {t.profile.uploadDoc}
                     </Button>
                   </div>
                 </form>
@@ -463,9 +469,9 @@ export default function ProfilePage() {
                   boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
                 }}
               >
-                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">Compliance Certificates</h3>
+                <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3 mb-4">{t.profile.documents}</h3>
                 {documents.length === 0 ? (
-                  <p className="text-xs text-gray-400 italic">No documentation uploaded yet.</p>
+                  <p className="text-xs text-gray-400 italic">{t.profile.noDocuments}</p>
                 ) : (
                   <div className="flex flex-col gap-4">
                     {documents.map((d) => (
@@ -474,7 +480,7 @@ export default function ProfilePage() {
                           <p className="text-sm font-semibold text-slate-800">{d.document_name}</p>
                           <p className="text-xs text-slate-500 font-medium">{d.document_type}</p>
                           {d.expiry_date && (
-                            <p className="text-[10px] text-rose-500 mt-0.5">Expires on {formatDate(d.expiry_date)}</p>
+                            <p className="text-[10px] text-rose-500 mt-0.5">{t.profile.expiryDate}: {formatDate(d.expiry_date, language)}</p>
                           )}
                         </div>
                         <div className="flex items-center gap-3">
@@ -483,7 +489,7 @@ export default function ProfilePage() {
                               d.is_verified ? "bg-emerald-100 text-emerald-700" : "bg-amber-100 text-amber-700"
                             }`}
                           >
-                            {d.is_verified ? "Verified" : "Pending Verification"}
+                            {d.is_verified ? t.profile.verified : t.profile.unverified}
                           </span>
                           <a
                             href={d.file_url}
@@ -491,7 +497,7 @@ export default function ProfilePage() {
                             rel="noopener noreferrer"
                             className="text-xs font-semibold text-indigo-600 hover:underline"
                           >
-                            View →
+                            {t.common.search} →
                           </a>
                         </div>
                       </div>

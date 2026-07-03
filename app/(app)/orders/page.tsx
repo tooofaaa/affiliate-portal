@@ -25,7 +25,7 @@ const FILTERS = ["All", "Pending", "Processing", "Shipped", "Delivered"];
 const TIMELINE_STEPS = ["Pending", "Processing", "Allocated", "Picking", "Packing", "Shipped", "Delivered"];
 
 export default function OrdersPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [filter, setFilter] = useState("All");
   const [orders, setOrders] = useState<Order[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -70,12 +70,12 @@ export default function OrdersPage() {
     setIsSubmittingReturn(true);
     const res = await requestReturn(selectedOrder.id, returnReason);
     if (res.success) {
-      alert("Return request submitted successfully!");
+      alert(language === "ar" ? "تم إرسال طلب الإرجاع بنجاح!" : "Return request submitted successfully!");
       setReturnReason("");
       setSelectedOrder(null);
       await loadOrders();
     } else {
-      alert(`Return failed: ${res.error}`);
+      alert((language === "ar" ? "فشل الإرجاع: " : "Return failed: ") + res.error);
     }
     setIsSubmittingReturn(false);
   };
@@ -85,14 +85,14 @@ export default function OrdersPage() {
     : orders.filter(o => o.status === filter);
 
   return (
-    <div className="flex flex-col gap-6 font-poppins pb-8">
+    <div className="flex flex-col gap-6 pb-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
             {t.nav.orders}
           </h1>
           <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-            Track and manage your purchasing history & order state machine timeline
+            {t.orders.subtitle}
           </p>
         </div>
         
@@ -101,7 +101,7 @@ export default function OrdersPage() {
             <SearchIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder={t.common.search + " orders..."}
+              placeholder={t.orders.searchPlaceholder}
               className="pl-9 pr-4 py-2 rounded-xl text-sm w-full md:w-64 transition-all"
               style={{
                 background: "rgba(255,255,255,0.8)",
@@ -120,6 +120,7 @@ export default function OrdersPage() {
       <div className="flex items-center gap-2 overflow-x-auto pb-2">
         {FILTERS.map((f) => {
           const isActive = filter === f;
+          const label = f === "All" ? t.orders.filterAll : (t.orders.statusMap[f as keyof typeof t.orders.statusMap] || f);
           return (
             <button
               key={f}
@@ -139,7 +140,7 @@ export default function OrdersPage() {
                     }
               }
             >
-              {f}
+              {label}
             </button>
           );
         })}
@@ -148,9 +149,8 @@ export default function OrdersPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Orders Table */}
         <div
-          className="lg:col-span-2 rounded-2xl overflow-hidden self-start"
+          className="lg:col-span-2 rounded-2xl overflow-hidden self-start bg-white"
           style={{
-            background: "rgba(255,255,255,0.95)",
             border: "1px solid rgba(99,102,241,0.1)",
             boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
           }}
@@ -159,10 +159,10 @@ export default function OrdersPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr style={{ background: "rgba(248,249,252,0.8)" }}>
-                  {[t.orders.poCode, t.orders.supplier, "Items", t.orders.status, t.orders.totalCost].map((h) => (
+                  {[t.orders.poCode, t.orders.supplier, t.orders.itemsHeader, t.orders.status, t.orders.totalCost].map((h) => (
                     <th
                       key={h}
-                      className="px-6 py-4 text-left text-xs font-semibold uppercase tracking-widest whitespace-nowrap"
+                      className="px-6 py-4 text-start text-xs font-semibold uppercase tracking-widest whitespace-nowrap"
                       style={{ color: "#94a3b8" }}
                     >
                       {h}
@@ -174,7 +174,7 @@ export default function OrdersPage() {
                 {isLoading ? (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
-                      Loading orders...
+                      {t.orders.loading}
                     </td>
                   </tr>
                 ) : filteredOrders.length > 0 ? (
@@ -182,6 +182,7 @@ export default function OrdersPage() {
                     const style = STATUS_STYLES[order.status] ?? { bg: "#f1f5f9", color: "#64748b" };
                     const itemsCount = order.items.reduce((sum, item) => sum + item.quantity, 0);
                     const isSelected = selectedOrder?.id === order.id;
+                    const statusLabel = t.orders.statusMap[order.status as keyof typeof t.orders.statusMap] || order.status;
                     
                     return (
                       <tr
@@ -199,7 +200,7 @@ export default function OrdersPage() {
                             {order.poCode}
                           </div>
                           <div className="text-[10px] text-gray-400 mt-1">
-                            {formatDate(order.createdAt)}
+                            {formatDate(order.createdAt, false, language)}
                           </div>
                         </td>
                         <td className="px-6 py-4 font-semibold text-slate-800">
@@ -207,7 +208,7 @@ export default function OrdersPage() {
                         </td>
                         <td className="px-6 py-4">
                           <div className="text-xs text-slate-600 font-medium">
-                            {itemsCount} units
+                            {t.orders.units.replace('{count}', String(itemsCount))}
                           </div>
                         </td>
                         <td className="px-6 py-4">
@@ -215,11 +216,11 @@ export default function OrdersPage() {
                             className="px-2.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap"
                             style={{ background: style.bg, color: style.color }}
                           >
-                            {order.status}
+                            {statusLabel}
                           </span>
                         </td>
                         <td className="px-6 py-4 font-bold text-slate-850">
-                          {formatCurrency(order.totalCost)}
+                          {formatCurrency(order.totalCost, language)}
                         </td>
                       </tr>
                     );
@@ -227,7 +228,7 @@ export default function OrdersPage() {
                 ) : (
                   <tr>
                     <td colSpan={5} className="px-6 py-12 text-center text-sm text-gray-500">
-                      No orders found.
+                      {t.orders.noOrdersFound}
                     </td>
                   </tr>
                 )}
@@ -249,20 +250,21 @@ export default function OrdersPage() {
                 }}
               >
                 <h3 className="font-bold text-sm text-slate-800 mb-4 border-b border-gray-100 pb-3 flex justify-between items-center">
-                  <span>Order: {selectedOrder.poCode}</span>
-                  <button onClick={() => setSelectedOrder(null)} className="text-xs text-indigo-500 font-medium hover:underline">Close</button>
+                  <span>{t.orders.orderTitle.replace('{code}', selectedOrder.poCode)}</span>
+                  <button onClick={() => setSelectedOrder(null)} className="text-xs text-indigo-500 font-medium hover:underline cursor-pointer">{t.orders.close}</button>
                 </h3>
 
-                <p className="text-xs text-slate-500 mb-6">Supplier: <span className="font-semibold text-slate-700">{selectedOrder.supplierName}</span></p>
+                <p className="text-xs text-slate-500 mb-6">{t.orders.supplierLabel} <span className="font-semibold text-slate-700">{selectedOrder.supplierName}</span></p>
 
                 {/* State Machine Steps Visualizer */}
-                <h4 className="text-xs font-bold uppercase text-indigo-600 tracking-wider mb-4">Track Progress</h4>
+                <h4 className="text-xs font-bold uppercase text-indigo-600 tracking-wider mb-4">{t.orders.trackProgress}</h4>
                 <div className="relative pl-6 border-l border-gray-100 flex flex-col gap-5">
                   {TIMELINE_STEPS.map((step) => {
                     const currentIndex = TIMELINE_STEPS.indexOf(selectedOrder.status);
                     const stepIndex = TIMELINE_STEPS.indexOf(step);
                     const isCompleted = stepIndex <= currentIndex;
                     const isActive = step === selectedOrder.status;
+                    const stepLabel = t.orders.statusMap[step as keyof typeof t.orders.statusMap] || step;
 
                     return (
                       <div key={step} className="relative flex items-center gap-3">
@@ -277,7 +279,7 @@ export default function OrdersPage() {
                           isActive ? "text-indigo-600" :
                           isCompleted ? "text-slate-800" : "text-slate-400"
                         }`}>
-                          {step}
+                          {stepLabel}
                         </span>
                       </div>
                     );
@@ -294,10 +296,10 @@ export default function OrdersPage() {
                     boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
                   }}
                 >
-                  <h3 className="font-bold text-sm text-rose-600 mb-4">Return Items</h3>
+                  <h3 className="font-bold text-sm text-rose-600 mb-4">{t.orders.returnItems}</h3>
                   <form onSubmit={handleReturn} className="flex flex-col gap-3">
                     <textarea
-                      placeholder="Reason for return request..."
+                      placeholder={t.orders.returnReasonPlaceholder}
                       value={returnReason}
                       onChange={(e) => setReturnReason(e.target.value)}
                       className="w-full px-3 py-2 border border-gray-200 rounded-xl text-xs outline-none focus:border-indigo-500 h-20"
@@ -309,7 +311,7 @@ export default function OrdersPage() {
                       disabled={isSubmittingReturn}
                       className="bg-rose-600 hover:bg-rose-700 w-full justify-center cursor-pointer"
                     >
-                      {isSubmittingReturn ? "Submitting..." : "Submit Return Request"}
+                      {isSubmittingReturn ? t.orders.submitting : t.orders.submitReturn}
                     </Button>
                   </form>
                 </div>
@@ -317,7 +319,7 @@ export default function OrdersPage() {
             </>
           ) : (
             <div className="p-8 text-center text-xs text-gray-400 border border-dashed border-gray-200 rounded-2xl bg-slate-50/50">
-              Select an order to view its state timeline or request returns.
+              {t.orders.selectOrderPlaceholder}
             </div>
           )}
         </div>

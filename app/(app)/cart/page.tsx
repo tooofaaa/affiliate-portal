@@ -10,7 +10,7 @@ import { useState } from "react";
 import { checkoutCart } from "@/lib/actions/orders";
 
 export default function CartPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const router = useRouter();
   const { items, updateQuantity, removeFromCart, totalItems, totalPrice, clearCart } = useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
@@ -39,12 +39,12 @@ export default function CartPage() {
             {t.nav.cart}
           </h1>
           <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-            Review your items and proceed to checkout
+            {t.cart.subtitle}
           </p>
         </div>
         {items.length > 0 && (
-          <Button variant="danger" onClick={clearCart} className="w-fit">
-            Clear Cart
+          <Button variant="danger" onClick={clearCart} className="w-fit cursor-pointer">
+            {t.cart.clearCart}
           </Button>
         )}
       </div>
@@ -54,10 +54,10 @@ export default function CartPage() {
           <div className="w-20 h-20 bg-indigo-50 rounded-full flex items-center justify-center mb-4">
             <span className="text-3xl">🛒</span>
           </div>
-          <h2 className="text-xl font-bold text-gray-900 mb-2">Your cart is empty</h2>
-          <p className="text-gray-500 mb-6">Looks like you haven&apos;t added any products to your cart yet.</p>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">{t.cart.emptyCart}</h2>
+          <p className="text-gray-500 mb-6">{t.cart.emptyCartDesc}</p>
           <Link href="/suppliers">
-            <Button variant="primary">Browse Suppliers</Button>
+            <Button variant="primary" className="cursor-pointer">{t.cart.browseSuppliers}</Button>
           </Link>
         </div>
       ) : (
@@ -83,9 +83,9 @@ export default function CartPage() {
                       <h3 className="font-bold text-gray-900 text-lg leading-tight">{item.product.name}</h3>
                       <p className="text-sm text-indigo-500 font-medium mt-0.5">{item.product.supplierName}</p>
                     </div>
-                    <div className="text-right">
-                      <p className="font-bold text-gray-900">{formatCurrency(item.product.price)}</p>
-                      <p className="text-xs text-gray-500">per {item.product.unit}</p>
+                    <div className="text-end">
+                      <p className="font-bold text-gray-900">{formatCurrency(item.product.price, language)}</p>
+                      <p className="text-xs text-gray-500">{t.cart.perUnit.replace('{unit}', item.product.unit)}</p>
                     </div>
                   </div>
 
@@ -93,14 +93,14 @@ export default function CartPage() {
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={() => updateQuantity(item.product.id, item.quantity - 1)}
-                        className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold transition-colors"
+                        className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold transition-colors cursor-pointer"
                       >
                         -
                       </button>
                       <span className="w-8 text-center font-semibold text-gray-900">{item.quantity}</span>
                       <button 
                         onClick={() => updateQuantity(item.product.id, item.quantity + 1)}
-                        className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold transition-colors"
+                        className="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-gray-200 flex items-center justify-center font-bold transition-colors cursor-pointer"
                       >
                         +
                       </button>
@@ -108,9 +108,9 @@ export default function CartPage() {
                     
                     <button 
                       onClick={() => removeFromCart(item.product.id)}
-                      className="text-sm text-red-500 font-medium hover:text-red-600 transition-colors"
+                      className="text-sm text-red-500 font-medium hover:text-red-600 transition-colors cursor-pointer"
                     >
-                      Remove
+                      {t.cart.remove}
                     </button>
                   </div>
                 </div>
@@ -127,38 +127,38 @@ export default function CartPage() {
                 boxShadow: "0 4px 20px rgba(0,0,0,0.05)",
               }}
             >
-              <h3 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h3>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">{t.cart.orderSummary}</h3>
               
               <div className="flex flex-col gap-3 text-sm mb-4">
                 <div className="flex justify-between text-gray-600">
-                  <span>Subtotal ({totalItems} items)</span>
-                  <span className="font-medium text-gray-900">{formatCurrency(totalPrice)}</span>
+                  <span>{t.cart.subtotal.replace('{count}', String(totalItems))}</span>
+                  <span className="font-medium text-gray-900">{formatCurrency(totalPrice, language)}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Estimated Shipping</span>
-                  <span className="font-medium text-gray-900">Calculated at checkout</span>
+                  <span>{t.cart.estimatedShipping}</span>
+                  <span className="font-medium text-gray-900">{t.cart.calculatedAtCheckout}</span>
                 </div>
                 <div className="flex justify-between text-gray-600">
-                  <span>Taxes</span>
-                  <span className="font-medium text-gray-900">{formatCurrency(totalPrice * 0.05)}</span>
+                  <span>{t.cart.taxes}</span>
+                  <span className="font-medium text-gray-900">{formatCurrency(totalPrice * 0.05, language)}</span>
                 </div>
               </div>
 
               <div className="border-t border-gray-100 pt-4 mb-6">
                 <div className="flex justify-between items-end">
-                  <span className="font-bold text-gray-900 text-base">Total</span>
-                  <span className="font-bold text-indigo-600 text-xl">{formatCurrency(totalPrice * 1.05)}</span>
+                  <span className="font-bold text-gray-900 text-base">{t.cart.total}</span>
+                  <span className="font-bold text-indigo-600 text-xl">{formatCurrency(totalPrice * 1.05, language)}</span>
                 </div>
-                <p className="text-xs text-gray-400 mt-1 text-right">Includes 5% VAT</p>
+                <p className="text-xs text-gray-400 mt-1 text-end">{t.cart.vatInclude}</p>
               </div>
 
               <Button 
                 variant="primary" 
-                className="w-full py-3 text-base shadow-indigo-500/25" 
+                className="w-full py-3 text-base shadow-indigo-500/25 cursor-pointer" 
                 onClick={handleCheckout}
                 isLoading={isCheckingOut}
               >
-                Proceed to Checkout
+                {t.cart.proceedToCheckout}
               </Button>
             </div>
           </div>

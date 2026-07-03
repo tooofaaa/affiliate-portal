@@ -13,7 +13,7 @@ export default function SettingsPage() {
           {t.nav.settings}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          Configure your portal preferences and notifications
+          {t.settingsPage.subtitle}
         </p>
       </div>
 
@@ -24,55 +24,55 @@ export default function SettingsPage() {
           boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
         }}
       >
-        <h3 className="font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4">Notifications</h3>
+        <h3 className="font-bold text-gray-900 mb-6 border-b border-gray-100 pb-4">{t.settingsPage.notifications}</h3>
         
         <div className="flex flex-col gap-4">
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" defaultChecked className="mt-1 accent-indigo-500 w-4 h-4 rounded" />
             <div>
-              <p className="text-sm font-semibold text-gray-900">Order Updates</p>
-              <p className="text-xs text-gray-500">Get notified when your order status changes (e.g., Shipped, Delivered).</p>
+              <p className="text-sm font-semibold text-gray-900">{t.settingsPage.orderUpdates}</p>
+              <p className="text-xs text-gray-500">{t.settingsPage.orderUpdatesDesc}</p>
             </div>
           </label>
           
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" defaultChecked className="mt-1 accent-indigo-500 w-4 h-4 rounded" />
             <div>
-              <p className="text-sm font-semibold text-gray-900">Supplier Promotions</p>
-              <p className="text-xs text-gray-500">Receive emails about new products and discounts from your favorite suppliers.</p>
+              <p className="text-sm font-semibold text-gray-900">{t.settingsPage.promotions}</p>
+              <p className="text-xs text-gray-500">{t.settingsPage.promotionsDesc}</p>
             </div>
           </label>
           
           <label className="flex items-start gap-3 cursor-pointer">
             <input type="checkbox" className="mt-1 accent-indigo-500 w-4 h-4 rounded" />
             <div>
-              <p className="text-sm font-semibold text-gray-900">Weekly Summary</p>
-              <p className="text-xs text-gray-500">Get a weekly email summarizing your total spending and pending orders.</p>
+              <p className="text-sm font-semibold text-gray-900">{t.settingsPage.weeklySummary}</p>
+              <p className="text-xs text-gray-500">{t.settingsPage.weeklySummaryDesc}</p>
             </div>
           </label>
         </div>
 
-        <h3 className="font-bold text-gray-900 mt-8 mb-6 border-b border-gray-100 pb-4">Security</h3>
+        <h3 className="font-bold text-gray-900 mt-8 mb-6 border-b border-gray-100 pb-4">{t.settingsPage.security}</h3>
         
         <div className="flex items-center justify-between py-2 border-b border-gray-50">
           <div>
-            <p className="text-sm font-semibold text-gray-900">Password</p>
-            <p className="text-xs text-gray-500">Last changed 3 months ago</p>
+            <p className="text-sm font-semibold text-gray-900">{t.settingsPage.password}</p>
+            <p className="text-xs text-gray-500">{t.settingsPage.passwordLastChanged}</p>
           </div>
-          <Button variant="secondary" className="text-xs px-3 py-1.5">Change Password</Button>
+          <Button variant="secondary" className="text-xs px-3 py-1.5 cursor-pointer">{t.settingsPage.changePassword}</Button>
         </div>
 
         <div className="flex items-center justify-between py-2 border-b border-gray-50 mt-2">
           <div>
-            <p className="text-sm font-semibold text-gray-900">Two-Factor Authentication (2FA)</p>
-            <p className="text-xs text-gray-500">Add an extra layer of security to your account.</p>
+            <p className="text-sm font-semibold text-gray-900">{t.settingsPage.tfa}</p>
+            <p className="text-xs text-gray-500">{t.settingsPage.tfaDesc}</p>
           </div>
-          <Button variant="secondary" className="text-xs px-3 py-1.5">Enable 2FA</Button>
+          <Button variant="secondary" className="text-xs px-3 py-1.5 cursor-pointer">{t.settingsPage.enableTfa}</Button>
         </div>
 
         <div className="mt-8 flex justify-end gap-3">
-          <Button variant="ghost">Reset to Defaults</Button>
-          <Button variant="primary">Save Preferences</Button>
+          <Button variant="ghost" className="cursor-pointer">{t.settingsPage.resetDefaults}</Button>
+          <Button variant="primary" className="cursor-pointer">{t.settingsPage.savePreferences}</Button>
         </div>
       </div>
     </div>

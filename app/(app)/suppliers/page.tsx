@@ -11,7 +11,9 @@ import { Supplier } from "@/lib/types";
 interface DBSupplier {
   id: number;
   supplier_name: string;
+  supplier_name_ar: string | null;
   description: string | null;
+  description_ar: string | null;
   logo_url: string | null;
   categories: string[] | null;
   rating: number | null;
@@ -20,7 +22,7 @@ interface DBSupplier {
 }
 
 export default function SuppliersPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -32,8 +34,8 @@ export default function SuppliersPage() {
       if (data) {
         const mapped = (data as unknown as DBSupplier[]).map((s) => ({
           id: s.id,
-          name: s.supplier_name,
-          description: s.description || "A trusted supplier for our business.",
+          name: (language === "ar" && s.supplier_name_ar) ? s.supplier_name_ar : s.supplier_name,
+          description: (language === "ar" && s.description_ar) ? s.description_ar : (s.description || t.supplierDetail.trustedSupplier),
           logoUrl: s.logo_url || "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=300&q=80",
           categories: s.categories || ["General"],
           rating: s.rating || 5.0,
@@ -46,7 +48,7 @@ export default function SuppliersPage() {
     }
     
     loadSuppliers();
-  }, []);
+  }, [language]);
 
   return (
     <div className="flex flex-col gap-6">
@@ -56,7 +58,7 @@ export default function SuppliersPage() {
             {t.nav.suppliers}
           </h1>
           <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-            Discover and connect with verified suppliers
+            {t.suppliersPage.subtitle}
           </p>
         </div>
         
@@ -65,7 +67,7 @@ export default function SuppliersPage() {
             <SearchIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
-              placeholder={t.common.search + " suppliers..."}
+              placeholder={t.suppliersPage.searchPlaceholder}
               className="pl-9 pr-4 py-2 rounded-xl text-sm w-full md:w-64 transition-all"
               style={{
                 background: "rgba(255,255,255,0.8)",
@@ -90,11 +92,11 @@ export default function SuppliersPage() {
 
       {isLoading ? (
         <div className="flex justify-center py-12">
-          <p className="text-gray-500">Loading suppliers...</p>
+          <p className="text-gray-500">{t.suppliersPage.loading}</p>
         </div>
       ) : suppliers.length === 0 ? (
         <div className="flex justify-center py-12">
-          <p className="text-gray-500">No suppliers found.</p>
+          <p className="text-gray-500">{t.suppliersPage.noSuppliers}</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -151,7 +153,7 @@ export default function SuppliersPage() {
                       <circle cx="12" cy="12" r="10" />
                       <polyline points="12 6 12 12 16 14" />
                     </svg>
-                    {supplier.deliveryTime} delivery
+                    {supplier.deliveryTime} {t.suppliersPage.delivery}
                   </p>
                 </div>
               </div>

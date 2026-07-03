@@ -30,6 +30,13 @@ const translations = {
     common: {
       search: "Search",
       noData: "No data available",
+      loading: "Loading...",
+      save: "Save Changes",
+      saving: "Saving...",
+      success: "Success",
+      failed: "Failed",
+      currency: "SAR",
+      customer: "Customer",
     },
     dashboard: {
       title: "Dashboard",
@@ -39,6 +46,19 @@ const translations = {
       completedOrders: "Completed Orders",
       suppliers: "Saved Suppliers",
       recentOrders: "Recent Orders",
+      allTimePurchases: "All time purchases",
+      inProgressShipments: "In progress shipments",
+      availableCredit: "Available credit",
+      activeRewardTier: "Active reward tier",
+      purchasingOverview: "here's your purchasing overview",
+      viewAll: "View all →",
+      loadingOrders: "Loading orders...",
+      noOrdersFound: "No orders found.",
+      recommendedProducts: "Recommended Products",
+      loadingRecommendations: "Loading recommendations...",
+      noRecommendations: "No products recommended yet.",
+      buy: "Buy",
+      quickActions: "Quick Actions",
     },
     login: {
       title: "Welcome Back",
@@ -63,6 +83,32 @@ const translations = {
       filterShipped: "Shipped",
       filterDelivered: "Delivered",
       noOrders: "You have no orders matching the criteria.",
+      subtitle: "Track and manage your purchasing history & order state machine timeline",
+      searchPlaceholder: "Search orders...",
+      itemsHeader: "Items",
+      loading: "Loading orders...",
+      noOrdersFound: "No orders found.",
+      units: "{count} units",
+      orderTitle: "Order: {code}",
+      close: "Close",
+      supplierLabel: "Supplier:",
+      trackProgress: "Track Progress",
+      returnItems: "Return Items",
+      returnReasonPlaceholder: "Reason for return request...",
+      submitting: "Submitting...",
+      submitReturn: "Submit Return Request",
+      selectOrderPlaceholder: "Select an order to view its state timeline or request returns.",
+      statusMap: {
+        Pending: "Pending",
+        Processing: "Processing",
+        Allocated: "Allocated",
+        Picking: "Picking",
+        Packing: "Packing",
+        Shipped: "Shipped",
+        Delivered: "Delivered",
+        ReturnRequest: "Return Request",
+        Returned: "Returned",
+      }
     },
     signup: {
       title: "Create an Account",
@@ -81,7 +127,148 @@ const translations = {
       title: "Check Your Email",
       subtitle: "We've sent you an email with a link to confirm your account. You must confirm your email before you can log in.",
       backToLogin: "Back to Login",
-    }
+    },
+    wallet: {
+      title: "Wallet & Payments",
+      subtitle: "Manage your deposit balances, payment methods, transaction ledger, and refunds.",
+      availableBalance: "Available Balance",
+      addFunds: "Add Funds",
+      amountPlaceholder: "Amount (SAR)...",
+      depositNow: "Deposit Now",
+      processing: "Processing...",
+      history: "Transaction History",
+      date: "Date",
+      type: "Type",
+      ref: "Ref",
+      description: "Description",
+      amount: "Amount",
+      noTransactions: "No transactions recorded.",
+      depositSuccess: "Successfully deposited {amount}!",
+      invalidAmount: "Please enter a valid deposit amount.",
+    },
+    membership: {
+      title: "Membership Program",
+      subtitle: "Track your membership tier, tier progress, and exclusive discounts.",
+      myLevel: "My Membership Level",
+      discountBadge: "{percent}% Off All Purchases",
+      totalSpent: "Total Spent",
+      tierProgress: "Tier Progress",
+      tierBenefits: "Tier Benefits",
+      availableTiers: "Available Membership Tiers",
+      minSpent: "Min Spent: {amount}",
+      discountText: "{percent}% discount",
+    },
+    warehouse: {
+      title: "Warehouse Allocation",
+      subtitle: "Request and manage your designated product storage space.",
+      requestSpace: "Request Storage Space",
+      requestedSpace: "Requested Space (m³)",
+      notes: "Additional Notes...",
+      submitRequest: "Submit Storage Request",
+      activeReservations: "Active Storage Reservations",
+      noReservations: "No storage reservations found.",
+      space: "Space",
+      status: "Status",
+      cost: "Cost / Month",
+      startDate: "Start Date",
+      endDate: "End Date",
+      pending: "Pending",
+      approved: "Approved",
+      expired: "Expired",
+      cancelled: "Cancelled",
+    },
+    profile: {
+      title: "My Profile",
+      subtitle: "Manage your company profile details, contact information, and business documents.",
+      businessInfo: "Business Information",
+      companyName: "Company Name",
+      taxNumber: "Tax Number (Optional)",
+      crNumber: "Commercial Register (Optional)",
+      email: "Contact Email",
+      phone: "Contact Phone (Optional)",
+      website: "Website URL (Optional)",
+      branches: "Branches",
+      addBranch: "Add New Branch",
+      branchName: "Branch Name",
+      address: "Address",
+      city: "City",
+      country: "Country",
+      primary: "Primary Branch",
+      noBranches: "No branches registered yet.",
+      documents: "Business Documents",
+      docType: "Document Type",
+      docName: "Document Name",
+      fileUrl: "File",
+      expiryDate: "Expiry Date",
+      noDocuments: "No documents uploaded yet.",
+      uploadDoc: "Upload New Document",
+      verified: "Verified",
+      unverified: "Unverified",
+    },
+    suppliersPage: {
+      title: "Suppliers",
+      subtitle: "Discover and connect with verified suppliers",
+      searchPlaceholder: "Search suppliers...",
+      loading: "Loading suppliers...",
+      noSuppliers: "No suppliers found.",
+      delivery: "delivery",
+    },
+    cart: {
+      subtitle: "Review your items and proceed to checkout",
+      clearCart: "Clear Cart",
+      emptyCart: "Your cart is empty",
+      emptyCartDesc: "Looks like you haven't added any products to your cart yet.",
+      browseSuppliers: "Browse Suppliers",
+      remove: "Remove",
+      orderSummary: "Order Summary",
+      subtotal: "Subtotal ({count} items)",
+      estimatedShipping: "Estimated Shipping",
+      calculatedAtCheckout: "Calculated at checkout",
+      taxes: "Taxes",
+      total: "Total",
+      vatInclude: "Includes 5% VAT",
+      proceedToCheckout: "Proceed to Checkout",
+      perUnit: "per {unit}",
+    },
+    supplierDetail: {
+      back: "← Back to Suppliers",
+      loading: "Loading supplier details...",
+      notFound: "Supplier Not Found",
+      notFoundDesc: "The supplier you are looking for does not exist.",
+      backButton: "Back to Suppliers",
+      trustedSupplier: "A trusted supplier for our business.",
+      highQuality: "High quality product.",
+      unknown: "Unknown",
+      delivery: "delivery",
+      allProducts: "All Products",
+      searchPlaceholder: "Search products...",
+      inStockOnly: "In stock only",
+      maxPrice: "Max Price (SAR)",
+      outOfStock: "Out of Stock",
+      qty: "Qty:",
+      addToCart: "Add to Cart",
+      minOrder: "Min. order: {qty} {unit}(s)",
+      noProducts: "No products match the selected criteria.",
+    },
+    settingsPage: {
+      subtitle: "Configure your portal preferences and notifications",
+      notifications: "Notifications",
+      orderUpdates: "Order Updates",
+      orderUpdatesDesc: "Get notified when your order status changes (e.g., Shipped, Delivered).",
+      promotions: "Supplier Promotions",
+      promotionsDesc: "Receive emails about new products and discounts from your favorite suppliers.",
+      weeklySummary: "Weekly Summary",
+      weeklySummaryDesc: "Get a weekly email summarizing your total spending and pending orders.",
+      security: "Security",
+      password: "Password",
+      passwordLastChanged: "Last changed 3 months ago",
+      changePassword: "Change Password",
+      tfa: "Two-Factor Authentication (2FA)",
+      tfaDesc: "Add an extra layer of security to your account.",
+      enableTfa: "Enable 2FA",
+      resetDefaults: "Reset to Defaults",
+      savePreferences: "Save Preferences",
+    },
   },
   ar: {
     brandName: "بوابة العملاء",
@@ -101,6 +288,13 @@ const translations = {
     common: {
       search: "بحث",
       noData: "لا توجد بيانات متاحة",
+      loading: "جاري التحميل...",
+      save: "حفظ التغييرات",
+      saving: "جاري الحفظ...",
+      success: "تم بنجاح",
+      failed: "فشل",
+      currency: "ر.س",
+      customer: "عميل",
     },
     dashboard: {
       title: "لوحة القيادة",
@@ -109,7 +303,20 @@ const translations = {
       activeOrders: "طلبات نشطة",
       completedOrders: "الطلبات المكتملة",
       suppliers: "الموردين المحفوظين",
-      recentOrders: "الطلبات الأخيرة",
+      recentOrders: "الطلب الأخيرة",
+      allTimePurchases: "إجمالي المشتريات",
+      inProgressShipments: "شحنات قيد التنفيذ",
+      availableCredit: "الرصيد المتاح",
+      activeRewardTier: "فئة المكافآت النشطة",
+      purchasingOverview: "هنا نظرة عامة على مشترياتك",
+      viewAll: "عرض الكل ←",
+      loadingOrders: "جاري تحميل الطلبات...",
+      noOrdersFound: "لم يتم العثور على طلبات.",
+      recommendedProducts: "المنتجات الموصى بها",
+      loadingRecommendations: "جاري تحميل التوصيات...",
+      noRecommendations: "لا توجد منتجات موصى بها بعد.",
+      buy: "شراء",
+      quickActions: "إجراءات سريعة",
     },
     login: {
       title: "مرحباً بعودتك",
@@ -134,6 +341,32 @@ const translations = {
       filterShipped: "تم الشحن",
       filterDelivered: "تم التوصيل",
       noOrders: "ليس لديك طلبات تطابق المعايير.",
+      subtitle: "تتبع وإدارة سجل الشراء والجدول الزمني للطلب",
+      searchPlaceholder: "البحث عن الطلبات...",
+      itemsHeader: "عناصر",
+      loading: "جاري تحميل الطلبات...",
+      noOrdersFound: "لم يتم العثور على طلبات.",
+      units: "{count} وحدات",
+      orderTitle: "الطلب: {code}",
+      close: "إغلاق",
+      supplierLabel: "المورد:",
+      trackProgress: "تتبع التقدم",
+      returnItems: "إرجاع العناصر",
+      returnReasonPlaceholder: "سبب طلب الإرجاع...",
+      submitting: "جاري الإرسال...",
+      submitReturn: "إرسال طلب الإرجاع",
+      selectOrderPlaceholder: "حدد طلباً لعرض خط سير الحالة أو طلب إرجاع.",
+      statusMap: {
+        Pending: "قيد الانتظار",
+        Processing: "قيد المعالجة",
+        Allocated: "تم التخصيص",
+        Picking: "قيد التجهيز",
+        Packing: "قيد التعبئة",
+        Shipped: "تم الشحن",
+        Delivered: "تم التوصيل",
+        ReturnRequest: "طلب إرجاع",
+        Returned: "تم الإرجاع",
+      }
     },
     signup: {
       title: "إنشاء حساب",
@@ -152,28 +385,185 @@ const translations = {
       title: "تحقق من بريدك الإلكتروني",
       subtitle: "لقد أرسلنا لك بريدًا إلكترونيًا يحتوي على رابط لتأكيد حسابك. يجب تأكيد بريدك الإلكتروني قبل تسجيل الدخول.",
       backToLogin: "العودة لتسجيل الدخول",
-    }
-  }
+    },
+    wallet: {
+      title: "المحفظة والمدفوعات",
+      subtitle: "إدارة رصيد الإيداع وطرق الدفع ودفتر المعاملات واللافتات المالية.",
+      availableBalance: "الرصيد المتاح",
+      addFunds: "إضافة أموال",
+      amountPlaceholder: "المبلغ (ر.س)...",
+      depositNow: "إيداع الآن",
+      processing: "جاري المعالجة...",
+      history: "سجل المعاملات",
+      date: "التاريخ",
+      type: "النوع",
+      ref: "المرجع",
+      description: "الوصف",
+      amount: "المبلغ",
+      noTransactions: "لا توجد معاملات مسجلة.",
+      depositSuccess: "تم إيداع {amount} بنجاح!",
+      invalidAmount: "الرجاء إدخال مبلغ إيداع صالح.",
+    },
+    membership: {
+      title: "برنامج العضوية",
+      subtitle: "تتبع فئة عضويتك، والتقدم نحو الفئة التالية، والخصومات الحصرية.",
+      myLevel: "مستوى عضويتي",
+      discountBadge: "خصم {percent}% على جميع المشتريات",
+      totalSpent: "إجمالي الإنفاق",
+      tierProgress: "التقدم في المستوى",
+      tierBenefits: "مزايا الفئة",
+      availableTiers: "فئات العضوية المتاحة",
+      minSpent: "الحد الأدنى للإنفاق: {amount}",
+      discountText: "خصم {percent}%",
+    },
+    warehouse: {
+      title: "تخصيص المستودع",
+      subtitle: "طلب وإدارة مساحة تخزين المنتجات المخصصة لك.",
+      requestSpace: "طلب مساحة تخزين",
+      requestedSpace: "المساحة المطلوبة (متر مكعب)",
+      notes: "ملاحظات إضافية...",
+      submitRequest: "إرسال طلب التخزين",
+      activeReservations: "حجوزات التخزين النشطة",
+      noReservations: "لا توجد حجوزات تخزين.",
+      space: "المساحة",
+      status: "الحالة",
+      cost: "التكلفة / شهرياً",
+      startDate: "تاريخ البدء",
+      endDate: "تاريخ الانتهاء",
+      pending: "قيد الانتظار",
+      approved: "تمت الموافقة",
+      expired: "منتهي",
+      cancelled: "ملغي",
+    },
+    profile: {
+      title: "ملفي الشخصي",
+      subtitle: "إدارة تفاصيل ملف تعريف الشركة ومعلومات الاتصال والمستندات التجارية.",
+      businessInfo: "معلومات العمل",
+      companyName: "اسم الشركة",
+      taxNumber: "الرقم الضريبي (اختياري)",
+      crNumber: "السجل التجاري (اختياري)",
+      email: "البريد الإلكتروني للاتصال",
+      phone: "هاتف الاتصال (اختياري)",
+      website: "رابط الموقع الإلكتروني (اختياري)",
+      branches: "الفروع",
+      addBranch: "إضافة فرع جديد",
+      branchName: "اسم الفرع",
+      address: "العنوان",
+      city: "المدينة",
+      country: "الدولة",
+      primary: "الفرع الرئيسي",
+      noBranches: "لا توجد فروع مسجلة بعد.",
+      documents: "مستندات العمل",
+      docType: "نوع المستند",
+      docName: "اسم المستند",
+      fileUrl: "الملف",
+      expiryDate: "تاريخ الانتهاء",
+      noDocuments: "لم يتم تحميل أي مستندات بعد.",
+      uploadDoc: "تحميل مستند جديد",
+      verified: "تم التحقق منه",
+      unverified: "غير معتمد",
+    },
+    suppliersPage: {
+      title: "الموردين",
+      subtitle: "اكتشف وتواصل مع الموردين المعتمدين",
+      searchPlaceholder: "البحث عن الموردين...",
+      loading: "جاري تحميل الموردين...",
+      noSuppliers: "لم يتم العثور على موردين.",
+      delivery: "التسليم",
+    },
+    cart: {
+      subtitle: "راجع عناصرك والمضي قدما لإتمام الشراء",
+      clearCart: "مسح عربة التسوق",
+      emptyCart: "عربة التسوق فارغة",
+      emptyCartDesc: "يبدو أنك لم تقم بإضافة أي منتجات إلى عربة التسوق الخاصة بك بعد.",
+      browseSuppliers: "تصفح الموردين",
+      remove: "إزالة",
+      orderSummary: "ملخص الطلب",
+      subtotal: "المجموع الفرعي ({count} عناصر)",
+      estimatedShipping: "الشحن التقديري",
+      calculatedAtCheckout: "يتم حسابه عند الدفع",
+      taxes: "الضرائب",
+      total: "الإجمالي",
+      vatInclude: "يشمل 5٪ ضريبة القيمة المضافة",
+      proceedToCheckout: "المضي قدما لإتمام الشراء",
+      perUnit: "لكل {unit}",
+    },
+    supplierDetail: {
+      back: "← العودة إلى الموردين",
+      loading: "جاري تحميل تفاصيل المورد...",
+      notFound: "المورد غير موجود",
+      notFoundDesc: "المورد الذي تبحث عنه غير موجود.",
+      backButton: "العودة إلى الموردين",
+      trustedSupplier: "مورد موثوق لأعمالنا.",
+      highQuality: "منتج عالي الجودة.",
+      unknown: "غير معروف",
+      delivery: "التسليم",
+      allProducts: "كل المنتجات",
+      searchPlaceholder: "البحث عن المنتجات...",
+      inStockOnly: "المتوفر في المخزن فقط",
+      maxPrice: "الحد الأقصى للسعر (ر.س)",
+      outOfStock: "نفدت الكمية",
+      qty: "الكمية:",
+      addToCart: "أضف إلى السلة",
+      minOrder: "أقل كمية للطلب: {qty} {unit}",
+      noProducts: "لا توجد منتجات تطابق المعايير المحددة.",
+    },
+    settingsPage: {
+      subtitle: "تكوين تفضيلات البوابة والإشعارات الخاصة بك",
+      notifications: "الإشعارات",
+      orderUpdates: "تحديثات الطلبات",
+      orderUpdatesDesc: "تلقي إشعارات عند تغيير حالة طلبك (مثل تم الشحن، تم التوصيل).",
+      promotions: "عروض الموردين الترويجية",
+      promotionsDesc: "تلقي رسائل بريد إلكتروني حول المنتجات الجديدة والخصومات من الموردين المفضلين لديك.",
+      weeklySummary: "ملخص أسبوعي",
+      weeklySummaryDesc: "تلقي رسالة بريد إلكتروني أسبوعية تلخص إجمالي الإنفاق والطلبات المعلقة.",
+      security: "الأمان",
+      password: "كلمة المرور",
+      passwordLastChanged: "تم التغيير منذ ٣ أشهر",
+      changePassword: "تغيير كلمة المرور",
+      tfa: "المصادقة الثنائية (2FA)",
+      tfaDesc: "إضافة طبقة حماية إضافية لحسابك.",
+      enableTfa: "تفعيل المصادقة الثنائية",
+      resetDefaults: "إعادة التعيين للافتراضي",
+      savePreferences: "حفظ التفضيلات",
+    },
+  },
 };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+const LANG_COOKIE = "portal-lang";
+
+function getCookieLang(): Language {
+  if (typeof document === "undefined") return "en";
+  const match = document.cookie.match(/(?:^|;\s*)portal-lang=([^;]+)/);
+  return match?.[1] === "ar" ? "ar" : "en";
+}
+
+function setCookieLang(lang: Language) {
+  document.cookie = `${LANG_COOKIE}=${lang}; path=/; max-age=${60 * 60 * 24 * 365}; SameSite=Lax`;
+}
+
+const LanguageContext = createContext<LanguageContextType | undefined>(
+  undefined
+);
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguage] = useState<Language>("en");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setTimeout(() => {
-      setMounted(true);
-      const saved = localStorage.getItem("portal-lang") as Language;
-      if (saved === "ar" || saved === "en") setLanguage(saved);
-    }, 0);
+    const saved = getCookieLang();
+    setLanguage(saved);
+    document.documentElement.lang = saved;
+    document.documentElement.dir = saved === "ar" ? "rtl" : "ltr";
+    setMounted(true);
   }, []);
 
   const toggleLanguage = () => {
-    const next = language === "en" ? "ar" : "en";
+    const next: Language = language === "en" ? "ar" : "en";
     setLanguage(next);
-    localStorage.setItem("portal-lang", next);
+    setCookieLang(next);
+    document.documentElement.lang = next;
+    document.documentElement.dir = next === "ar" ? "rtl" : "ltr";
   };
 
   const isRTL = language === "ar";
@@ -181,7 +571,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   if (!mounted) {
     return (
-      <LanguageContext.Provider value={{ language: "en", toggleLanguage: () => {}, isRTL: false, t: translations.en }}>
+      <LanguageContext.Provider
+        value={{
+          language: "en",
+          toggleLanguage: () => {},
+          isRTL: false,
+          t: translations.en,
+        }}
+      >
         <div style={{ visibility: "hidden" }}>{children}</div>
       </LanguageContext.Provider>
     );
@@ -196,6 +593,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
 export function useLanguage() {
   const context = useContext(LanguageContext);
-  if (!context) throw new Error("useLanguage must be used within LanguageProvider");
+  if (!context)
+    throw new Error("useLanguage must be used within LanguageProvider");
   return context;
 }

@@ -16,7 +16,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
   const { totalItems } = useCart();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [userName, setUserName] = useState("Customer");
+  const [userName, setUserName] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -56,7 +56,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
 
   return (
     <div
-      className="flex flex-row justify-between items-center gap-3 px-4 py-3 md:pr-6 relative z-20"
+      className="flex flex-row justify-between items-center gap-3 px-4 py-3 md:pe-6 relative z-20"
       style={{
         background: "rgba(255,255,255,0.95)",
         backdropFilter: "blur(12px)",
@@ -68,7 +68,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
       <button
         onClick={onMenuClick}
         id="topbar-menu-btn"
-        className="md:hidden p-2 -ml-1 rounded-xl transition-all duration-200 cursor-pointer"
+        className="md:hidden p-2 -ms-1 rounded-xl transition-all duration-200 cursor-pointer"
         aria-label="Open menu"
         style={{ color: "#64748b" }}
         onMouseEnter={(e) => {
@@ -96,7 +96,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
             color: "#6366f1",
           }}
         >
-          Customer Portal
+          {t.brandName}
         </span>
       </div>
 
@@ -112,7 +112,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         >
           <ShoppingCartIcon className="w-5 h-5" />
           {totalItems > 0 && (
-            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
+            <span className="absolute -top-1 -end-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
               {totalItems}
             </span>
           )}
@@ -149,12 +149,12 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
               boxShadow: "0 2px 10px rgba(99,102,241,0.35)",
             }}
           >
-            {userName.charAt(0).toUpperCase()}
+            {(userName || t.common.customer).charAt(0).toUpperCase()}
           </button>
 
           {dropdownOpen && (
             <div
-              className="absolute right-0 top-12 w-44 rounded-xl py-1 z-50"
+              className="absolute end-0 top-12 w-44 rounded-xl py-1 z-50"
               style={{
                 background: "#ffffff",
                 border: "1px solid rgba(99,102,241,0.12)",

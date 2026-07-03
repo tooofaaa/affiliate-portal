@@ -8,7 +8,7 @@ import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import { Button } from "@/components/ui/Button";
 
 export default function MembershipPage() {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [membership, setMembership] = useState<CustomerMembership | null>(null);
   const [levels, setLevels] = useState<MembershipLevel[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,16 +34,16 @@ export default function MembershipPage() {
     setIsUpdating(true);
     const res = await recalculateMembershipTier();
     if (res.success) {
-      alert(`Membership tier synced successfully! New Tier: ${res.newTier}`);
+      alert(`${t.common.success}! New Tier: ${res.newTier}`);
       await loadData();
     } else {
-      alert(`Sync failed: ${res.error}`);
+      alert(`${t.common.failed}: ${res.error}`);
     }
     setIsUpdating(false);
   };
 
   if (isLoading) {
-    return <p className="text-gray-500 py-12 text-center">Loading membership status...</p>;
+    return <p className="text-gray-500 py-12 text-center">{t.common.loading}</p>;
   }
 
   const currentLevel = membership?.level;
@@ -60,8 +60,8 @@ export default function MembershipPage() {
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-850">Membership & Rewards</h1>
-          <p className="text-sm text-slate-500 mt-1">Unlock exclusive purchasing discounts, support priorities, and logistics fast-tracks.</p>
+          <h1 className="text-2xl font-bold text-slate-850">{t.membership.title}</h1>
+          <p className="text-sm text-slate-500 mt-1">{t.membership.subtitle}</p>
         </div>
         <Button 
           variant="secondary"
@@ -69,7 +69,7 @@ export default function MembershipPage() {
           disabled={isUpdating}
           className="cursor-pointer"
         >
-          {isUpdating ? "Syncing..." : "🔄 Recalculate Tier"}
+          {isUpdating ? t.common.saving : `🔄 ${t.nav.membership}`}
         </Button>
       </div>
 
@@ -87,16 +87,20 @@ export default function MembershipPage() {
             <div className="flex items-center gap-3">
               <span className="text-3xl">🏆</span>
               <div>
-                <h3 className="text-lg font-bold text-slate-800">{currentLevel?.level_name} Membership</h3>
-                <p className="text-xs text-slate-400 mt-0.5">Joined on {formatDate(membership?.joined_at || "")}</p>
+                <h3 className="text-lg font-bold text-slate-800">
+                  {currentLevel?.level_name} {t.nav.membership}
+                </h3>
+                <p className="text-xs text-slate-400 mt-0.5">
+                  {t.profile.verified}: {formatDate(membership?.joined_at || "", language)}
+                </p>
               </div>
             </div>
             
             {nextLevel ? (
               <div className="mt-6">
                 <div className="flex justify-between text-xs font-semibold text-slate-600 mb-2">
-                  <span>Progress to {nextLevel.level_name}</span>
-                  <span>{formatCurrency(spent)} / {formatCurrency(nextLevel.min_spent_sar)}</span>
+                  <span>{t.membership.tierProgress} ({nextLevel.level_name})</span>
+                  <span>{formatCurrency(spent, language)} / {formatCurrency(nextLevel.min_spent_sar, language)}</span>
                 </div>
                 <div className="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
                   <div 
@@ -104,16 +108,18 @@ export default function MembershipPage() {
                     style={{ width: `${percent}%` }}
                   />
                 </div>
-                <p className="text-[11px] text-slate-400 mt-2">Spend another {formatCurrency(Number(nextLevel.min_spent_sar) - spent)} to unlock {nextLevel.level_name} benefits.</p>
+                <p className="text-[11px] text-slate-400 mt-2">
+                  {t.membership.minSpent.replace("{amount}", formatCurrency(Number(nextLevel.min_spent_sar) - spent, language))} -> {nextLevel.level_name}
+                </p>
               </div>
             ) : (
-              <p className="text-sm font-semibold text-emerald-600 mt-6">✓ You have achieved the highest tier (Platinum)! Enjoy maximum rewards.</p>
+              <p className="text-sm font-semibold text-emerald-600 mt-6">✓ {t.common.success}! Platinum Tier</p>
             )}
           </div>
 
           {/* Active Benefits */}
           <div className="w-full md:w-80 bg-indigo-50/50 rounded-xl p-5 border border-indigo-100/40">
-            <h4 className="text-xs font-bold uppercase text-indigo-600 tracking-wider mb-3">Active Tier Benefits</h4>
+            <h4 className="text-xs font-bold uppercase text-indigo-600 tracking-wider mb-3">{t.membership.tierBenefits}</h4>
             <ul className="space-y-2 text-xs text-slate-600">
               {currentLevel?.benefits.map((b, i) => (
                 <li key={i} className="flex items-center gap-2">
@@ -127,7 +133,7 @@ export default function MembershipPage() {
 
       {/* Levels Grid */}
       <div>
-        <h3 className="font-semibold text-base text-slate-800 mb-4">Membership Levels</h3>
+        <h3 className="font-semibold text-base text-slate-800 mb-4">{t.membership.availableTiers}</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {levels.map((lvl) => {
             const isActive = lvl.level_name === currentLevel?.level_name;
@@ -148,12 +154,16 @@ export default function MembershipPage() {
                     <span className="font-bold text-sm text-slate-800">{lvl.level_name}</span>
                     {isActive && (
                       <span className="text-[10px] bg-indigo-100 text-indigo-700 font-bold px-2 py-0.5 rounded-full">
-                        Active
+                        {t.profile.verified}
                       </span>
                     )}
                   </div>
-                  <p className="text-2xl font-bold text-indigo-600">{lvl.discount_percentage}% off</p>
-                  <p className="text-[11px] text-slate-400 mt-1">Min spent: {formatCurrency(lvl.min_spent_sar)}</p>
+                  <p className="text-2xl font-bold text-indigo-600">
+                    {t.membership.discountText.replace("{percent}", String(lvl.discount_percentage))}
+                  </p>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    {t.membership.minSpent.replace("{amount}", formatCurrency(lvl.min_spent_sar, language))}
+                  </p>
                   
                   <div className="h-px bg-slate-100 my-4" />
                   

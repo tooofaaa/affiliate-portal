@@ -3,19 +3,19 @@
 import { useState } from "react";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
-import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-  const { isRTL } = useLanguage();
 
-  let mainContentClasses = "md:ml-60 w-full h-screen overflow-y-auto";
-  if (isMobileSidebarOpen) {
-    mainContentClasses += " overflow-hidden";
-  }
+  // md:ms-60 uses logical margin-inline-start — automatically flips
+  // to the correct side in both LTR and RTL without any manual isRTL check.
+  const mainContentClasses = [
+    "md:ms-60 w-full h-screen overflow-y-auto",
+    isMobileSidebarOpen ? "overflow-hidden" : "",
+  ].join(" ");
 
   return (
-    <div className="flex" dir={isRTL ? "rtl" : "ltr"}>
+    <div className="flex">
       <Sidebar
         isOpen={isMobileSidebarOpen}
         setIsOpen={setIsMobileSidebarOpen}
