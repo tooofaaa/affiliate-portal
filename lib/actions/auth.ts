@@ -9,13 +9,23 @@ export async function loginCustomer(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
     return { success: false, message: error.message };
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user || user.user_metadata?.role !== "customer") {
+    await supabase.auth.signOut();
+    return { 
+      success: false, 
+      message: "Unauthorized access: This portal is reserved for customers." 
+    };
   }
 
   revalidatePath("/");
