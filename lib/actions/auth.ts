@@ -39,8 +39,10 @@ export async function signupCustomer(formData: FormData) {
   const name = formData.get("name") as string;
 
   const headersList = await headers();
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
+  const forwardedHost = headersList.get("x-forwarded-host");
+  const forwardedProto = headersList.get("x-forwarded-proto") || "https";
+  const host = forwardedHost || headersList.get("host") || "localhost:3000";
+  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
   const redirectTo = `${protocol}://${host}/auth/callback`;
 
   const { data, error } = await supabase.auth.signUp({
@@ -112,8 +114,10 @@ export async function requestPasswordReset(email: string) {
   
   const { browser, platform, device } = parseUserAgent(userAgent);
   
-  const host = headersList.get("host") || "localhost:3000";
-  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
+  const forwardedHost = headersList.get("x-forwarded-host");
+  const forwardedProto = headersList.get("x-forwarded-proto") || "https";
+  const host = forwardedHost || headersList.get("host") || "localhost:3000";
+  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
   const resetUrl = `${protocol}://${host}/auth/callback?next=/reset-password`;
 
   // Log reset requested
