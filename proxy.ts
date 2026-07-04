@@ -38,6 +38,8 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/login") ||
       pathname.startsWith("/signup") ||
       pathname.startsWith("/confirm") ||
+      pathname.startsWith("/forgot-password") ||
+      pathname.startsWith("/reset-password") ||
       pathname.startsWith("/auth/callback");
 
     // Redirect unauthenticated users to login
