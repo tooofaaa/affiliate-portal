@@ -49,22 +49,20 @@ export default function SupplierDetailsPage() {
       const supabase = createClient();
       
       const [supplierRes, productsRes] = await Promise.all([
-        supabase.from('suppliers').select('*').eq('id', id).single(),
+        supabase.from('suppliers').select('id, enterprise_unique_id, categories').eq('id', id).single(),
         supabase.from('products').select('*').eq('supplier_id', id)
       ]);
 
       if (supplierRes.data) {
-        const sName = (isAr && supplierRes.data.supplier_name_ar) ? supplierRes.data.supplier_name_ar : supplierRes.data.supplier_name;
-        const sDesc = (isAr && supplierRes.data.description_ar) ? supplierRes.data.description_ar : (supplierRes.data.description || t.supplierDetail.trustedSupplier);
         setSupplier({
           id: supplierRes.data.id,
-          name: sName,
-          description: sDesc,
-          logoUrl: supplierRes.data.logo_url || "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=300&q=80",
+          name: supplierRes.data.enterprise_unique_id,
+          description: t.supplierDetail.trustedSupplier,
+          logoUrl: "",
           categories: supplierRes.data.categories || ["General"],
-          rating: supplierRes.data.rating || 5.0,
-          deliveryTime: supplierRes.data.delivery_time || "2-3 days",
-          location: supplierRes.data.address || "Main Distribution Center"
+          rating: 5.0,
+          deliveryTime: "2-3 days",
+          location: "Main Distribution Center"
         } as Supplier);
       }
 
@@ -72,7 +70,7 @@ export default function SupplierDetailsPage() {
         const mappedProducts = (productsRes.data as DBProduct[]).map((p) => {
           const pName = (isAr && p.product_name_ar) ? p.product_name_ar : p.product_name;
           const pDesc = (isAr && p.description_ar) ? p.description_ar : (p.description || t.supplierDetail.highQuality);
-          const sName = supplierRes.data ? ((isAr && supplierRes.data.supplier_name_ar) ? supplierRes.data.supplier_name_ar : supplierRes.data.supplier_name) : t.supplierDetail.unknown;
+          const sName = supplierRes.data ? supplierRes.data.enterprise_unique_id : t.supplierDetail.unknown;
           return {
             id: p.id,
             supplierId: p.supplier_id,

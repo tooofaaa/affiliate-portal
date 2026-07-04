@@ -26,7 +26,7 @@ export async function getApprovedCatalog(params?: {
 
   let query = supabase
     .from("products")
-    .select("id, product_name, product_category, product_type, sell_price, amount_stock, moq, description, product_image, supplier_id, suppliers(supplier_name)")
+    .select("id, product_name, product_category, product_type, sell_price, amount_stock, moq, description, product_image, supplier_id, suppliers(enterprise_unique_id)")
     .eq("approval_status", "Approved")
     .eq("is_active", true)
     .gt("amount_stock", 0)
@@ -57,7 +57,7 @@ export async function getApprovedCatalog(params?: {
     description: p.description || "",
     product_image: p.product_image || "",
     supplier_id: p.supplier_id,
-    supplier_name: p.suppliers?.supplier_name || "Unknown Supplier",
+    supplier_name: p.suppliers?.enterprise_unique_id || "Unknown Supplier",
   }));
 
   return { data: mapped, error: null };

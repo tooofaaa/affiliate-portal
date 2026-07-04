@@ -29,18 +29,18 @@ export default function SuppliersPage() {
   useEffect(() => {
     async function loadSuppliers() {
       const supabase = createClient();
-      const { data } = await supabase.from('suppliers').select('*').order('supplier_name');
+      const { data } = await supabase.from('suppliers').select('id, enterprise_unique_id, categories');
 
       if (data) {
-        const mapped = (data as unknown as DBSupplier[]).map((s) => ({
+        const mapped = (data as any[]).map((s) => ({
           id: s.id,
-          name: (language === "ar" && s.supplier_name_ar) ? s.supplier_name_ar : s.supplier_name,
-          description: (language === "ar" && s.description_ar) ? s.description_ar : (s.description || t.supplierDetail.trustedSupplier),
-          logoUrl: s.logo_url || "https://images.unsplash.com/photo-1560179707-f14e90ef3623?w=300&q=80",
+          name: s.enterprise_unique_id,
+          description: t.supplierDetail.trustedSupplier,
+          logoUrl: "",
           categories: s.categories || ["General"],
-          rating: s.rating || 5.0,
-          deliveryTime: s.delivery_time || "2-3 days",
-          location: s.address || "Main Distribution Center"
+          rating: 5.0,
+          deliveryTime: "2-3 days",
+          location: "Main Distribution Center"
         })) as Supplier[];
         setSuppliers(mapped);
       }

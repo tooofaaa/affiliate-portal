@@ -113,7 +113,7 @@ export async function getMyOrders(): Promise<{ data: Order[]; error: string | nu
 
   const { data, error } = await supabase
     .from("orders")
-    .select("*, suppliers(supplier_name), order_items(*, products(*))")
+    .select("*, suppliers(enterprise_unique_id), order_items(*, products(*))")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 
@@ -125,7 +125,7 @@ export async function getMyOrders(): Promise<{ data: Order[]; error: string | nu
     id: o.id,
     poCode: o.po_code,
     supplierId: o.supplier_id,
-    supplierName: o.suppliers?.supplier_name || "Unknown",
+    supplierName: o.suppliers?.enterprise_unique_id || "Unknown",
     status: o.status,
     totalCost: o.total_cost,
     createdAt: o.created_at,
