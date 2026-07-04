@@ -2,6 +2,7 @@
 
 import { createClientServer } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 
 export async function loginCustomer(formData: FormData) {
   const supabase = await createClientServer();
@@ -27,10 +28,16 @@ export async function signupCustomer(formData: FormData) {
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
 
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : "https";
+  const redirectTo = `${protocol}://${host}/auth/callback`;
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: redirectTo,
       data: {
         role: "customer",
         name,
