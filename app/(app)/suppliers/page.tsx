@@ -27,16 +27,22 @@ export default function SuppliersPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    async function loadSuppliers() {
-      const supabase = createClient();
-      const { data } = await supabase.from('suppliers').select('id, enterprise_unique_id, categories');
+    const supabase = createClient();
 
-      if (data) {
+    async function loadSuppliers() {
+      setIsLoading(true);
+      console.log('Fetching suppliers from Supabase...');
+      const { data, error } = await supabase.from('suppliers').select('id, enterprise_unique_id, supplier_name, logo_url, categories, status').eq('status', 'Approved');
+
+      if (error) {
+        console.error('Error fetching suppliers:', error);
+      } else {
+        console.log('Suppliers fetched successfully:', data);
         const mapped = (data as any[]).map((s) => ({
           id: s.id,
-          name: s.enterprise_unique_id,
+          name: s.supplier_name || s.enterprise_unique_id,
           description: t.supplierDetail.trustedSupplier,
-          logoUrl: "",
+          logoUrl: s.logo_url || "",
           categories: s.categories || ["General"],
           rating: 5.0,
           deliveryTime: "2-3 days",
@@ -48,7 +54,22 @@ export default function SuppliersPage() {
     }
     
     loadSuppliers();
-  }, [language]);
+
+    const channel = supabase
+      .channel("suppliers-portal-realtime")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "suppliers" },
+        () => {
+          loadSuppliers();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [language, t]);
 
   return (
     <div className="flex flex-col gap-6">

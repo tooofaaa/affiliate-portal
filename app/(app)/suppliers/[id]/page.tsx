@@ -45,20 +45,21 @@ export default function SupplierDetailsPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    const supabase = createClient();
+
     async function loadData() {
-      const supabase = createClient();
-      
+      setIsLoading(true);
       const [supplierRes, productsRes] = await Promise.all([
-        supabase.from('suppliers').select('id, enterprise_unique_id, categories').eq('id', id).single(),
+        supabase.from('suppliers').select('id, enterprise_unique_id, supplier_name, logo_url, categories').eq('id', id).single(),
         supabase.from('products').select('*').eq('supplier_id', id)
       ]);
 
       if (supplierRes.data) {
         setSupplier({
           id: supplierRes.data.id,
-          name: supplierRes.data.enterprise_unique_id,
+          name: supplierRes.data.supplier_name || supplierRes.data.enterprise_unique_id,
           description: t.supplierDetail.trustedSupplier,
-          logoUrl: "",
+          logoUrl: supplierRes.data.logo_url || "",
           categories: supplierRes.data.categories || ["General"],
           rating: 5.0,
           deliveryTime: "2-3 days",
@@ -70,7 +71,7 @@ export default function SupplierDetailsPage() {
         const mappedProducts = (productsRes.data as DBProduct[]).map((p) => {
           const pName = (isAr && p.product_name_ar) ? p.product_name_ar : p.product_name;
           const pDesc = (isAr && p.description_ar) ? p.description_ar : (p.description || t.supplierDetail.highQuality);
-          const sName = supplierRes.data ? supplierRes.data.enterprise_unique_id : t.supplierDetail.unknown;
+          const sName = supplierRes.data ? (supplierRes.data.supplier_name || supplierRes.data.enterprise_unique_id) : t.supplierDetail.unknown;
           return {
             id: p.id,
             supplierId: p.supplier_id,
@@ -93,7 +94,30 @@ export default function SupplierDetailsPage() {
     }
     
     loadData();
-  }, [id, isAr]);
+
+    // Live sync for supplier details and products
+    const channel = supabase
+      .channel(`supplier-details-${id}-realtime`)
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "suppliers", filter: `id=eq.${id}` },
+        () => {
+          loadData();
+        }
+      )
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "products", filter: `supplier_id=eq.${id}` },
+        () => {
+          loadData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [id, isAr, t]);
 
   // Apply frontend search filters dynamically
   useEffect(() => {
