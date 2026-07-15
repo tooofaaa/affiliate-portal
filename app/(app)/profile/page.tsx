@@ -399,7 +399,7 @@ export default function ProfilePage() {
           {/* Tab 3: Documents Upload & Management */}
           {activeTab === "documents" && (
             <div className="flex flex-col gap-6">
-              {/* Upload Mock Document */}
+              {/* Upload Document */}
               <div
                 className="rounded-2xl p-6 bg-white"
                 style={{
