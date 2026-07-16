@@ -40,13 +40,13 @@ export default function SuppliersPage() {
         console.log('Suppliers fetched successfully:', data);
         const mapped = (data as any[]).map((s) => ({
           id: s.id,
-          name: s.supplier_name || s.enterprise_unique_id,
+          name: s.enterprise_unique_id || `Provider #${s.id}`,
           description: t.supplierDetail.trustedSupplier,
-          logoUrl: s.logo_url || "",
+          logoUrl: "",
           categories: s.categories || ["General"],
           rating: 5.0,
-          deliveryTime: "2-3 days",
-          location: "Main Distribution Center"
+          deliveryTime: "",
+          location: ""
         })) as Supplier[];
         setSuppliers(mapped);
       }
@@ -158,23 +158,15 @@ export default function SuppliersPage() {
                     <h3 className="font-semibold text-base truncate pr-2" style={{ color: "#0f172a" }}>
                       {supplier.name}
                     </h3>
-                    <div className="flex items-center gap-1 text-xs font-semibold bg-amber-50 text-amber-600 px-2 py-0.5 rounded-md">
-                      ★ {supplier.rating}
+                    <div className="flex items-center gap-1 text-xs font-semibold bg-indigo-50 text-indigo-600 px-2 py-0.5 rounded-md">
+                      Code: {supplier.name}
                     </div>
                   </div>
-                  <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "#64748b" }}>
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
-                      <circle cx="12" cy="10" r="3" />
+                  <p className="text-xs mt-2 flex items-center gap-1.5" style={{ color: "#64748b" }}>
+                    <svg className="w-3.5 h-3.5 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    {supplier.location}
-                  </p>
-                  <p className="text-xs mt-1 flex items-center gap-1.5" style={{ color: "#64748b" }}>
-                    <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
-                      <circle cx="12" cy="12" r="10" />
-                      <polyline points="12 6 12 12 16 14" />
-                    </svg>
-                    {supplier.deliveryTime} {t.suppliersPage.delivery}
+                    Verified Provider
                   </p>
                 </div>
               </div>

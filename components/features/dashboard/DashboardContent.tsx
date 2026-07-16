@@ -35,16 +35,16 @@ export default function DashboardContent() {
       const supabase = createClient();
       
       const [ordersRes, suppliersRes, walletRes, membershipRes, productsRes] = await Promise.all([
-        supabase.from('orders').select('*, suppliers(supplier_name, supplier_name_ar)').order('created_at', { ascending: false }),
+        supabase.from('orders').select('*, suppliers(enterprise_unique_id)').order('created_at', { ascending: false }),
         supabase.from('suppliers').select('id', { count: 'exact', head: true }),
         getCustomerWallet(),
         getCustomerMembership(),
-        supabase.from('products').select('*, suppliers(supplier_name, supplier_name_ar)').limit(3)
+        supabase.from('products').select('*, suppliers(enterprise_unique_id)').limit(3)
       ]);
 
       if (ordersRes.data) {
         setOrders(ordersRes.data.map(o => {
-          const sName = o.suppliers ? ((isAr && o.suppliers.supplier_name_ar) ? o.suppliers.supplier_name_ar : o.suppliers.supplier_name) : t.supplierDetail.unknown;
+          const sName = o.suppliers?.enterprise_unique_id ? String(o.suppliers.enterprise_unique_id) : `Provider #${o.supplier_id}`;
           return {
             id: o.id,
             poCode: o.po_code,
@@ -73,7 +73,7 @@ export default function DashboardContent() {
 
       if (productsRes.data) {
         setRecommendations(productsRes.data.map(p => {
-          const sName = p.suppliers ? ((isAr && p.suppliers.supplier_name_ar) ? p.suppliers.supplier_name_ar : p.suppliers.supplier_name) : t.supplierDetail.unknown;
+          const sName = p.suppliers?.enterprise_unique_id ? String(p.suppliers.enterprise_unique_id) : `Provider #${p.supplier_id}`;
           const pName = (isAr && p.product_name_ar) ? p.product_name_ar : p.product_name;
           return {
             id: p.id,

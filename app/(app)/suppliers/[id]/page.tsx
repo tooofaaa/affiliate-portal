@@ -57,13 +57,13 @@ export default function SupplierDetailsPage() {
       if (supplierRes.data) {
         setSupplier({
           id: supplierRes.data.id,
-          name: supplierRes.data.supplier_name || supplierRes.data.enterprise_unique_id,
+          name: supplierRes.data.enterprise_unique_id || `Provider #${supplierRes.data.id}`,
           description: t.supplierDetail.trustedSupplier,
-          logoUrl: supplierRes.data.logo_url || "",
+          logoUrl: "",
           categories: supplierRes.data.categories || ["General"],
           rating: 5.0,
-          deliveryTime: "2-3 days",
-          location: "Main Distribution Center"
+          deliveryTime: "",
+          location: ""
         } as Supplier);
       }
 
@@ -71,7 +71,7 @@ export default function SupplierDetailsPage() {
         const mappedProducts = (productsRes.data as DBProduct[]).map((p) => {
           const pName = (isAr && p.product_name_ar) ? p.product_name_ar : p.product_name;
           const pDesc = (isAr && p.description_ar) ? p.description_ar : (p.description || t.supplierDetail.highQuality);
-          const sName = supplierRes.data ? (supplierRes.data.supplier_name || supplierRes.data.enterprise_unique_id) : t.supplierDetail.unknown;
+          const sName = supplierRes.data?.enterprise_unique_id ? String(supplierRes.data.enterprise_unique_id) : `Provider #${p.supplier_id}`;
           return {
             id: p.id,
             supplierId: p.supplier_id,
@@ -189,27 +189,22 @@ export default function SupplierDetailsPage() {
           boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
         }}
       >
-        <div className="w-24 h-24 rounded-2xl overflow-hidden bg-white flex-shrink-0 shadow-lg border border-white/10 flex items-center justify-center">
-          <img src={supplier.logoUrl} alt={supplier.name} className="w-full h-full object-cover" />
+        <div className="w-24 h-24 rounded-2xl bg-indigo-50/10 flex-shrink-0 flex items-center justify-center border border-indigo-500/20">
+          <svg className="w-10 h-10 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <path d="M9 3v18M15 3v18M3 9h18M3 15h18" />
+          </svg>
         </div>
         <div className="flex-1 text-white">
           <div className="flex items-center gap-3 mb-2">
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">{supplier.name}</h1>
-            <span className="bg-amber-500/20 text-amber-400 text-xs font-bold px-2.5 py-1 rounded-md border border-amber-500/20">
-              ★ {supplier.rating}
+            <span className="bg-indigo-500/20 text-indigo-400 text-xs font-bold px-2.5 py-1 rounded-md border border-indigo-500/20">
+              Verified Provider
             </span>
           </div>
           <p className="text-gray-400 text-sm md:text-base leading-relaxed max-w-3xl font-light">
             {supplier.description}
           </p>
-          <div className="flex flex-wrap items-center gap-4 mt-4 text-sm font-medium text-gray-300">
-            <div className="flex items-center gap-1.5">
-              <span className="text-indigo-400">📍</span> {supplier.location}
-            </div>
-            <div className="flex items-center gap-1.5">
-              <span className="text-indigo-400">⏱</span> {supplier.deliveryTime} {t.supplierDetail.delivery}
-            </div>
-          </div>
         </div>
       </div>
 
