@@ -51,7 +51,7 @@ export default function SupplierDetailsPage() {
       setIsLoading(true);
       const [supplierRes, productsRes] = await Promise.all([
         supabase.from('suppliers').select('id, enterprise_unique_id, supplier_name, logo_url, categories').eq('id', id).single(),
-        supabase.from('products').select('*').eq('supplier_id', id)
+        supabase.from('products').select('*').eq('supplier_id', id).eq('approval_status', 'Approved')
       ]);
 
       if (supplierRes.data) {
