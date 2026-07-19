@@ -119,10 +119,37 @@ export interface CustomerWalletTransaction {
   id: number;
   wallet_id: number;
   amount: number;
-  transaction_type: 'Deposit' | 'Payment' | 'Refund' | 'Bonus' | 'StorageCharge';
+  transaction_type: 'Deposit' | 'Payment' | 'Refund' | 'Bonus' | 'StorageCharge' | 'CREDIT' | 'CHARGE';
   reference_id?: string;
   description?: string;
   created_at: string;
+}
+
+export interface BankAccount {
+  id: number;
+  customer_id: number;
+  bank_name: string;
+  account_holder: string;
+  account_number: string;
+  iban?: string;
+  swift_code?: string;
+  currency: string;
+  is_primary: boolean;
+  is_verified: boolean;
+  created_at: string;
+}
+
+export interface WalletWithdrawal {
+  id: number;
+  customer_id: number;
+  bank_account_id?: number | null;
+  amount: number;
+  currency: string;
+  status: 'Pending' | 'Processing' | 'Completed' | 'Rejected';
+  notes?: string;
+  reviewed_by?: string | null;
+  reviewed_at?: string | null;
+  requested_at: string;
 }
 
 export interface WarehouseStorage {

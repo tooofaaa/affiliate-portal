@@ -85,3 +85,55 @@ html[dir="rtl"] body {
 [dir="rtl"] .-translate-x-full {
   transform: translateX(0);
 }
+
+/* Premium Page Transition */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-transition-enter {
+  animation: pageFadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Premium Loading Spinner */
+@keyframes spin-dual {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.loading-spinner-ring {
+  width: 44px;
+  height: 44px;
+  border: 3px solid rgba(99, 102, 241, 0.1);
+  border-top-color: #6366f1;
+  border-right-color: #3b82f6;
+  border-radius: 50%;
+  animation: spin-dual 1s cubic-bezier(0.5, 0.1, 0.5, 0.9) infinite;
+}
+
+/* Premium Loader Overlay */
+.premium-loader-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba(248, 250, 252, 0.45);
+  backdrop-filter: blur(1px);
+  transition: all 0.3s;
+}
+
+@media (min-width: 768px) {
+  .premium-loader-overlay {
+    inset-inline-start: 15rem;
+  }
+}
