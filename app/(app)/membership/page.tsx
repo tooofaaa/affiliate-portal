@@ -91,7 +91,7 @@ export default function MembershipPage() {
                   {currentLevel?.level_name} {t.nav.membership}
                 </h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  {t.profile.verified}: {formatDate(membership?.joined_at || "", language)}
+                  {language === 'ar' ? 'عضو منذ' : 'Member since'}: {formatDate(membership?.joined_at || "", language)}
                 </p>
               </div>
             </div>

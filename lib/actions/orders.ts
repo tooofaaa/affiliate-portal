@@ -86,6 +86,28 @@ export async function checkoutCart(items: CheckoutItem[]): Promise<{ success: bo
           reason: "Order checkout completed",
           changed_by: user.id,
         });
+
+        // Notify supplier of new order
+        try {
+          const { data: supplier } = await supabase
+            .from("suppliers")
+            .select("portal_user_id")
+            .eq("id", supplierId)
+            .single();
+          if (supplier?.portal_user_id) {
+            await supabase.from("notifications").insert({
+              user_id: supplier.portal_user_id,
+              is_admin: false,
+              title: "New Order Received",
+              message: "A new purchase order has been placed.",
+              type: "new_order",
+              link: "/orders",
+              read: false,
+            });
+          }
+        } catch (notifError) {
+          console.error("Failed to insert supplier notification:", notifError);
+        }
       }
     }
 
@@ -163,10 +185,10 @@ export async function requestReturn(orderId: number, reason: string): Promise<{ 
 
   if (!user) return { success: false, error: "Unauthorized" };
 
-  // Fetch order current status
+  // Fetch order current status and supplier_id
   const { data: order } = await supabase
     .from("orders")
-    .select("status")
+    .select("status, supplier_id")
     .eq("id", orderId)
     .single();
 
@@ -192,6 +214,42 @@ export async function requestReturn(orderId: number, reason: string): Promise<{ 
     reason: reason,
     changed_by: user.id,
   });
+
+  // Notify supplier and admin of return request
+  try {
+    const { data: supplier } = await supabase
+      .from("suppliers")
+      .select("portal_user_id")
+      .eq("id", order.supplier_id)
+      .single();
+    if (supplier?.portal_user_id) {
+      await supabase.from("notifications").insert({
+        user_id: supplier.portal_user_id,
+        is_admin: false,
+        title: "Return Request",
+        message: `A customer has requested a return for order #${orderId}.`,
+        type: "return_request",
+        link: `/orders/${orderId}`,
+        read: false,
+      });
+    }
+  } catch (notifError) {
+    console.error("Failed to insert supplier return notification:", notifError);
+  }
+
+  try {
+    await supabase.from("notifications").insert({
+      user_id: null,
+      is_admin: true,
+      title: "Return Request",
+      message: `Customer submitted a return request for order #${orderId}.`,
+      type: "return_request",
+      link: "/admin?tab=orders",
+      read: false,
+    });
+  } catch (notifError) {
+    console.error("Failed to insert admin return notification:", notifError);
+  }
 
   revalidatePath("/orders");
 

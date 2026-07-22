@@ -10,6 +10,7 @@ import { createClient } from "@/lib/supabase/client";
 import { Order, Product } from "@/lib/types";
 import { getCustomerWallet } from "@/lib/actions/wallet";
 import { getCustomerMembership } from "@/lib/actions/membership";
+import { getMyOrders } from "@/lib/actions/orders";
 
 const STATUS_STYLES: Record<string, { bg: string; color: string }> = {
   Pending: { bg: "rgba(245,158,11,0.1)", color: "#d97706" },
@@ -35,7 +36,7 @@ export default function DashboardContent() {
       const supabase = createClient();
       
       const [ordersRes, suppliersRes, walletRes, membershipRes, productsRes] = await Promise.all([
-        supabase.from('orders').select('*, suppliers(enterprise_unique_id)').order('created_at', { ascending: false }),
+        getMyOrders(),
         supabase.from('suppliers').select('id', { count: 'exact', head: true }),
         getCustomerWallet(),
         getCustomerMembership(),
@@ -43,20 +44,7 @@ export default function DashboardContent() {
       ]);
 
       if (ordersRes.data) {
-        setOrders(ordersRes.data.map(o => {
-          const sName = o.suppliers?.enterprise_unique_id ? String(o.suppliers.enterprise_unique_id) : `Provider #${o.supplier_id}`;
-          return {
-            id: o.id,
-            poCode: o.po_code,
-            supplierId: o.supplier_id,
-            supplierName: sName,
-            status: o.status,
-            items: [],
-            totalCost: o.total_cost,
-            createdAt: o.created_at,
-            expectedDelivery: o.expected_delivery_date
-          };
-        }) as Order[]);
+        setOrders(ordersRes.data);
       }
       
       if (suppliersRes.count !== null) {

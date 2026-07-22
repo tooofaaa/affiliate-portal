@@ -38,7 +38,7 @@ export default function WithdrawalsList({ withdrawals }: WithdrawalsListProps) {
               <th className="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">{t.wallet.requestId}</th>
               <th className="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">{t.wallet.requestedOn}</th>
               <th className="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">{t.wallet.transAmount}</th>
-              <th className="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">{t.wallet.bankAccount}</th>
+              <th className="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">{t.wallet.bankAccounts}</th>
               <th className="px-4 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider border-b border-gray-100">{language === 'ar' ? 'الحالة' : 'Status'}</th>
             </tr>
           </thead>
@@ -52,7 +52,7 @@ export default function WithdrawalsList({ withdrawals }: WithdrawalsListProps) {
             ) : (
               filtered.map((w) => {
                 const statusLabel = t.wallet.wdStatusMap[w.status as keyof typeof t.wallet.wdStatusMap] || w.status;
-                const bankName = (w as any).bank_account?.bank_name || t.wallet.bankAccount;
+                const bankName = (w as any).bank_account?.bank_name || t.wallet.bankAccounts;
                 return (
                   <tr key={w.id} className="hover:bg-gray-50 transition-colors">
                     <td className="px-4 py-3 font-mono text-xs text-gray-500">WD-{w.id.toString().padStart(4, '0')}</td>

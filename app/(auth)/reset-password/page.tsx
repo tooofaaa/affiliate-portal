@@ -105,7 +105,7 @@ export default function ResetPasswordPage() {
         {!successMsg && (
           <>
             <div className="flex flex-col gap-1.5 relative">
-              <label className="text-sm font-semibold text-gray-700 ml-1">
+              <label className="text-sm font-semibold text-gray-700 ms-1">
                 {l.newPassword}
               </label>
               <input
@@ -142,7 +142,7 @@ export default function ResetPasswordPage() {
             )}
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-sm font-semibold text-gray-700 ml-1">
+              <label className="text-sm font-semibold text-gray-700 ms-1">
                 {l.confirmPassword}
               </label>
               <input

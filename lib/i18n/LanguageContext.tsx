@@ -38,6 +38,7 @@ const translations = {
       currency: "SAR",
       customer: "Customer",
       delete: "Delete",
+      cancel: "Cancel",
     },
     dashboard: {
       title: "Dashboard",
@@ -227,7 +228,9 @@ const translations = {
       accNumLabel: "Account Number *",
       setPrimary: "Set as primary withdrawal account",
       adding: "Adding...",
-      addAccountBtn: "Add Account"
+      addAccountBtn: "Add Account",
+      requestWithdrawal: "Request Withdrawal",
+      pendingWithdrawals: "Pending Withdrawals"
     },
     membership: {
       title: "Membership Program",
@@ -333,6 +336,16 @@ const translations = {
       minOrder: "Min. order: {qty} {unit}(s)",
       noProducts: "No products match the selected criteria.",
     },
+    notifications: {
+      title: "Notifications",
+      markAllRead: "Mark all as read",
+      noNotifications: "No notifications yet",
+      justNow: "Just now",
+      minutesAgo: "{n} min ago",
+      hoursAgo: "{n}h ago",
+      orderStatusUpdate: "Order Status Updated",
+      returnRequestUpdate: "Return Request Update",
+    },
     settingsPage: {
       subtitle: "Configure your portal preferences and notifications",
       notifications: "Notifications",
@@ -379,6 +392,7 @@ const translations = {
       currency: "ر.س",
       customer: "العميل",
       delete: "حذف",
+      cancel: "إلغاء",
     },
     dashboard: {
       title: "لوحة القيادة",
@@ -406,7 +420,7 @@ const translations = {
       title: "مرحباً بعودتك",
       subtitle: "قم بتسجيل الدخول للوصول إلى حساب العميل الخاص بك",
       email: "البريد الإلكتروني",
-      emailPlaceholder: "you@example.com",
+      emailPlaceholder: "أدخل بريدك الإلكتروني",
       password: "كلمة المرور",
       passwordPlaceholder: "••••••••",
       signIn: "تسجيل الدخول",
@@ -417,7 +431,7 @@ const translations = {
       title: "استعادة كلمة المرور",
       subtitle: "أدخل عنوان بريدك الإلكتروني لتلقي رابط إعادة تعيين آمن",
       email: "البريد الإلكتروني",
-      emailPlaceholder: "you@example.com",
+      emailPlaceholder: "أدخل بريدك الإلكتروني",
       sendLink: "إرسال رابط إعادة التعيين",
       backToLogin: "العودة لتسجيل الدخول",
       resendEmail: "إعادة إرسال الرابط",
@@ -493,7 +507,7 @@ const translations = {
       name: "الاسم الكامل",
       namePlaceholder: "أحمد محمد",
       email: "البريد الإلكتروني",
-      emailPlaceholder: "you@example.com",
+      emailPlaceholder: "أدخل بريدك الإلكتروني",
       password: "كلمة المرور",
       passwordPlaceholder: "••••••••",
       signUp: "إنشاء الحساب",
@@ -568,7 +582,9 @@ const translations = {
       accNumLabel: "رقم الحساب *",
       setPrimary: "تعيين كحساب سحب أساسي",
       adding: "جاري الإضافة...",
-      addAccountBtn: "إضافة الحساب"
+      addAccountBtn: "إضافة الحساب",
+      requestWithdrawal: "طلب سحب",
+      pendingWithdrawals: "السحوبات المعلقة"
     },
     membership: {
       title: "برنامج العضوية",
@@ -673,6 +689,16 @@ const translations = {
       addToCart: "أضف إلى السلة",
       minOrder: "أقل كمية للطلب: {qty} {unit}",
       noProducts: "لا توجد منتجات تطابق المعايير المحددة.",
+    },
+    notifications: {
+      title: "الإشعارات",
+      markAllRead: "تعيين الكل كمقروء",
+      noNotifications: "لا توجد إشعارات بعد",
+      justNow: "الآن",
+      minutesAgo: "منذ {n} دقيقة",
+      hoursAgo: "منذ {n} ساعة",
+      orderStatusUpdate: "تم تحديث حالة الطلب",
+      returnRequestUpdate: "تحديث طلب الإرجاع",
     },
     settingsPage: {
       subtitle: "تكوين تفضيلات البوابة والإشعارات الخاصة بك",

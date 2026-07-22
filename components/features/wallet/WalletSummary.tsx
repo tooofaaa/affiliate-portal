@@ -10,7 +10,6 @@ interface WalletSummaryProps {
   cashbackBalance: number;
   pendingWithdrawals: number;
   totalCredits: number;
-  totalCharges: number;
   onWithdraw: () => void;
 }
 
@@ -27,8 +26,8 @@ export default function WalletSummary({
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
       <div className="lg:col-span-2 bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-4 -mr-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-4 -ml-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
+        <div className="absolute top-0 right-0 -mt-4 -me-4 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
+        <div className="absolute bottom-0 left-0 -mb-4 -ms-4 w-24 h-24 bg-white opacity-10 rounded-full blur-xl"></div>
         
         <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>

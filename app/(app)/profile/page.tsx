@@ -497,7 +497,7 @@ export default function ProfilePage() {
                             rel="noopener noreferrer"
                             className="text-xs font-semibold text-indigo-600 hover:underline"
                           >
-                            {t.common.search} →
+                            View →
                           </a>
                         </div>
                       </div>

@@ -30,7 +30,7 @@ export default function WarehousePage() {
     e.preventDefault();
     const space = parseFloat(spaceRequest);
     if (isNaN(space) || space <= 0) {
-      alert(t.wallet.invalidAmount);
+      alert(t.warehouse.notes ? "Please enter a valid space amount." : "Please enter a valid space amount.");
       return;
     }
 
@@ -106,7 +106,7 @@ export default function WarehousePage() {
                 />
               </div>
               <div>
-                <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">{t.profile.documents}</label>
+                <label className="text-[10px] font-bold uppercase text-slate-400 block mb-1">{language === 'ar' ? 'ملاحظات إضافية' : 'Additional Notes'}</label>
                 <textarea
                   placeholder={t.warehouse.notes}
                   value={notes}
@@ -182,7 +182,7 @@ export default function WarehousePage() {
                             {localizedStatus}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-slate-600 text-xs">{s.period}</td>
+                        <td className="px-6 py-4 text-slate-600 text-xs">{s.end_date ? formatDate(s.end_date, language) : s.period}</td>
                       </tr>
                     );
                   })

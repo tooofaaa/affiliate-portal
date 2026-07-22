@@ -38,7 +38,7 @@ export default function BankAccountsList({ accounts, onAdd }: BankAccountsListPr
           {accounts.map(account => (
             <div key={account.id} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 relative overflow-hidden">
               {account.is_primary && (
-                <div className="absolute top-0 right-0 bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-lg">
+                <div className="absolute top-0 end-0 bg-blue-500 text-white text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-bs-lg">
                   {t.wallet.primary}
                 </div>
               )}

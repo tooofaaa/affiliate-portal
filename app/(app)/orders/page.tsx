@@ -34,6 +34,7 @@ export default function OrdersPage() {
   const [isLoadingTimeline, setIsLoadingTimeline] = useState(false);
   const [returnReason, setReturnReason] = useState("");
   const [isSubmittingReturn, setIsSubmittingReturn] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   async function loadOrders() {
     setIsLoading(true);
@@ -80,9 +81,9 @@ export default function OrdersPage() {
     setIsSubmittingReturn(false);
   };
 
-  const filteredOrders = filter === "All"
-    ? orders
-    : orders.filter(o => o.status === filter);
+  const filteredOrders = orders
+    .filter(o => filter === "All" || o.status === filter)
+    .filter(o => !searchQuery || o.poCode?.toLowerCase().includes(searchQuery.toLowerCase()) || o.supplierName?.toLowerCase().includes(searchQuery.toLowerCase()));
 
   return (
     <div className="flex flex-col gap-6 pb-8">
@@ -98,11 +99,13 @@ export default function OrdersPage() {
         
         <div className="flex items-center gap-3">
           <div className="relative">
-            <SearchIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <SearchIcon className="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder={t.orders.searchPlaceholder}
-              className="pl-9 pr-4 py-2 rounded-xl text-sm w-full md:w-64 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="ps-9 pr-4 py-2 rounded-xl text-sm w-full md:w-64 transition-all"
               style={{
                 background: "rgba(255,255,255,0.8)",
                 border: "1px solid rgba(99,102,241,0.2)",
@@ -258,7 +261,7 @@ export default function OrdersPage() {
 
                 {/* State Machine Steps Visualizer */}
                 <h4 className="text-xs font-bold uppercase text-indigo-600 tracking-wider mb-4">{t.orders.trackProgress}</h4>
-                <div className="relative pl-6 border-l border-gray-100 flex flex-col gap-5">
+                <div className="relative ps-6 border-s border-gray-100 flex flex-col gap-5">
                   {TIMELINE_STEPS.map((step) => {
                     const currentIndex = TIMELINE_STEPS.indexOf(selectedOrder.status);
                     const stepIndex = TIMELINE_STEPS.indexOf(step);
@@ -269,8 +272,8 @@ export default function OrdersPage() {
                     return (
                       <div key={step} className="relative flex items-center gap-3">
                         {/* Dot indicator */}
-                        <div 
-                          className={`absolute -left-[30px] w-3 h-3 rounded-full border-2 ${
+                        <div
+                          className={`absolute -start-[30px] w-3 h-3 rounded-full border-2 ${
                             isActive ? "bg-indigo-600 border-indigo-600 scale-125 shadow shadow-indigo-300" :
                             isCompleted ? "bg-emerald-500 border-emerald-500" : "bg-white border-gray-200"
                           }`}

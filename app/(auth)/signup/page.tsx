@@ -64,7 +64,7 @@ export default function SignupPage() {
         )}
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-semibold text-gray-700 ml-1">
+          <label className="text-sm font-semibold text-gray-700 ms-1">
             {l.name}
           </label>
           <div className="relative group">
@@ -80,7 +80,7 @@ export default function SignupPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-semibold text-gray-700 ml-1">
+          <label className="text-sm font-semibold text-gray-700 ms-1">
             {l.email}
           </label>
           <div className="relative group">
@@ -96,7 +96,7 @@ export default function SignupPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-semibold text-gray-700 ml-1">
+          <label className="text-sm font-semibold text-gray-700 ms-1">
             {l.password}
           </label>
           <div className="relative group">

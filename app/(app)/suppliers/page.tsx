@@ -25,6 +25,7 @@ export default function SuppliersPage() {
   const { t, language } = useLanguage();
   const [suppliers, setSuppliers] = useState<Supplier[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     const supabase = createClient();
@@ -85,11 +86,13 @@ export default function SuppliersPage() {
         
         <div className="flex items-center gap-3">
           <div className="relative">
-            <SearchIcon className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+            <SearchIcon className="w-4 h-4 absolute start-3 top-1/2 -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder={t.suppliersPage.searchPlaceholder}
-              className="pl-9 pr-4 py-2 rounded-xl text-sm w-full md:w-64 transition-all"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="ps-9 pr-4 py-2 rounded-xl text-sm w-full md:w-64 transition-all"
               style={{
                 background: "rgba(255,255,255,0.8)",
                 border: "1px solid rgba(99,102,241,0.2)",
@@ -121,7 +124,7 @@ export default function SuppliersPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {suppliers.map((supplier) => (
+          {suppliers.filter(s => !searchQuery || s.name?.toLowerCase().includes(searchQuery.toLowerCase())).map((supplier) => (
             <Link
               href={`/suppliers/${supplier.id}`}
               key={supplier.id}

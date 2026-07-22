@@ -6,6 +6,7 @@ import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useCart } from "@/lib/context/CartContext";
 import Link from "next/link";
 import { logoutCustomer } from "@/lib/actions/auth";
+import NotificationDropdown from "@/components/layout/NotificationDropdown";
 
 interface TopbarProps {
   onMenuClick: () => void;
@@ -117,6 +118,9 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
             </span>
           )}
         </Link>
+
+        {/* Notifications */}
+        <NotificationDropdown />
 
         {/* Language toggle */}
         <button

@@ -14,13 +14,13 @@ async function getCustomerContext() {
     .eq('portal_user_id', user.id)
     .maybeSingle();
   if (!customer) return { supabase, user, customerId: null, walletId: null };
-  
+
   let { data: wallet } = await supabase
     .from('customer_wallets')
     .select('id')
     .eq('customer_id', customer.id)
     .maybeSingle();
-    
+
   if (!wallet) {
     const { data: newWallet } = await supabase
       .from('customer_wallets')
@@ -29,9 +29,10 @@ async function getCustomerContext() {
       .single();
     wallet = newWallet;
   }
-  
+
   return { supabase, user, customerId: customer.id, walletId: wallet?.id ?? null };
 }
+
 
 export async function getWalletSummary(): Promise<{
   availableBalance: number;
@@ -84,6 +85,12 @@ export async function getWalletSummary(): Promise<{
   const cashbackBalance = Math.max(0, totalCashback - totalCharges);
   const remainingChargesForRefundable = Math.max(0, totalCharges - totalCashback);
   const refundableBalance = Math.max(0, totalRefundable - remainingChargesForRefundable);
+
+  // Sync stored balance column so it stays consistent with the ledger
+  await supabase
+    .from("customer_wallets")
+    .update({ balance: Math.max(0, availableBalance) })
+    .eq("id", walletId);
 
   // Pending withdrawals
   const { data: withdrawals, error: wdError } = await supabase
