@@ -67,7 +67,7 @@ export async function loginAffiliate(formData: FormData) {
 
   if (affiliate.status === "pending") {
     await supabase.auth.signOut();
-    return { success: false, message: "Your account is pending admin approval" };
+    return { success: false, message: "Your account is pending approval. You will be notified once activated." };
   }
 
   if (affiliate.status === "suspended") {
@@ -157,12 +157,14 @@ export async function signupAffiliate(formData: FormData) {
     });
   }
 
+  // Even if Supabase auto-confirms the email and returns a session, the affiliate
+  // account is still pending admin approval. Sign out immediately so the user
+  // cannot bypass the pending gate by navigating directly to /dashboard.
   if (data.session) {
-    revalidatePath("/");
-    return { success: true, message: "Signed up successfully. Your account is pending admin approval.", session: true };
+    await supabase.auth.signOut();
   }
 
-  return { success: true, message: "Signed up successfully. Please check your email to confirm.", session: false };
+  return { success: true, message: "Signed up successfully. Your account is pending admin approval.", session: false };
 }
 
 export async function logoutCustomer() {
