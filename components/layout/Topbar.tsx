@@ -1,11 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { HamburgerIcon, LogOutIcon, ShoppingCartIcon } from "@/lib/icons";
+import { HamburgerIcon, LogOutIcon } from "@/lib/icons";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { useCart } from "@/lib/context/CartContext";
-import Link from "next/link";
-import { logoutCustomer } from "@/lib/actions/auth";
+import { logoutAffiliate } from "@/lib/actions/auth";
 import NotificationDropdown from "@/components/layout/NotificationDropdown";
 
 interface TopbarProps {
@@ -13,8 +11,7 @@ interface TopbarProps {
 }
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
-  const { t, language, toggleLanguage } = useLanguage();
-  const { totalItems } = useCart();
+  const { t, language, toggleLanguage, isRTL } = useLanguage();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [userName, setUserName] = useState("");
@@ -28,15 +25,15 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         const { data: { user }, error: userError } = await supabase.auth.getUser();
         if (userError) return;
         if (user && active) {
-          const { data } = await supabase.from("users").select("name").eq("id", user.id).single();
+          const { data } = await supabase.from("affiliates").select("name").eq("portal_user_id", user.id).maybeSingle();
           if (data && data.name && active) {
             setUserName(data.name);
           } else if (user.user_metadata?.name && active) {
             setUserName(user.user_metadata.name);
           }
         }
-      } catch (e) {
-        // Safe fallback for unmounts/aborts
+      } catch {
+        // Safe fallback
       }
     }
     loadUserName();
@@ -84,11 +81,8 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
 
       {/* Page title / brand */}
       <div className="hidden md:flex items-center gap-2">
-        <span
-          className="text-sm font-semibold"
-          style={{ color: "#0f172a" }}
-        >
-          {t.brandName}
+        <span className="text-sm font-semibold" style={{ color: "#0f172a" }}>
+          {isRTL ? "بوابة الشركاء" : "Affiliate Portal"}
         </span>
         <span
           className="text-xs px-2 py-0.5 rounded-full font-medium"
@@ -97,28 +91,15 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
             color: "#6366f1",
           }}
         >
-          {t.brandName}
+          {isRTL ? "شريك" : "Partner"}
         </span>
       </div>
 
       {/* Spacer */}
       <div className="flex-1" />
 
-      {/* Right: Lang toggle + User */}
+      {/* Right: Lang toggle + Notifications + User */}
       <div className="flex items-center gap-2 md:gap-3">
-        {/* Cart */}
-        <Link
-          href="/cart"
-          className="relative p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"
-        >
-          <ShoppingCartIcon className="w-5 h-5" />
-          {totalItems > 0 && (
-            <span className="absolute -top-1 -end-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full">
-              {totalItems}
-            </span>
-          )}
-        </Link>
-
         {/* Notifications */}
         <NotificationDropdown />
 
@@ -139,7 +120,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
             (e.currentTarget as HTMLButtonElement).style.background = "rgba(99,102,241,0.08)";
           }}
         >
-          {language === "en" ? "🇸🇦 عربي" : "🇬🇧 English"}
+          {language === "en" ? "عربي" : "English"}
         </button>
 
         {/* User dropdown */}
@@ -153,7 +134,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
               boxShadow: "0 2px 10px rgba(99,102,241,0.35)",
             }}
           >
-            {(userName || t.common.customer).charAt(0).toUpperCase()}
+            {(userName || "A").charAt(0).toUpperCase()}
           </button>
 
           {dropdownOpen && (
@@ -163,27 +144,26 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
                 background: "#ffffff",
                 border: "1px solid rgba(99,102,241,0.12)",
                 boxShadow: "0 8px 30px rgba(0,0,0,0.12)",
-                animation: "dropdownIn 0.15s ease-out",
               }}
             >
-                <button
-                  type="button"
-                  onClick={async () => {
-                    await logoutCustomer();
-                    window.location.href = '/login';
-                  }}
-                  className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm cursor-pointer transition-all duration-150"
-                  style={{ color: "#ef4444" }}
-                  onMouseEnter={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.06)";
-                  }}
-                  onMouseLeave={(e) => {
-                    (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-                  }}
-                >
-                  <LogOutIcon className="w-4 h-4" />
-                  {t.nav.logOut}
-                </button>
+              <button
+                type="button"
+                onClick={async () => {
+                  await logoutAffiliate();
+                  window.location.href = '/login';
+                }}
+                className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm cursor-pointer transition-all duration-150"
+                style={{ color: "#ef4444" }}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.06)";
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLButtonElement).style.background = "transparent";
+                }}
+              >
+                <LogOutIcon className="w-4 h-4" />
+                {isRTL ? "تسجيل الخروج" : "Log Out"}
+              </button>
             </div>
           )}
         </div>

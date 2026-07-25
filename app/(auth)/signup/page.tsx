@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { signupCustomer } from "@/lib/actions/auth";
+import { signupAffiliate } from "@/lib/actions/auth";
 import Link from "next/link";
 
 export default function SignupPage() {
@@ -28,12 +28,12 @@ export default function SignupPage() {
     formData.append("email", email);
     formData.append("password", password);
 
-    const res = await signupCustomer(formData);
-    
+    const res = await signupAffiliate(formData);
+
     setIsLoading(false);
 
     if (res.success) {
-      if ((res as any).session) {
+      if ((res as { session?: boolean }).session) {
         router.push("/dashboard");
       } else {
         router.push("/confirm");
@@ -48,10 +48,10 @@ export default function SignupPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
-            {l.title}
+            Create Affiliate Account
           </h2>
           <p className="text-gray-500 mt-2 text-sm font-medium">
-            {l.subtitle}
+            Join the Affiliate Portal to start earning commissions
           </p>
         </div>
       </div>

@@ -22,10 +22,57 @@ export async function loginCustomer(formData: FormData) {
 
   if (!user || user.user_metadata?.role !== "customer") {
     await supabase.auth.signOut();
-    return { 
-      success: false, 
-      message: "Unauthorized access: This portal is reserved for customers." 
+    return {
+      success: false,
+      message: "Unauthorized access: This portal is reserved for customers."
     };
+  }
+
+  revalidatePath("/");
+  return { success: true, message: "Logged in successfully" };
+}
+
+export async function loginAffiliate(formData: FormData) {
+  const supabase = await createClientServer();
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  const { error } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  const { data: { user } } = await supabase.auth.getUser();
+
+  if (!user) {
+    await supabase.auth.signOut();
+    return { success: false, message: "Authentication failed." };
+  }
+
+  // Check affiliates table
+  const { data: affiliate } = await supabase
+    .from("affiliates")
+    .select("id, status")
+    .eq("portal_user_id", user.id)
+    .maybeSingle();
+
+  if (!affiliate) {
+    await supabase.auth.signOut();
+    return { success: false, message: "Account not linked to an affiliate record" };
+  }
+
+  if (affiliate.status === "pending") {
+    await supabase.auth.signOut();
+    return { success: false, message: "Your account is pending admin approval" };
+  }
+
+  if (affiliate.status === "suspended") {
+    await supabase.auth.signOut();
+    return { success: false, message: "Your account has been suspended" };
   }
 
   revalidatePath("/");
@@ -70,7 +117,62 @@ export async function signupCustomer(formData: FormData) {
   return { success: true, message: "Signed up successfully. Please check your email to confirm.", session: false };
 }
 
+export async function signupAffiliate(formData: FormData) {
+  const supabase = await createClientServer();
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+  const name = formData.get("name") as string;
+
+  const headersList = await headers();
+  const forwardedHost = headersList.get("x-forwarded-host");
+  const forwardedProto = headersList.get("x-forwarded-proto") || "https";
+  const host = forwardedHost || headersList.get("host") || "localhost:3003";
+  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
+  const redirectTo = `${protocol}://${host}/auth/callback`;
+
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      emailRedirectTo: redirectTo,
+      data: {
+        role: "affiliate",
+        name,
+      },
+    },
+  });
+
+  if (error) {
+    return { success: false, message: error.message };
+  }
+
+  // Insert into affiliates with status pending
+  if (data.user) {
+    await supabase.from("affiliates").insert({
+      portal_user_id: data.user.id,
+      name,
+      email,
+      status: "pending",
+      commission_pct: 0,
+    });
+  }
+
+  if (data.session) {
+    revalidatePath("/");
+    return { success: true, message: "Signed up successfully. Your account is pending admin approval.", session: true };
+  }
+
+  return { success: true, message: "Signed up successfully. Please check your email to confirm.", session: false };
+}
+
 export async function logoutCustomer() {
+  const supabase = await createClientServer();
+  await supabase.auth.signOut();
+  revalidatePath("/");
+  return { success: true, message: "Logged out successfully" };
+}
+
+export async function logoutAffiliate() {
   const supabase = await createClientServer();
   await supabase.auth.signOut();
   revalidatePath("/");

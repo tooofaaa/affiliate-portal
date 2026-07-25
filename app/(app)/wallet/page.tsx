@@ -1,22 +1,18 @@
-import { getWalletSummary, getTransactions, getWithdrawals, getBankAccounts } from "@/lib/actions/wallet";
-import WalletPageContent from "@/components/features/wallet/WalletPageContent";
+import AffiliateWalletContent from "@/components/features/wallet/AffiliateWalletContent";
+import { getAffiliateWallet, getAffiliateTransactions, getAffiliateWithdrawals } from "@/lib/actions/affiliate";
 
 export default async function WalletPage() {
-  const [summary, transactionsRes, withdrawalsRes, bankAccountsRes] = await Promise.all([
-    getWalletSummary(),
-    getTransactions({ pageSize: 50 }),
-    getWithdrawals(),
-    getBankAccounts(),
+  const [walletRes, txRes, wdRes] = await Promise.all([
+    getAffiliateWallet(),
+    getAffiliateTransactions(),
+    getAffiliateWithdrawals(),
   ]);
-  
+
   return (
-    <div className="flex flex-col gap-6 pb-8 page-enter">
-      <WalletPageContent
-        summary={summary}
-        transactions={transactionsRes.data}
-        withdrawals={withdrawalsRes.data}
-        bankAccounts={bankAccountsRes.data}
-      />
-    </div>
+    <AffiliateWalletContent
+      wallet={walletRes.data}
+      transactions={txRes.data}
+      withdrawals={wdRes.data}
+    />
   );
 }

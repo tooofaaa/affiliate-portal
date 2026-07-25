@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { loginCustomer } from "@/lib/actions/auth";
+import { loginAffiliate } from "@/lib/actions/auth";
 import Link from "next/link";
 
 export default function LoginPage() {
@@ -26,8 +26,8 @@ export default function LoginPage() {
     formData.append("email", email);
     formData.append("password", password);
 
-    const res = await loginCustomer(formData);
-    
+    const res = await loginAffiliate(formData);
+
     setIsLoading(false);
 
     if (res.success) {
@@ -42,10 +42,10 @@ export default function LoginPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold text-gray-900 tracking-tight">
-            {l.title}
+            Welcome Back
           </h2>
           <p className="text-gray-500 mt-2 text-sm font-medium">
-            {l.subtitle}
+            Sign in to your Affiliate Portal account
           </p>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function LoginPage() {
           <p className="text-sm text-gray-600">
             Don&apos;t have an account?{" "}
             <Link href="/signup" className="text-indigo-600 font-semibold hover:underline">
-              {t.signup?.signUp || "Sign Up"}
+              Sign Up
             </Link>
           </p>
         </div>

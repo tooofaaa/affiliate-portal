@@ -38,11 +38,14 @@ export interface Order {
   poCode: string;
   supplierId: number;
   supplierName: string;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Allocated" | "Picking" | "Packing" | "ReturnRequest" | "Returned";
+  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled" | "Allocated" | "Picking" | "Packing" | "ReturnRequest" | "Returned" | "disputed" | "Completed";
   items: OrderItem[];
   totalCost: number;
   createdAt: string;
   expectedDelivery: string;
+  deliveredAt?: string | null;
+  disputeDeadlineAt?: string | null;
+  deliveryAccepted?: boolean;
   trackingNumber?: string;
   shippingAddress?: string;
 }
