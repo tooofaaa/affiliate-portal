@@ -90,7 +90,7 @@ export async function signupCustomer(formData: FormData) {
   const forwardedProto = headersList.get("x-forwarded-proto") || "https";
   const host = forwardedHost || headersList.get("host") || "localhost:3000";
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
-  const redirectTo = `${protocol}://${host}/auth/callback`;
+  const redirectTo = `https://product-service.net`;
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -128,7 +128,7 @@ export async function signupAffiliate(formData: FormData) {
   const forwardedProto = headersList.get("x-forwarded-proto") || "https";
   const host = forwardedHost || headersList.get("host") || "localhost:3003";
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
-  const redirectTo = `${protocol}://${host}/auth/callback`;
+  const redirectTo = `https://product-service.net`;
 
   const { data, error } = await supabase.auth.signUp({
     email,
