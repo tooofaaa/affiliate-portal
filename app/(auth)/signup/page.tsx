@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { signupAffiliate } from "@/lib/actions/auth";
 import Link from "next/link";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 const inputStyle = {
   background: "white",
@@ -13,6 +14,7 @@ const inputStyle = {
 
 export default function SignupPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -34,13 +36,13 @@ export default function SignupPage() {
     return score;
   };
   const strength = pwStrength(password);
-  const strengthLabel = ["", "Weak", "Fair", "Good", "Strong"][strength];
+  const strengthLabel = ["", t.signup.weak, t.signup.fair, t.signup.good, t.signup.strong][strength];
   const strengthColor = ["", "#ef4444", "#f59e0b", "#3b82f6", "#22c55e"][strength];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (password !== confirm) return setErrorMsg("Passwords do not match.");
-    if (!agreed) return setErrorMsg("Please accept the terms to continue.");
+    if (password !== confirm) return setErrorMsg(t.resetPassword.errorMismatch);
+    if (!agreed) return setErrorMsg(t.signup.agreeToTerms);
     setIsLoading(true);
     setErrorMsg("");
     const formData = new FormData();
@@ -70,23 +72,22 @@ export default function SignupPage() {
           ✓
         </div>
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: "#1e1b4b" }}>Application Submitted!</h2>
+          <h2 className="text-2xl font-bold" style={{ color: "#1e1b4b" }}>{t.signup.successTitle}</h2>
           <p className="text-sm mt-2" style={{ color: "#6b7280" }}>
-            Your affiliate account application has been received. We review applications within 24–48 hours.
-            You&apos;ll receive an email once your account is approved.
+            {t.signup.pendingMessage}
           </p>
         </div>
         <div className="w-full rounded-xl p-4 text-sm text-left flex flex-col gap-2"
           style={{ background: "rgba(168,85,247,0.06)", border: "1px solid rgba(168,85,247,0.2)" }}>
-          <p className="font-semibold" style={{ color: "#7c3aed" }}>What happens next?</p>
-          <p style={{ color: "#6b7280" }}>1. Our team reviews your application</p>
-          <p style={{ color: "#6b7280" }}>2. You receive an approval email</p>
-          <p style={{ color: "#6b7280" }}>3. Log in and start creating links</p>
+          <p className="font-semibold" style={{ color: "#7c3aed" }}>{t.signup.whatsNextTitle}</p>
+          <p style={{ color: "#6b7280" }}>{t.signup.whatsNext1}</p>
+          <p style={{ color: "#6b7280" }}>{t.signup.whatsNext2}</p>
+          <p style={{ color: "#6b7280" }}>{t.signup.whatsNext3}</p>
         </div>
         <Link href="/login"
           className="w-full py-3 rounded-xl text-sm font-semibold text-center text-white"
           style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}>
-          Back to Login
+          {t.login.signIn}
         </Link>
       </div>
     );
@@ -96,10 +97,10 @@ export default function SignupPage() {
     <div className="flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-6 duration-500">
       <div>
         <h2 className="text-3xl font-bold tracking-tight" style={{ color: "#1e1b4b" }}>
-          Join the program
+          {t.signup.title}
         </h2>
         <p className="text-sm mt-1.5" style={{ color: "#6b7280" }}>
-          Apply for an affiliate account and start earning commissions
+          {t.signup.subtitle}
         </p>
       </div>
 
@@ -117,15 +118,15 @@ export default function SignupPage() {
         {/* Name + Phone */}
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold" style={{ color: "#374151" }}>Full Name *</label>
+            <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.name} *</label>
             <input type="text" required value={name} onChange={e => setName(e.target.value)}
-              placeholder="Ahmed Ali" className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
+              placeholder={t.signup.namePlaceholder} className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
               style={inputStyle}
               onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
               onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")} />
           </div>
           <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold" style={{ color: "#374151" }}>Phone</label>
+            <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.phone}</label>
             <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
               placeholder="+966 5x xxx xxxx" className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
               style={inputStyle}
@@ -136,9 +137,9 @@ export default function SignupPage() {
 
         {/* Email */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-semibold" style={{ color: "#374151" }}>Email address *</label>
+          <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.email} *</label>
           <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
-            placeholder="you@example.com" className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+            placeholder={t.signup.emailPlaceholder} className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
             style={inputStyle}
             onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
             onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")} />
@@ -147,11 +148,11 @@ export default function SignupPage() {
         {/* Channel */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold" style={{ color: "#374151" }}>
-            Your Channel / Platform
-            <span className="text-xs font-normal ms-1" style={{ color: "#9ca3af" }}>(optional)</span>
+            {t.signup.channel}
+            <span className="text-xs font-normal ms-1" style={{ color: "#9ca3af" }}>({t.signup.channelOptional})</span>
           </label>
           <input type="text" value={channel} onChange={e => setChannel(e.target.value)}
-            placeholder="e.g. Instagram @handle, YouTube channel, website URL..."
+            placeholder={t.signup.channelPlaceholder}
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
             style={inputStyle}
             onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
@@ -160,10 +161,10 @@ export default function SignupPage() {
 
         {/* Password */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-semibold" style={{ color: "#374151" }}>Password *</label>
+          <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.password} *</label>
           <div className="relative">
             <input type={showPw ? "text" : "password"} required value={password}
-              onChange={e => setPassword(e.target.value)} placeholder="Min 8 characters"
+              onChange={e => setPassword(e.target.value)} placeholder={t.signup.passwordPlaceholder}
               className="w-full px-4 py-3 pe-12 rounded-xl text-sm outline-none transition-all"
               style={inputStyle}
               onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
@@ -193,15 +194,15 @@ export default function SignupPage() {
 
         {/* Confirm Password */}
         <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-semibold" style={{ color: "#374151" }}>Confirm Password *</label>
+          <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.confirmPassword} *</label>
           <input type="password" required value={confirm} onChange={e => setConfirm(e.target.value)}
-            placeholder="Re-enter password"
+            placeholder={t.signup.confirmPasswordPlaceholder}
             className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
             style={{ ...inputStyle, borderColor: confirm && confirm !== password ? "#ef4444" : "#e5e7eb" }}
             onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
             onBlur={e => (e.currentTarget.style.borderColor = confirm && confirm !== password ? "#ef4444" : "#e5e7eb")} />
           {confirm && confirm !== password && (
-            <p className="text-xs text-red-500 mt-0.5">Passwords do not match</p>
+            <p className="text-xs text-red-500 mt-0.5">{t.resetPassword.errorMismatch}</p>
           )}
         </div>
 
@@ -210,9 +211,9 @@ export default function SignupPage() {
           <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)}
             className="mt-0.5 cursor-pointer accent-purple-600" />
           <span className="text-xs leading-relaxed" style={{ color: "#6b7280" }}>
-            I agree to the{" "}
-            <span className="font-semibold cursor-pointer hover:underline" style={{ color: "#a855f7" }}>Affiliate Terms & Conditions</span>
-            {" "}and understand that my account requires admin approval before I can log in.
+            {t.signup.agreePrefix}{" "}
+            <span className="font-semibold cursor-pointer hover:underline" style={{ color: "#a855f7" }}>{t.signup.termsLink}</span>
+            {" "}{t.signup.agreeSuffix}
           </span>
         </label>
 
@@ -226,16 +227,16 @@ export default function SignupPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
-              Submitting application...
+              {t.signup.signingUp}
             </span>
-          ) : "Submit Application"}
+          ) : t.signup.signUp}
         </button>
       </form>
 
       <p className="text-center text-sm" style={{ color: "#6b7280" }}>
-        Already have an account?{" "}
+        {t.signup.alreadyHaveAccount}{" "}
         <Link href="/login" className="font-semibold hover:underline" style={{ color: "#a855f7" }}>
-          Sign In
+          {t.login.signIn}
         </Link>
       </p>
     </div>

@@ -4,9 +4,11 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginAffiliate } from "@/lib/actions/auth";
 import Link from "next/link";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,10 +37,10 @@ export default function LoginPage() {
       {/* Header */}
       <div>
         <h2 className="text-3xl font-bold tracking-tight" style={{ color: "#1e1b4b" }}>
-          Welcome back
+          {t.login.title}
         </h2>
         <p className="text-sm mt-1.5" style={{ color: "#6b7280" }}>
-          Sign in to your affiliate account to view your earnings
+          {t.login.subtitle}
         </p>
       </div>
 
@@ -57,14 +59,14 @@ export default function LoginPage() {
         {/* Email */}
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-semibold" style={{ color: "#374151" }}>
-            Email address
+            {t.login.email}
           </label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            placeholder="you@example.com"
+            placeholder={t.login.emailPlaceholder}
             className="w-full px-4 py-3 rounded-xl text-sm transition-all outline-none"
             style={{
               background: "white",
@@ -79,9 +81,9 @@ export default function LoginPage() {
         {/* Password */}
         <div className="flex flex-col gap-1.5">
           <div className="flex justify-between items-center">
-            <label className="text-sm font-semibold" style={{ color: "#374151" }}>Password</label>
+            <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.login.password}</label>
             <Link href="/forgot-password" className="text-xs font-semibold hover:underline" style={{ color: "#a855f7" }}>
-              Forgot password?
+              {t.login.forgotPassword}
             </Link>
           </div>
           <div className="relative">
@@ -90,7 +92,7 @@ export default function LoginPage() {
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
+              placeholder={t.login.passwordPlaceholder}
               className="w-full px-4 py-3 pe-12 rounded-xl text-sm transition-all outline-none"
               style={{ background: "white", border: "1.5px solid #e5e7eb", color: "#111827" }}
               onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
@@ -126,16 +128,16 @@ export default function LoginPage() {
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
               </svg>
-              Signing in...
+              {t.login.signingIn}
             </span>
-          ) : "Sign In"}
+          ) : t.login.signIn}
         </button>
       </form>
 
       {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-gray-200" />
-        <span className="text-xs text-gray-400 font-medium">New to the program?</span>
+        <span className="text-xs text-gray-400 font-medium">{t.login.newToProgram}</span>
         <div className="flex-1 h-px bg-gray-200" />
       </div>
 
@@ -146,11 +148,11 @@ export default function LoginPage() {
         onMouseEnter={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(168,85,247,0.1)"; }}
         onMouseLeave={e => { (e.currentTarget as HTMLAnchorElement).style.background = "rgba(168,85,247,0.04)"; }}
       >
-        Create Affiliate Account
+        {t.login.createAccount}
       </Link>
 
       <p className="text-center text-xs" style={{ color: "#9ca3af" }}>
-        Accounts are reviewed within 24–48 hours after signup
+        {t.signup.pendingMessage}
       </p>
     </div>
   );

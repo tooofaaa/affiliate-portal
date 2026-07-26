@@ -245,13 +245,13 @@ export async function requestWithdrawal(params: {
     return { error: "Insufficient withdrawable (refundable) balance" };
   }
 
-  const { error: wdError } = await supabase.from("customer_wallet_withdrawals").insert({
+  const { data: wdData, error: wdError } = await supabase.from("customer_wallet_withdrawals").insert({
     customer_id: customerId,
     amount: params.amount,
     bank_account_id: params.bank_account_id,
     notes: params.notes,
     status: 'Pending'
-  });
+  }).select('id').single();
 
   if (wdError) return { error: wdError.message };
 
@@ -265,7 +265,11 @@ export async function requestWithdrawal(params: {
 
   if (txError) {
     console.error("requestWithdrawal: CHARGE insert failed after withdrawal created:", txError);
-    return { error: "Withdrawal recorded but balance deduction failed. Please contact support." };
+    // Mark the withdrawal as failed so the balance is not in an inconsistent state
+    await supabase.from("customer_wallet_withdrawals")
+      .update({ status: 'Failed' })
+      .eq('id', wdData.id);
+    return { error: "Withdrawal could not be processed. Please try again or contact support." };
   }
 
   revalidatePath("/wallet");

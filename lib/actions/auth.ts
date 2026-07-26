@@ -255,8 +255,9 @@ export async function requestPasswordReset(email: string) {
       details: error.message,
     });
     if (error.status === 429) {
-      return { success: false, message: "Rate limit exceeded. Please wait before requesting again." };
+      return { success: false, message: "Too many reset requests. Please wait a few minutes before trying again." };
     }
+    return { success: false, message: "Unable to send reset email. Please try again shortly." };
   } else {
     // Log reset sent successfully
     await supabase.from("security_audit_logs").insert({

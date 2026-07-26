@@ -88,7 +88,7 @@ export async function createLink(destination: string) {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   const rand4 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   const slug = `${Date.now().toString(36)}${rand4}`;
-  const full_url = `http://32.196.224.189:3000/products?ref=${slug}`;
+  const full_url = `https://customer-portal-five-gamma.vercel.app/products?ref=${slug}`;
 
   const { data, error } = await supabase
     .from("affiliate_links")
