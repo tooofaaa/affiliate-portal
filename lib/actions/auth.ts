@@ -1,6 +1,6 @@
 "use server";
 
-import { createClientServer } from "@/lib/supabase/server";
+import { createClientServer, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
@@ -148,7 +148,8 @@ export async function signupAffiliate(formData: FormData) {
 
   // Insert into affiliates with status pending
   if (data.user) {
-    await supabase.from("affiliates").insert({
+    const adminClientAff = createAdminClient();
+    await adminClientAff.from("affiliates").insert({
       portal_user_id: data.user.id,
       name,
       email,
