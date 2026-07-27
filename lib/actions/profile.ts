@@ -51,13 +51,19 @@ export async function updateAffiliateProfile(payload: {
   if (payload.name !== undefined) updates.name = payload.name;
   if (payload.contact_number !== undefined) updates.contact_number = payload.contact_number;
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("affiliates")
     .update(updates)
-    .eq("portal_user_id", user.id);
+    .eq("portal_user_id", user.id)
+    .select("id");
 
   if (error) {
     return { success: false, error: error.message };
+  }
+
+  // Detect silent no-op: if no rows were returned the affiliate record does not exist.
+  if (!updated || updated.length === 0) {
+    return { success: false, error: "Affiliate profile not found." };
   }
 
   revalidatePath("/profile");

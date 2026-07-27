@@ -298,6 +298,8 @@ const translations = {
       open: "Open",
       closed: "Closed",
       replied: "Replied",
+      ticketCreated: "Ticket created successfully!",
+      ticketFailed: "Failed to create ticket. Please try again.",
     },
     profile: {
       title: "My Profile",
@@ -643,6 +645,8 @@ const translations = {
       open: "مفتوحة",
       closed: "مغلقة",
       replied: "تم الرد",
+      ticketCreated: "تم إنشاء التذكرة بنجاح!",
+      ticketFailed: "فشل إنشاء التذكرة. يرجى المحاولة مرة أخرى.",
     },
     profile: {
       title: "ملفي الشخصي",

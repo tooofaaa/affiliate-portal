@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { addTicketMessage } from "@/lib/actions/affiliate";
 import { formatDate } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { createClient } from "@/lib/supabase/client";
 
 interface TicketMessage {
   id: number;
@@ -38,6 +39,51 @@ export default function TicketDetailContent({
   const [messages, setMessages] = useState(initialMessages);
   const [reply, setReply] = useState("");
   const [sending, setSending] = useState(false);
+  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+
+  // Realtime: subscribe to new ticket_messages rows for this ticket so admin
+  // replies appear live without a page refresh.
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel(`ticket-messages-${ticket.id}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "ticket_messages",
+          filter: `ticket_id=eq.${ticket.id}`,
+        },
+        (payload) => {
+          const newMsg = payload.new as TicketMessage;
+          // Avoid duplicating a message that the current user just sent
+          // (optimistically added in handleReply).
+          setMessages((prev) => {
+            const alreadyPresent = prev.some(
+              (m) =>
+                m.sender_id === newMsg.sender_id &&
+                m.content === newMsg.content &&
+                // within 5 s of the server timestamp to handle the optimistic copy
+                Math.abs(
+                  new Date(m.created_at ?? 0).getTime() -
+                    new Date(newMsg.created_at ?? 0).getTime()
+                ) < 5000
+            );
+            if (alreadyPresent) return prev;
+            return [...prev, newMsg];
+          });
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [ticket.id]);
 
   const handleReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -47,6 +93,8 @@ export default function TicketDetailContent({
     const res = await addTicketMessage(ticket.id, reply.trim());
 
     if (res.success) {
+      // Optimistic update — realtime INSERT event will arrive shortly and the
+      // dedup logic above will prevent a double render.
       setMessages((prev) => [
         ...prev,
         {

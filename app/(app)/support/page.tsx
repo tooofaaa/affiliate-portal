@@ -1,8 +1,11 @@
 import SupportContent from "@/components/features/support/SupportContent";
-import { getMyTickets } from "@/lib/actions/affiliate";
+import { getMyTickets, getAffiliateIdForCurrentUser } from "@/lib/actions/affiliate";
 
 export default async function SupportPage() {
-  const { data: tickets } = await getMyTickets();
+  const [{ data: tickets }, affiliateId] = await Promise.all([
+    getMyTickets(),
+    getAffiliateIdForCurrentUser(),
+  ]);
 
-  return <SupportContent tickets={tickets} />;
+  return <SupportContent tickets={tickets} affiliateId={affiliateId} />;
 }

@@ -19,13 +19,13 @@ interface DiscountCode {
 
 interface CodesContentProps {
   activeCode: DiscountCode | null;
-  history: DiscountCode[];
+  history: DiscountCode[] | null;
 }
 
 export default function CodesContent({ activeCode: initialCode, history: initialHistory }: CodesContentProps) {
   const { language } = useLanguage();
-  const [activeCode, setActiveCode] = useState(initialCode);
-  const [history, setHistory] = useState(initialHistory);
+  const [activeCode, setActiveCode] = useState<DiscountCode | null>(initialCode ?? null);
+  const [history, setHistory] = useState<DiscountCode[]>(initialHistory ?? []);
   const [discountPct, setDiscountPct] = useState(10);
   const [level, setLevel] = useState<1 | 2>(1);
   const [creating, setCreating] = useState(false);
@@ -54,12 +54,32 @@ export default function CodesContent({ activeCode: initialCode, history: initial
     setCreating(false);
   };
 
+  const legacyCopy = (text: string) => {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    try { document.execCommand("copy"); } catch { /* ignore */ }
+    document.body.removeChild(el);
+  };
+
   const handleCopyCode = () => {
     if (!activeCode) return;
-    navigator.clipboard.writeText(activeCode.code).then(() => {
+    const onSuccess = () => {
       setCopiedCode(true);
       setTimeout(() => setCopiedCode(false), 2000);
-    });
+    };
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(activeCode.code).then(onSuccess).catch(() => {
+        legacyCopy(activeCode.code);
+        onSuccess();
+      });
+    } else {
+      legacyCopy(activeCode.code);
+      onSuccess();
+    }
   };
 
   const statusStyle = (status: string) => {

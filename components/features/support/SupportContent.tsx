@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { createTicket } from "@/lib/actions/affiliate";
 import { formatDate } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { createClient } from "@/lib/supabase/client";
 
 interface Ticket {
   id: number;
@@ -16,6 +17,7 @@ interface Ticket {
 
 interface SupportContentProps {
   tickets: Ticket[];
+  affiliateId: number | null;
 }
 
 const TICKET_TYPES = [
@@ -27,8 +29,8 @@ const TICKET_TYPES = [
   "Other",
 ];
 
-export default function SupportContent({ tickets: initialTickets }: SupportContentProps) {
-  const { language } = useLanguage();
+export default function SupportContent({ tickets: initialTickets, affiliateId }: SupportContentProps) {
+  const { language, t } = useLanguage();
   const [tickets, setTickets] = useState(initialTickets);
   const [showForm, setShowForm] = useState(false);
   const [subject, setSubject] = useState("");
@@ -37,15 +39,47 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
   const [submitting, setSubmitting] = useState(false);
   const [formMessage, setFormMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
+  // Realtime: subscribe to new support_tickets rows for this affiliate so the list
+  // updates live when a ticket's status changes (e.g. admin marks in_progress).
+  const channelRef = useRef<ReturnType<ReturnType<typeof createClient>["channel"]> | null>(null);
+
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel("support-tickets-list")
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "support_tickets",
+        },
+        (payload) => {
+          const updated = payload.new as Ticket;
+          setTickets((prev) =>
+            prev.map((tk) => (tk.id === updated.id ? { ...tk, ...updated } : tk))
+          );
+        }
+      )
+      .subscribe();
+
+    channelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
     setFormMessage(null);
 
-    const res = await createTicket(subject, type, messageText);
+    const res = await createTicket(subject, type, messageText, affiliateId);
 
     if (res.success) {
-      setFormMessage({ type: "success", text: "Ticket created successfully!" });
+      setFormMessage({ type: "success", text: t.support.ticketCreated ?? "Ticket created successfully!" });
       setTickets((prev) => [
         {
           id: res.ticket_id ?? Date.now(),
@@ -61,7 +95,7 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
       setMessageText("");
       setShowForm(false);
     } else {
-      setFormMessage({ type: "error", text: "Failed to create ticket. Please try again." });
+      setFormMessage({ type: "error", text: t.support.ticketFailed ?? "Failed to create ticket. Please try again." });
     }
     setSubmitting(false);
   };
@@ -82,10 +116,10 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-            Support
+            {t.support.title}
           </h1>
           <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-            Create and manage your support tickets
+            {t.support.subtitle}
           </p>
         </div>
         <button
@@ -93,7 +127,7 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
           className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all cursor-pointer"
           style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
         >
-          {showForm ? "Cancel" : "New Ticket"}
+          {showForm ? t.support.cancel : t.support.newTicket}
         </button>
       </div>
 
@@ -107,7 +141,7 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
           }}
         >
           <h3 className="font-semibold text-base mb-4" style={{ color: "#0f172a" }}>
-            Create New Ticket
+            {t.support.newTicket}
           </h3>
 
           {formMessage && (
@@ -125,7 +159,7 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-500">Subject *</label>
+                <label className="text-xs font-semibold text-slate-500">{t.support.subject}</label>
                 <input
                   type="text"
                   required
@@ -136,20 +170,20 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
                 />
               </div>
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-slate-500">Type *</label>
+                <label className="text-xs font-semibold text-slate-500">{t.support.type}</label>
                 <select
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                   className="px-3 py-2 rounded-xl border border-gray-200 text-sm bg-white focus:outline-none focus:border-indigo-500"
                 >
-                  {TICKET_TYPES.map((t) => (
-                    <option key={t} value={t}>{t}</option>
+                  {TICKET_TYPES.map((tp) => (
+                    <option key={tp} value={tp}>{tp}</option>
                   ))}
                 </select>
               </div>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-500">Message *</label>
+              <label className="text-xs font-semibold text-slate-500">{t.support.message}</label>
               <textarea
                 required
                 rows={4}
@@ -166,7 +200,7 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
                 className="px-6 py-2.5 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 cursor-pointer"
                 style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
               >
-                {submitting ? "Submitting..." : "Submit Ticket"}
+                {submitting ? t.support.submitting : t.support.submitTicket}
               </button>
             </div>
           </form>
@@ -186,14 +220,14 @@ export default function SupportContent({ tickets: initialTickets }: SupportConte
           style={{ borderBottom: "1px solid rgba(99,102,241,0.08)" }}
         >
           <h3 className="font-semibold text-base" style={{ color: "#0f172a" }}>
-            My Tickets
+            {t.support.myTickets}
           </h3>
         </div>
 
         {tickets.length === 0 ? (
           <div className="px-6 py-10 text-center">
             <p className="text-4xl mb-3">🎫</p>
-            <p className="text-sm text-slate-400">No tickets yet. Create one above if you need help.</p>
+            <p className="text-sm text-slate-400">{t.support.noTickets}</p>
           </div>
         ) : (
           <div className="divide-y divide-gray-50">

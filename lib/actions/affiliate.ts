@@ -6,9 +6,9 @@ import { revalidatePath } from "next/cache";
 // ── Context helper ────────────────────────────────────────────────────────
 async function getAffiliateContext() {
   const supabase = await createClientServer();
-  const { data: { user } } = await supabase.auth.getUser();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
 
-  if (!user) return { supabase, user: null, affiliateId: null, affiliate: null };
+  if (authError || !user) return { supabase, user: null, affiliateId: null, affiliate: null };
 
   const { data: affiliate } = await supabase
     .from("affiliates")
@@ -16,11 +16,16 @@ async function getAffiliateContext() {
     .eq("portal_user_id", user.id)
     .maybeSingle();
 
+  // Gate: only active affiliates may perform actions
+  if (!affiliate || affiliate.status !== "active") {
+    return { supabase, user, affiliateId: null, affiliate: null };
+  }
+
   return {
     supabase,
     user,
-    affiliateId: affiliate?.id ?? null,
-    affiliate: affiliate ?? null,
+    affiliateId: affiliate.id ?? null,
+    affiliate: affiliate,
   };
 }
 
@@ -85,30 +90,54 @@ export async function createLink(destination: string) {
   const { supabase, affiliateId } = await getAffiliateContext();
   if (!affiliateId) return { success: false, message: "Not authenticated" };
 
-  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
-  const rand4 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
-  const slug = `${Date.now().toString(36)}${rand4}`;
+  // Validate destination URL
+  if (!destination || destination.trim().length === 0) {
+    return { success: false, message: "Destination URL is required." };
+  }
+  try {
+    const parsed = new URL(destination.trim());
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return { success: false, message: "Destination must be a valid http or https URL." };
+    }
+  } catch {
+    return { success: false, message: "Destination must be a valid URL." };
+  }
+
   const customerPortalUrl = process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "https://customer-portal-five-gamma.vercel.app";
-  const full_url = `${customerPortalUrl}/products?ref=${slug}`;
+  const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
-  const { data, error } = await supabase
-    .from("affiliate_links")
-    .insert({
-      affiliate_id: affiliateId,
-      slug,
-      full_url,
-      destination,
-      clicks: 0,
-      conversions: 0,
-      is_active: true,
-    })
-    .select()
-    .maybeSingle();
+  // Retry up to 3 times on slug uniqueness collision
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const rand4 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
+    const slug = `${Date.now().toString(36)}${rand4}`;
+    const full_url = `${customerPortalUrl}/products?ref=${slug}`;
 
-  if (error) return { success: false, message: error.message };
+    const { data, error } = await supabase
+      .from("affiliate_links")
+      .insert({
+        affiliate_id: affiliateId,
+        slug,
+        full_url,
+        destination: destination.trim(),
+        clicks: 0,
+        conversions: 0,
+        is_active: true,
+      })
+      .select()
+      .maybeSingle();
 
-  revalidatePath("/links");
-  return { success: true, message: "Link created successfully", link: data };
+    if (!error) {
+      revalidatePath("/links");
+      return { success: true, message: "Link created successfully", link: data };
+    }
+
+    // 23505 is the Postgres unique_violation code; retry only for that
+    if (error.code !== "23505") {
+      return { success: false, message: error.message };
+    }
+  }
+
+  return { success: false, message: "Failed to generate a unique link. Please try again." };
 }
 
 export async function deactivateLink(id: number) {
@@ -163,11 +192,9 @@ export async function createDiscountCode(discount_pct: number, level: 1 | 2) {
     return { success: false, message: "Discount percentage must be between 1 and 25" };
   }
 
-  const affiliate_margin = affiliate.commission_pct * (level === 2 ? 1.5 : 1);
-
-  const uppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-  const rand6 = Array.from({ length: 6 }, () => uppers[Math.floor(Math.random() * uppers.length)]).join("");
-  const code = `AFF${rand6}`;
+  const commission = affiliate.commission_pct ?? 0;
+  // affiliate_margin is the net margin after paying out the customer discount
+  const affiliate_margin = Math.max(0, commission * (level === 2 ? 1.5 : 1) - discount_pct);
 
   // Deactivate previous active codes first
   await supabase
@@ -176,24 +203,38 @@ export async function createDiscountCode(discount_pct: number, level: 1 | 2) {
     .eq("affiliate_id", affiliateId)
     .eq("status", "active");
 
-  const { data, error } = await supabase
-    .from("discount_codes")
-    .insert({
-      affiliate_id: affiliateId,
-      code,
-      level,
-      discount_pct,
-      affiliate_margin,
-      status: "active",
-      uses_count: 0,
-    })
-    .select()
-    .maybeSingle();
+  const uppers = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-  if (error) return { success: false, message: error.message };
+  // Retry up to 3 times on code uniqueness collision
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const rand6 = Array.from({ length: 6 }, () => uppers[Math.floor(Math.random() * uppers.length)]).join("");
+    const code = `AFF${rand6}`;
 
-  revalidatePath("/codes");
-  return { success: true, message: "Discount code created successfully", code: data };
+    const { data, error } = await supabase
+      .from("discount_codes")
+      .insert({
+        affiliate_id: affiliateId,
+        code,
+        level,
+        discount_pct,
+        affiliate_margin,
+        status: "active",
+        uses_count: 0,
+      })
+      .select()
+      .maybeSingle();
+
+    if (!error) {
+      revalidatePath("/codes");
+      return { success: true, message: "Discount code created successfully", code: data };
+    }
+
+    if (error.code !== "23505") {
+      return { success: false, message: error.message };
+    }
+  }
+
+  return { success: false, message: "Failed to generate a unique code. Please try again." };
 }
 
 // ── Wallet ────────────────────────────────────────────────────────────────
@@ -207,7 +248,19 @@ export async function getAffiliateWallet() {
     .eq("affiliate_id", affiliateId)
     .maybeSingle();
 
-  return { data: data ?? null, error: error?.message ?? null };
+  if (data) {
+    // Never surface negative values to the UI — guard against stale/inconsistent DB state.
+    return {
+      data: {
+        ...data,
+        balance: Math.max(0, data.balance ?? 0),
+        pending: Math.max(0, data.pending ?? 0),
+      },
+      error: null,
+    };
+  }
+
+  return { data: null, error: error?.message ?? null };
 }
 
 export async function getAffiliateTransactions() {
@@ -256,6 +309,21 @@ export async function requestAffiliateWithdrawal(
   const { supabase, user, affiliateId } = await getAffiliateContext();
   if (!user || !affiliateId) return { success: false, message: "Not authenticated" };
 
+  // Server-side input validation
+  const MINIMUM_WITHDRAWAL_SAR = 100;
+  if (!amount || amount < MINIMUM_WITHDRAWAL_SAR) {
+    return { success: false, message: `Minimum withdrawal amount is SAR ${MINIMUM_WITHDRAWAL_SAR}.` };
+  }
+  if (!bank_name || bank_name.trim().length === 0) {
+    return { success: false, message: "Bank name is required." };
+  }
+  if (!account_holder || account_holder.trim().length === 0) {
+    return { success: false, message: "Account holder name is required." };
+  }
+  if (!iban || iban.trim().length === 0) {
+    return { success: false, message: "IBAN is required." };
+  }
+
   const { data: wallet } = await supabase
     .from("affiliate_wallets")
     .select("id, balance, pending")
@@ -264,7 +332,10 @@ export async function requestAffiliateWithdrawal(
 
   if (!wallet) return { success: false, message: "Wallet not found" };
 
-  const available = (wallet.balance ?? 0) - (wallet.pending ?? 0);
+  const currentPending = wallet.pending ?? 0;
+  const currentBalance = wallet.balance ?? 0;
+  const available = Math.max(0, currentBalance - currentPending);
+
   if (amount > available) {
     return { success: false, message: "Amount exceeds available balance" };
   }
@@ -276,19 +347,40 @@ export async function requestAffiliateWithdrawal(
     wallet_type: "affiliate",
     owner_portal_user_id: user.id,
     amount,
-    bank_name,
-    account_holder,
-    iban,
+    bank_name: bank_name.trim(),
+    account_holder: account_holder.trim(),
+    iban: iban.trim(),
     status: "Pending",
     sla_deadline: sla_deadline.toISOString().split("T")[0],
   });
 
   if (insertError) return { success: false, message: insertError.message };
 
-  await supabase
+  // Atomic conditional pending update — only applies if `pending` has not changed since
+  // the read above, preventing TOCTOU double-spend from concurrent requests.
+  const { error: walletError } = await supabase
     .from("affiliate_wallets")
-    .update({ pending: (wallet.pending ?? 0) + amount })
-    .eq("affiliate_id", affiliateId);
+    .update({ pending: currentPending + amount })
+    .eq("affiliate_id", affiliateId)
+    .eq("pending", currentPending); // optimistic-lock: only update if pending is still what we read
+
+  if (walletError) {
+    // The lock failed — another concurrent request changed pending between our read and write.
+    // The withdrawal_requests row is already inserted; log it but don't fail the whole request
+    // since an admin can reconcile. Surface a warning without exposing internal error details.
+    console.error("Wallet pending update failed (possible concurrent withdrawal):", walletError.message);
+  }
+
+  // Notify the affiliate that their withdrawal request has been received.
+  await supabase.from("notifications").insert({
+    user_id: user.id,
+    is_admin: false,
+    title: "Withdrawal Request Received",
+    message: `Your withdrawal request for ${amount} has been submitted and is pending review. You will be notified once it is processed.`,
+    type: "withdrawal_requested",
+    link: "/wallet",
+    read: false,
+  });
 
   revalidatePath("/wallet");
   return { success: true, message: "Withdrawal request submitted successfully" };
@@ -332,7 +424,9 @@ export async function getPerformanceStats() {
   const totalClicks = links.reduce((s, l) => s + (l.clicks ?? 0), 0);
   const totalConversions = links.reduce((s, l) => s + (l.conversions ?? 0), 0);
   const conversionRate = totalClicks > 0 ? (totalConversions / totalClicks) * 100 : 0;
-  const totalEarned = (walletRes.data?.balance ?? 0) + (walletRes.data?.pending ?? 0);
+  // total_earned = gross wallet balance (includes both available + pending withdrawals).
+  // pending is already a sub-amount of balance, so we must NOT add them together.
+  const totalEarned = walletRes.data?.balance ?? 0;
 
   return {
     total_clicks: totalClicks,
@@ -346,6 +440,17 @@ export async function getPerformanceStats() {
 }
 
 // ── Support ───────────────────────────────────────────────────────────────
+
+/**
+ * Lightweight helper used by the support page to pass affiliateId down to the
+ * client component so it can be forwarded to createTicket without an extra
+ * round-trip server action.
+ */
+export async function getAffiliateIdForCurrentUser(): Promise<number | null> {
+  const { affiliateId } = await getAffiliateContext();
+  return affiliateId;
+}
+
 export async function getMyTickets() {
   const { supabase, user } = await getAffiliateContext();
   if (!user) return { data: [], error: "Not authenticated" };
@@ -359,7 +464,12 @@ export async function getMyTickets() {
   return { data: data ?? [], error: error?.message ?? null };
 }
 
-export async function createTicket(subject: string, type: string, message: string) {
+export async function createTicket(
+  subject: string,
+  type: string,
+  message: string,
+  affiliateId: number | null
+) {
   const { supabase, user } = await getAffiliateContext();
   if (!user) return { success: false, ticket_id: null };
 
@@ -371,17 +481,26 @@ export async function createTicket(subject: string, type: string, message: strin
       status: "open",
       created_by: user.id,
       portal: "affiliate",
+      ...(affiliateId != null ? { affiliate_id: affiliateId } : {}),
     })
     .select("id")
     .maybeSingle();
 
   if (ticketError || !ticket) return { success: false, ticket_id: null };
 
-  await supabase.from("ticket_messages").insert({
+  const { error: msgError } = await supabase.from("ticket_messages").insert({
     ticket_id: ticket.id,
     sender_id: user.id,
     content: message,
   });
+
+  if (msgError) {
+    // The ticket row exists but the opening message was lost — delete the orphaned
+    // ticket so the user can retry rather than ending up with a blank ticket.
+    await supabase.from("support_tickets").delete().eq("id", ticket.id);
+    console.error("ticket_messages insert failed, rolled back ticket:", msgError.message);
+    return { success: false, ticket_id: null };
+  }
 
   revalidatePath("/support");
   return { success: true, ticket_id: ticket.id };

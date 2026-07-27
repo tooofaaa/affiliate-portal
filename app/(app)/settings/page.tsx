@@ -1,10 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/Button";
 
 export default function SettingsPage() {
   const { t } = useLanguage();
+  const router = useRouter();
 
   return (
     <div className="flex flex-col gap-6 max-w-4xl pb-10">
@@ -59,7 +61,13 @@ export default function SettingsPage() {
             <p className="text-sm font-semibold text-gray-900">{t.settingsPage.password}</p>
             <p className="text-xs text-gray-500">{t.settingsPage.passwordLastChanged}</p>
           </div>
-          <Button variant="secondary" className="text-xs px-3 py-1.5 cursor-pointer">{t.settingsPage.changePassword}</Button>
+          <Button
+            variant="secondary"
+            className="text-xs px-3 py-1.5 cursor-pointer"
+            onClick={() => router.push("/forgot-password")}
+          >
+            {t.settingsPage.changePassword}
+          </Button>
         </div>
 
         <div className="flex items-center justify-between py-2 border-b border-gray-50 mt-2">

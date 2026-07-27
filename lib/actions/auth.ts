@@ -56,11 +56,24 @@ export async function signupAffiliate(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
+  const phone = (formData.get("phone") as string) ?? "";
+  const channel = (formData.get("channel") as string) ?? "";
+
+  // Basic input validation
+  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    return { success: false, message: "Please enter a valid email address." };
+  }
+  if (!password || password.length < 8) {
+    return { success: false, message: "Password must be at least 8 characters." };
+  }
+  if (!name || name.trim().length === 0) {
+    return { success: false, message: "Full name is required." };
+  }
 
   const headersList = await headers();
   const forwardedHost = headersList.get("x-forwarded-host");
   const forwardedProto = headersList.get("x-forwarded-proto") || "https";
-  const host = forwardedHost || headersList.get("host") || "localhost:3003";
+  const host = forwardedHost || headersList.get("host") || "localhost:3000";
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
   const redirectTo = `${protocol}://${host}/auth/callback`;
 
@@ -71,25 +84,56 @@ export async function signupAffiliate(formData: FormData) {
       emailRedirectTo: redirectTo,
       data: {
         role: "affiliate",
-        name,
+        name: name.trim(),
       },
     },
   });
 
   if (error) {
-    return { success: false, message: error.message };
+    // Generic message to prevent user enumeration (don't leak "User already registered")
+    return { success: false, message: "Unable to create account. Please check your details and try again." };
   }
 
   // Insert into affiliates with status pending
   if (data.user) {
-    const adminClientAff = createAdminClient();
-    await adminClientAff.from("affiliates").insert({
+    const adminClient = createAdminClient();
+
+    const { error: insertError } = await adminClient.from("affiliates").insert({
       portal_user_id: data.user.id,
-      name,
+      name: name.trim(),
       email,
+      phone: phone.trim() || null,
+      channel: channel.trim() || null,
       status: "pending",
       commission_pct: 0,
     });
+
+    if (insertError) {
+      // Affiliate row failed to insert — clean up the orphaned auth user so the
+      // affiliate can retry signup rather than being permanently locked out.
+      await adminClient.auth.admin.deleteUser(data.user.id);
+      console.error("affiliates insert failed, rolled back auth user:", insertError.message);
+      return { success: false, message: "Account creation failed. Please try again shortly." };
+    }
+
+    // Notify all admins about the new pending affiliate application
+    const { data: admins } = await adminClient
+      .from("profiles")
+      .select("id")
+      .eq("is_admin", true);
+
+    if (admins && admins.length > 0) {
+      const notifications = admins.map((admin: { id: string }) => ({
+        user_id: admin.id,
+        is_admin: true,
+        title: "New Affiliate Application",
+        message: `${name.trim()} (${email}) has applied to join the affiliate program and is pending approval.`,
+        type: "affiliate_signup",
+        link: "/admin/affiliates",
+        read: false,
+      }));
+      await adminClient.from("notifications").insert(notifications);
+    }
   }
 
   // Even if Supabase auto-confirms the email and returns a session, the affiliate
@@ -114,11 +158,12 @@ function parseUserAgent(userAgent: string) {
   let platform = "Unknown Platform";
   let device = "Desktop";
 
-  if (/chrome|crios/i.test(userAgent)) browser = "Chrome";
+  // Edge and Opera must be checked before Chrome — their UA strings contain "Chrome"
+  if (/edg\//i.test(userAgent)) browser = "Edge";
+  else if (/opr\//i.test(userAgent)) browser = "Opera";
+  else if (/chrome|crios/i.test(userAgent)) browser = "Chrome";
   else if (/firefox|fxios/i.test(userAgent)) browser = "Firefox";
-  else if (/safari/i.test(userAgent) && !/chrome|crios/i.test(userAgent)) browser = "Safari";
-  else if (/opr/i.test(userAgent)) browser = "Opera";
-  else if (/edg/i.test(userAgent)) browser = "Edge";
+  else if (/safari/i.test(userAgent)) browser = "Safari";
 
   if (/windows/i.test(userAgent)) platform = "Windows";
   else if (/macintosh|mac os x/i.test(userAgent)) platform = "macOS";
@@ -152,18 +197,6 @@ export async function requestPasswordReset(email: string) {
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
   const resetUrl = `${protocol}://${host}/auth/callback?next=/reset-password`;
 
-  // Log reset requested
-  await supabase.from("security_audit_logs").insert({
-    email,
-    event_type: "PASSWORD_RESET_REQUESTED",
-    ip_address: ipAddress,
-    user_agent: userAgent,
-    device,
-    browser,
-    platform,
-    status: "SUCCESS",
-  });
-
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: resetUrl,
   });
@@ -185,19 +218,19 @@ export async function requestPasswordReset(email: string) {
       return { success: false, message: "Too many reset requests. Please wait a few minutes before trying again." };
     }
     return { success: false, message: "Unable to send reset email. Please try again shortly." };
-  } else {
-    // Log reset sent successfully
-    await supabase.from("security_audit_logs").insert({
-      email,
-      event_type: "PASSWORD_RESET_SENT",
-      ip_address: ipAddress,
-      user_agent: userAgent,
-      device,
-      browser,
-      platform,
-      status: "SUCCESS",
-    });
   }
+
+  // Log only after a successful send — one event, one row
+  await supabase.from("security_audit_logs").insert({
+    email,
+    event_type: "PASSWORD_RESET_REQUESTED",
+    ip_address: ipAddress,
+    user_agent: userAgent,
+    device,
+    browser,
+    platform,
+    status: "SUCCESS",
+  });
 
   // Generic success to prevent user enumeration
   return {

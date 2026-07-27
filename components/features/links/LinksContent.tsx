@@ -16,12 +16,12 @@ interface AffiliateLink {
 }
 
 interface LinksContentProps {
-  links: AffiliateLink[];
+  links: AffiliateLink[] | null;
 }
 
 export default function LinksContent({ links: initialLinks }: LinksContentProps) {
   const { language } = useLanguage();
-  const [links, setLinks] = useState(initialLinks);
+  const [links, setLinks] = useState<AffiliateLink[]>(initialLinks ?? []);
   const [destination, setDestination] = useState("");
   const [creating, setCreating] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -59,10 +59,32 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
   };
 
   const handleCopy = (id: number, url: string) => {
-    navigator.clipboard.writeText(url).then(() => {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+      }).catch(() => {
+        // fallback for non-secure contexts
+        legacyCopy(url);
+        setCopiedId(id);
+        setTimeout(() => setCopiedId(null), 2000);
+      });
+    } else {
+      legacyCopy(url);
       setCopiedId(id);
       setTimeout(() => setCopiedId(null), 2000);
-    });
+    }
+  };
+
+  const legacyCopy = (text: string) => {
+    const el = document.createElement("textarea");
+    el.value = text;
+    el.style.position = "fixed";
+    el.style.opacity = "0";
+    document.body.appendChild(el);
+    el.select();
+    try { document.execCommand("copy"); } catch { /* ignore */ }
+    document.body.removeChild(el);
   };
 
   return (

@@ -9,11 +9,13 @@ export async function getNotifications(): Promise<{ data: Notification[]; error:
 
   if (!user) return { data: [], error: "Unauthorized" };
 
+  // Filter to affiliate (non-admin) notifications owned by this user.
+  // Use `or` to also match rows where is_admin is NULL (treat null as non-admin).
   const { data, error } = await supabase
     .from("notifications")
     .select("*")
-    .eq("is_admin", false)
     .eq("user_id", user.id)
+    .or("is_admin.eq.false,is_admin.is.null")
     .order("created_at", { ascending: false })
     .limit(20);
 

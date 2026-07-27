@@ -69,7 +69,7 @@ export default function NotificationDropdown() {
         const { createClient } = await import("@/lib/supabase/client");
         const supabase = createClient();
         channelRef = supabase
-          .channel("notifications-customer")
+          .channel("notifications-affiliate")
           .on(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             "postgres_changes" as any,

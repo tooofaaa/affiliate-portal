@@ -26,11 +26,22 @@ interface PerformanceStats {
 }
 
 interface PerformanceContentProps {
-  stats: PerformanceStats;
+  stats: PerformanceStats | null;
 }
 
-export default function PerformanceContent({ stats }: PerformanceContentProps) {
+export default function PerformanceContent({ stats: rawStats }: PerformanceContentProps) {
   const { language } = useLanguage();
+
+  // Provide safe defaults so no .toFixed() / .toLocaleString() call can crash on null/undefined.
+  const stats: PerformanceStats = {
+    total_clicks: rawStats?.total_clicks ?? 0,
+    total_conversions: rawStats?.total_conversions ?? 0,
+    conversion_rate: rawStats?.conversion_rate ?? 0,
+    total_earned: rawStats?.total_earned ?? 0,
+    active_codes: rawStats?.active_codes ?? 0,
+    links_count: rawStats?.links_count ?? 0,
+    links: rawStats?.links ?? [],
+  };
 
   const statCards = [
     {
@@ -138,9 +149,11 @@ export default function PerformanceContent({ stats }: PerformanceContentProps) {
                 </tr>
               ) : (
                 stats.links.map((link, i) => {
+                  const safeClicks = link.clicks ?? 0;
+                  const safeConversions = link.conversions ?? 0;
                   const linkConvRate =
-                    link.clicks > 0
-                      ? ((link.conversions / link.clicks) * 100).toFixed(1)
+                    safeClicks > 0
+                      ? ((safeConversions / safeClicks) * 100).toFixed(1)
                       : "0.0";
                   return (
                     <tr
@@ -156,10 +169,10 @@ export default function PerformanceContent({ stats }: PerformanceContentProps) {
                         {link.destination || "-"}
                       </td>
                       <td className="px-4 py-3 font-semibold text-slate-700">
-                        {link.clicks ?? 0}
+                        {safeClicks}
                       </td>
                       <td className="px-4 py-3 font-semibold text-slate-700">
-                        {link.conversions ?? 0}
+                        {safeConversions}
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2">

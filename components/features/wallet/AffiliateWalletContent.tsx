@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { requestAffiliateWithdrawal } from "@/lib/actions/affiliate";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
@@ -40,14 +40,85 @@ interface AffiliateWalletContentProps {
 type TabType = "transactions" | "withdrawals" | "how-to-earn";
 
 export default function AffiliateWalletContent({
-  wallet,
+  wallet: initialWallet,
   transactions: initialTransactions,
   withdrawals: initialWithdrawals,
 }: AffiliateWalletContentProps) {
   const { language } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabType>("transactions");
-  const [transactions] = useState(initialTransactions);
+  const [wallet, setWallet] = useState(initialWallet);
+  const [transactions, setTransactions] = useState(initialTransactions);
   const [withdrawals, setWithdrawals] = useState(initialWithdrawals);
+
+  // Realtime: refresh wallet balance and transactions when affiliate_wallets or
+  // wallet_transactions rows change for this affiliate.
+  useEffect(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let channelRef: any = null;
+
+    async function subscribe() {
+      try {
+        const { createClient } = await import("@/lib/supabase/client");
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Fetch fresh wallet data
+        const refreshWallet = async () => {
+          const { data: aff } = await supabase
+            .from("affiliates")
+            .select("id")
+            .eq("portal_user_id", user.id)
+            .maybeSingle();
+          if (!aff) return;
+
+          const { data: w } = await supabase
+            .from("affiliate_wallets")
+            .select("id, balance, pending, currency")
+            .eq("affiliate_id", aff.id)
+            .maybeSingle();
+          if (w) setWallet(w);
+
+          const { data: txs } = await supabase
+            .from("wallet_transactions")
+            .select("id, type, amount, description, created_at")
+            .eq("wallet_type", "affiliate")
+            .eq("wallet_id", w?.id ?? 0)
+            .order("created_at", { ascending: false })
+            .limit(50);
+          if (txs) setTransactions(txs);
+        };
+
+        channelRef = supabase
+          .channel("affiliate-wallet-rt")
+          .on(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            "postgres_changes" as any,
+            { event: "*", schema: "public", table: "affiliate_wallets" },
+            refreshWallet
+          )
+          .on(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            "postgres_changes" as any,
+            { event: "INSERT", schema: "public", table: "wallet_transactions" },
+            refreshWallet
+          )
+          .subscribe();
+      } catch {
+        // ignore — realtime is best-effort
+      }
+    }
+
+    subscribe();
+
+    return () => {
+      if (channelRef) {
+        import("@/lib/supabase/client").then(({ createClient }) => {
+          createClient().removeChannel(channelRef);
+        });
+      }
+    };
+  }, []);
 
   // Withdrawal form state
   const [showForm, setShowForm] = useState(false);
@@ -58,7 +129,7 @@ export default function AffiliateWalletContent({
   const [submitting, setSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  const available = (wallet?.balance ?? 0) - (wallet?.pending ?? 0);
+  const available = Math.max(0, (wallet?.balance ?? 0) - (wallet?.pending ?? 0));
   const pending = wallet?.pending ?? 0;
 
   const handleWithdrawal = async (e: React.FormEvent) => {

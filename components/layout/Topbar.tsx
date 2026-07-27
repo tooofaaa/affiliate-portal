@@ -79,22 +79,6 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         <HamburgerIcon className="w-5 h-5" />
       </button>
 
-      {/* Page title / brand */}
-      <div className="hidden md:flex items-center gap-2">
-        <span className="text-sm font-semibold" style={{ color: "#0f172a" }}>
-          {isRTL ? "بوابة الشركاء" : "Affiliate Portal"}
-        </span>
-        <span
-          className="text-xs px-2 py-0.5 rounded-full font-medium"
-          style={{
-            background: "rgba(99,102,241,0.1)",
-            color: "#6366f1",
-          }}
-        >
-          {isRTL ? "شريك" : "Partner"}
-        </span>
-      </div>
-
       {/* Spacer */}
       <div className="flex-1" />
 
