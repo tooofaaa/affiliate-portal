@@ -15,6 +15,7 @@ export async function proxy(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
       {
+        cookieOptions: { name: "sb-affiliate-auth" },
         cookies: {
           getAll() {
             return request.cookies.getAll();
@@ -33,7 +34,7 @@ export async function proxy(request: NextRequest) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const pathname = request.nextUrl.pathname;
-    
+
     const isAuthRoute =
       pathname.startsWith("/login") ||
       pathname.startsWith("/signup") ||
