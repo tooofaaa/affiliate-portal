@@ -4,34 +4,6 @@ import { createClientServer, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-export async function loginCustomer(formData: FormData) {
-  const supabase = await createClientServer();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
-  const { data: authData, error } = await supabase.auth.signInWithPassword({
-    email,
-    password,
-  });
-
-  if (error) {
-    return { success: false, message: error.message };
-  }
-
-  const { data: { user } } = await supabase.auth.getUser();
-
-  if (!user || user.user_metadata?.role !== "customer") {
-    await supabase.auth.signOut();
-    return {
-      success: false,
-      message: "Unauthorized access: This portal is reserved for customers."
-    };
-  }
-
-  revalidatePath("/");
-  return { success: true, message: "Logged in successfully" };
-}
-
 export async function loginAffiliate(formData: FormData) {
   const supabase = await createClientServer();
   const email = formData.get("email") as string;
@@ -79,44 +51,6 @@ export async function loginAffiliate(formData: FormData) {
   return { success: true, message: "Logged in successfully" };
 }
 
-export async function signupCustomer(formData: FormData) {
-  const supabase = await createClientServer();
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const name = formData.get("name") as string;
-
-  const headersList = await headers();
-  const forwardedHost = headersList.get("x-forwarded-host");
-  const forwardedProto = headersList.get("x-forwarded-proto") || "https";
-  const host = forwardedHost || headersList.get("host") || "localhost:3000";
-  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
-  const redirectTo = `https://product-service.net`;
-
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      emailRedirectTo: redirectTo,
-      data: {
-        role: "customer",
-        name,
-      },
-    },
-  });
-
-  if (error) {
-    return { success: false, message: error.message };
-  }
-
-  // If Supabase auto-confirms (no email verification required), it returns a session
-  if (data.session) {
-    revalidatePath("/");
-    return { success: true, message: "Signed up successfully. Redirecting to dashboard...", session: true };
-  }
-
-  return { success: true, message: "Signed up successfully. Please check your email to confirm.", session: false };
-}
-
 export async function signupAffiliate(formData: FormData) {
   const supabase = await createClientServer();
   const email = formData.get("email") as string;
@@ -128,7 +62,7 @@ export async function signupAffiliate(formData: FormData) {
   const forwardedProto = headersList.get("x-forwarded-proto") || "https";
   const host = forwardedHost || headersList.get("host") || "localhost:3003";
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
-  const redirectTo = `https://product-service.net`;
+  const redirectTo = `${protocol}://${host}/auth/callback`;
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -166,13 +100,6 @@ export async function signupAffiliate(formData: FormData) {
   }
 
   return { success: true, message: "Signed up successfully. Your account is pending admin approval.", session: false };
-}
-
-export async function logoutCustomer() {
-  const supabase = await createClientServer();
-  await supabase.auth.signOut();
-  revalidatePath("/");
-  return { success: true, message: "Logged out successfully" };
 }
 
 export async function logoutAffiliate() {

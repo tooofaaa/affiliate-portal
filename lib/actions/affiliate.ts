@@ -88,7 +88,8 @@ export async function createLink(destination: string) {
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
   const rand4 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
   const slug = `${Date.now().toString(36)}${rand4}`;
-  const full_url = `https://customer-portal-five-gamma.vercel.app/products?ref=${slug}`;
+  const customerPortalUrl = process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "https://customer-portal-five-gamma.vercel.app";
+  const full_url = `${customerPortalUrl}/products?ref=${slug}`;
 
   const { data, error } = await supabase
     .from("affiliate_links")
@@ -387,7 +388,17 @@ export async function createTicket(subject: string, type: string, message: strin
 }
 
 export async function getTicketMessages(ticket_id: number) {
-  const { supabase } = await getAffiliateContext();
+  const { supabase, user } = await getAffiliateContext();
+  if (!user) return { data: [], error: "Unauthorized" };
+
+  // Verify this affiliate owns the ticket before returning messages
+  const { data: ticket } = await supabase
+    .from("support_tickets")
+    .select("id")
+    .eq("id", ticket_id)
+    .eq("created_by", user.id)
+    .maybeSingle();
+  if (!ticket) return { data: [], error: "Ticket not found" };
 
   const { data, error } = await supabase
     .from("ticket_messages")
@@ -401,6 +412,15 @@ export async function getTicketMessages(ticket_id: number) {
 export async function addTicketMessage(ticket_id: number, content: string) {
   const { supabase, user } = await getAffiliateContext();
   if (!user) return { success: false };
+
+  // Verify ownership before allowing message insert
+  const { data: ticket } = await supabase
+    .from("support_tickets")
+    .select("id")
+    .eq("id", ticket_id)
+    .eq("created_by", user.id)
+    .maybeSingle();
+  if (!ticket) return { success: false };
 
   const { error } = await supabase.from("ticket_messages").insert({
     ticket_id,
