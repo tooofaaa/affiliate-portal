@@ -37,11 +37,6 @@ export async function loginAffiliate(formData: FormData) {
     return { success: false, message: "Account not linked to an affiliate record" };
   }
 
-  if (affiliate.status === "pending") {
-    await supabase.auth.signOut();
-    return { success: false, message: "Your account is pending approval. You will be notified once activated." };
-  }
-
   if (affiliate.status === "suspended") {
     await supabase.auth.signOut();
     return { success: false, message: "Your account has been suspended" };
@@ -70,80 +65,49 @@ export async function signupAffiliate(formData: FormData) {
     return { success: false, message: "Full name is required." };
   }
 
-  const headersList = await headers();
-  const forwardedHost = headersList.get("x-forwarded-host");
-  const forwardedProto = headersList.get("x-forwarded-proto") || "https";
-  const host = forwardedHost || headersList.get("host") || "localhost:3000";
-  const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
-  const redirectTo = `${protocol}://${host}/auth/callback`;
-
-  const { data, error } = await supabase.auth.signUp({
+  // Use admin client to create user with email auto-confirmed (no email verification step)
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient.auth.admin.createUser({
     email,
     password,
-    options: {
-      emailRedirectTo: redirectTo,
-      data: {
-        role: "affiliate",
-        name: name.trim(),
-      },
+    email_confirm: true,
+    user_metadata: {
+      role: "affiliate",
+      name: name.trim(),
     },
   });
 
   if (error) {
-    // Generic message to prevent user enumeration (don't leak "User already registered")
     return { success: false, message: "Unable to create account. Please check your details and try again." };
   }
 
-  // Insert into affiliates with status pending
-  if (data.user) {
-    const adminClient = createAdminClient();
-
-    const { error: insertError } = await adminClient.from("affiliates").insert({
-      portal_user_id: data.user.id,
-      name: name.trim(),
-      email,
-      phone: phone.trim() || null,
-      channel: channel.trim() || null,
-      status: "pending",
-      commission_pct: 0,
-    });
-
-    if (insertError) {
-      // Affiliate row failed to insert — clean up the orphaned auth user so the
-      // affiliate can retry signup rather than being permanently locked out.
-      await adminClient.auth.admin.deleteUser(data.user.id);
-      console.error("affiliates insert failed, rolled back auth user:", insertError.message);
-      return { success: false, message: "Account creation failed. Please try again shortly." };
-    }
-
-    // Notify all admins about the new pending affiliate application
-    const { data: admins } = await adminClient
-      .from("profiles")
-      .select("id")
-      .eq("is_admin", true);
-
-    if (admins && admins.length > 0) {
-      const notifications = admins.map((admin: { id: string }) => ({
-        user_id: admin.id,
-        is_admin: true,
-        title: "New Affiliate Application",
-        message: `${name.trim()} (${email}) has applied to join the affiliate program and is pending approval.`,
-        type: "affiliate_signup",
-        link: "/admin/affiliates",
-        read: false,
-      }));
-      await adminClient.from("notifications").insert(notifications);
-    }
+  if (!data.user) {
+    return { success: false, message: "Account creation failed. Please try again shortly." };
   }
 
-  // Even if Supabase auto-confirms the email and returns a session, the affiliate
-  // account is still pending admin approval. Sign out immediately so the user
-  // cannot bypass the pending gate by navigating directly to /dashboard.
-  if (data.session) {
-    await supabase.auth.signOut();
+  const { error: insertError } = await adminClient.from("affiliates").insert({
+    portal_user_id: data.user.id,
+    name: name.trim(),
+    email,
+    phone: phone.trim() || null,
+    channel: channel.trim() || null,
+    status: "active",
+    commission_pct: 0,
+  });
+
+  if (insertError) {
+    await adminClient.auth.admin.deleteUser(data.user.id);
+    console.error("affiliates insert failed, rolled back auth user:", insertError.message);
+    return { success: false, message: "Account creation failed. Please try again shortly." };
   }
 
-  return { success: true, message: "Signed up successfully. Your account is pending admin approval.", session: false };
+  // Auto-login so the user lands directly on the dashboard
+  const { error: signInError } = await supabase.auth.signInWithPassword({ email, password });
+  if (signInError) {
+    return { success: true, message: "Account created. Please log in.", session: false };
+  }
+
+  return { success: true, message: "Signed up successfully.", session: true };
 }
 
 export async function logoutAffiliate() {

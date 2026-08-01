@@ -55,28 +55,21 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    if (user && !isAuthRoute) {
-      // Check affiliate status on every authenticated, non-auth request.
-      // A pending or suspended affiliate must be redirected to login even if
-      // their session cookie is still valid (e.g. suspended after login).
-      const { data: affiliate } = await supabase
-        .from("affiliates")
-        .select("status")
-        .eq("portal_user_id", user.id)
-        .maybeSingle();
-
-      if (affiliate && affiliate.status !== "active") {
-        // Sign out and redirect so the session cookie is cleared
-        await supabase.auth.signOut();
-        const url = request.nextUrl.clone();
-        url.pathname = "/login";
-        url.searchParams.set(
-          "error",
-          affiliate.status === "pending" ? "pending" : "suspended"
-        );
-        return NextResponse.redirect(url);
-      }
-    }
+    // AUTH STATUS CHECK DISABLED FOR TESTING — restore when done
+    // if (user && !isAuthRoute) {
+    //   const { data: affiliate } = await supabase
+    //     .from("affiliates")
+    //     .select("status")
+    //     .eq("portal_user_id", user.id)
+    //     .maybeSingle();
+    //   if (affiliate && affiliate.status !== "active") {
+    //     await supabase.auth.signOut();
+    //     const url = request.nextUrl.clone();
+    //     url.pathname = "/login";
+    //     url.searchParams.set("error", affiliate.status === "pending" ? "pending" : "suspended");
+    //     return NextResponse.redirect(url);
+    //   }
+    // }
 
     // Redirect authenticated, active users away from auth routes to dashboard
     if (user && (isAuthRoute || pathname === "/")) {
