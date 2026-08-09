@@ -52,7 +52,6 @@ export async function signupAffiliate(formData: FormData) {
   const password = formData.get("password") as string;
   const name = formData.get("name") as string;
   const phone = (formData.get("phone") as string) ?? "";
-  const channel = (formData.get("channel") as string) ?? "";
 
   // Basic input validation
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -89,8 +88,7 @@ export async function signupAffiliate(formData: FormData) {
     portal_user_id: data.user.id,
     name: name.trim(),
     email,
-    phone: phone.trim() || null,
-    channel: channel.trim() || null,
+    contact_number: phone.trim() || null,
     status: "active",
     commission_pct: 0,
   });
