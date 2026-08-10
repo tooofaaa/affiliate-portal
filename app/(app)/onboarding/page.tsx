@@ -303,7 +303,7 @@ export default function OnboardingPage() {
             {canSubmit() ? "Ready to submit!" : "Upload required documents"}
           </p>
           <p className="text-xs mt-0.5" style={{ color: "#9ca3af" }}>
-            {documents.filter((d) => d.status !== "declined").length} of {DOC_SLOTS.filter((s) => s.required).length} required documents uploaded
+            {documents.filter((d) => DOC_SLOTS.find((s) => s.type === d.document_type && s.required) && d.status !== "declined").length} of {DOC_SLOTS.filter((s) => s.required).length} required documents uploaded
           </p>
         </div>
       </div>
