@@ -55,21 +55,31 @@ export async function proxy(request: NextRequest) {
       return NextResponse.redirect(url);
     }
 
-    // AUTH STATUS CHECK DISABLED FOR TESTING — restore when done
-    // if (user && !isAuthRoute) {
-    //   const { data: affiliate } = await supabase
-    //     .from("affiliates")
-    //     .select("status")
-    //     .eq("portal_user_id", user.id)
-    //     .maybeSingle();
-    //   if (affiliate && affiliate.status !== "active") {
-    //     await supabase.auth.signOut();
-    //     const url = request.nextUrl.clone();
-    //     url.pathname = "/login";
-    //     url.searchParams.set("error", affiliate.status === "pending" ? "pending" : "suspended");
-    //     return NextResponse.redirect(url);
-    //   }
-    // }
+    // Check affiliate status and onboarding
+    if (user && !isAuthRoute) {
+      const { data: affiliate } = await supabase
+        .from("affiliates")
+        .select("status, onboarding_status")
+        .eq("portal_user_id", user.id)
+        .maybeSingle();
+      if (affiliate && affiliate.status !== "active") {
+        await supabase.auth.signOut();
+        const url = request.nextUrl.clone();
+        url.pathname = "/login";
+        url.searchParams.set("error", affiliate.status === "pending" ? "pending" : "suspended");
+        return NextResponse.redirect(url);
+      }
+      // Redirect to onboarding if not yet complete
+      if (
+        affiliate &&
+        affiliate.onboarding_status === "incomplete" &&
+        !pathname.startsWith("/onboarding")
+      ) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/onboarding";
+        return NextResponse.redirect(url);
+      }
+    }
 
     // Redirect authenticated, active users away from auth routes to dashboard
     if (user && (isAuthRoute || pathname === "/")) {

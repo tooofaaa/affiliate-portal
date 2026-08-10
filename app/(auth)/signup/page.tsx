@@ -54,7 +54,9 @@ export default function SignupPage() {
     const res = await signupAffiliate(formData);
     setIsLoading(false);
     if (res.success) {
-      if ((res as { session?: boolean }).session) {
+      if ((res as { onboarding?: boolean }).onboarding) {
+        router.push("/onboarding");
+      } else if ((res as { session?: boolean }).session) {
         router.push("/dashboard");
       } else {
         setSuccess(true);

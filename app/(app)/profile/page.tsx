@@ -1,7 +1,26 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { getAffiliateProfile, updateAffiliateProfile, AffiliateProfile } from "@/lib/actions/profile";
+import { getAffiliateOnboardingData } from "@/lib/actions/onboarding";
+
+interface UploadedDoc {
+  id: string;
+  document_type: string;
+  document_name: string;
+  file_url: string;
+  file_path: string;
+  status: string;
+  admin_note: string | null;
+  created_at: string;
+}
+
+const docStatusChip: Record<string, { label: string; color: string; bg: string }> = {
+  pending: { label: "Pending", color: "#92400e", bg: "rgba(245,158,11,0.12)" },
+  approved: { label: "Approved", color: "#065f46", bg: "rgba(16,185,129,0.12)" },
+  declined: { label: "Declined", color: "#991b1b", bg: "rgba(239,68,68,0.12)" },
+};
 
 export default function ProfilePage() {
   const [isLoading, setIsLoading] = useState(true);
@@ -11,18 +30,23 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<AffiliateProfile | null>(null);
   const [name, setName] = useState("");
   const [contactNumber, setContactNumber] = useState("");
+  const [documents, setDocuments] = useState<UploadedDoc[]>([]);
 
   async function loadProfile() {
     try {
       setIsLoading(true);
-      const res = await getAffiliateProfile();
-      if (res.data) {
-        setProfile(res.data);
-        setName(res.data.name || "");
-        setContactNumber(res.data.contact_number || "");
-      } else if (res.error) {
-        setMessage({ type: "error", text: res.error });
+      const [profileRes, onboardingRes] = await Promise.all([
+        getAffiliateProfile(),
+        getAffiliateOnboardingData(),
+      ]);
+      if (profileRes.data) {
+        setProfile(profileRes.data);
+        setName(profileRes.data.name || "");
+        setContactNumber(profileRes.data.contact_number || "");
+      } else if (profileRes.error) {
+        setMessage({ type: "error", text: profileRes.error });
       }
+      setDocuments(onboardingRes.documents || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -204,6 +228,103 @@ export default function ProfilePage() {
             </form>
           </div>
         </div>
+      </div>
+
+      {/* Documents Section */}
+      <div className="flex flex-col gap-4">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-base font-bold" style={{ color: "#0f172a" }}>
+              Verification Documents
+            </h3>
+            <p className="text-xs mt-0.5" style={{ color: "#94a3b8" }}>
+              Documents submitted for account verification
+            </p>
+          </div>
+          <Link
+            href="/onboarding"
+            className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90"
+            style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}
+          >
+            Upload More
+          </Link>
+        </div>
+
+        {documents.length === 0 ? (
+          <div
+            className="rounded-2xl p-6 text-center bg-white flex flex-col items-center gap-3"
+            style={{
+              border: "1px solid rgba(168,85,247,0.12)",
+              boxShadow: "0 2px 16px rgba(0,0,0,0.04)",
+            }}
+          >
+            <span className="text-3xl">📄</span>
+            <p className="text-sm" style={{ color: "#6b7280" }}>
+              No documents uploaded yet.
+            </p>
+            <Link
+              href="/onboarding"
+              className="text-xs font-semibold underline"
+              style={{ color: "#a855f7" }}
+            >
+              Complete onboarding
+            </Link>
+          </div>
+        ) : (
+          <div className="flex flex-col gap-3">
+            {documents.map((doc) => {
+              const chip = docStatusChip[doc.status] ?? {
+                label: doc.status,
+                color: "#6b7280",
+                bg: "rgba(107,114,128,0.1)",
+              };
+              return (
+                <div
+                  key={doc.id}
+                  className="rounded-2xl p-4 bg-white flex items-start justify-between gap-4"
+                  style={{
+                    border: "1px solid rgba(99,102,241,0.1)",
+                    boxShadow: "0 2px 10px rgba(0,0,0,0.04)",
+                  }}
+                >
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-900 truncate">{doc.document_name}</p>
+                    <p className="text-xs" style={{ color: "#9ca3af" }}>
+                      {new Date(doc.created_at).toLocaleDateString()}
+                    </p>
+                    {doc.admin_note && doc.status === "declined" && (
+                      <p
+                        className="text-xs mt-1 px-2 py-1 rounded-lg"
+                        style={{ background: "rgba(239,68,68,0.07)", color: "#dc2626" }}
+                      >
+                        Note: {doc.admin_note}
+                      </p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-3 flex-shrink-0">
+                    <span
+                      className="text-xs font-semibold px-2.5 py-1 rounded-full"
+                      style={{ color: chip.color, background: chip.bg }}
+                    >
+                      {chip.label}
+                    </span>
+                    {doc.file_url && (
+                      <a
+                        href={doc.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs underline"
+                        style={{ color: "#a855f7" }}
+                      >
+                        View
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -105,7 +105,7 @@ export async function signupAffiliate(formData: FormData) {
     return { success: true, message: "Account created. Please log in.", session: false };
   }
 
-  return { success: true, message: "Signed up successfully.", session: true };
+  return { success: true, message: "Registration successful! Setting up your profile...", onboarding: true, session: true };
 }
 
 export async function logoutAffiliate() {
