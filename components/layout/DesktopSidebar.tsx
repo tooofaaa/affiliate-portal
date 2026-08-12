@@ -8,6 +8,7 @@ import Link from "next/link";
 
 const NAV_LINKS = [
   { href: "/dashboard", label: "Dashboard", labelAr: "لوحة القيادة" },
+  { href: "/catalog", label: "Affiliate Catalog", labelAr: "كتالوج التسويق" },
   { href: "/links", label: "My Links", labelAr: "روابطي" },
   { href: "/codes", label: "Discount Codes", labelAr: "رموز الخصم" },
   { href: "/wallet", label: "Wallet", labelAr: "المحفظة" },
@@ -67,6 +68,18 @@ function PerformanceIcon(props: React.SVGProps<SVGSVGElement>) {
     </svg>
   );
 }
+function CatalogIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <rect x="2" y="3" width="6" height="6" rx="1" />
+      <rect x="9" y="3" width="6" height="6" rx="1" />
+      <rect x="16" y="3" width="6" height="6" rx="1" />
+      <rect x="2" y="12" width="6" height="6" rx="1" />
+      <rect x="9" y="12" width="6" height="6" rx="1" />
+      <rect x="16" y="12" width="6" height="6" rx="1" />
+    </svg>
+  );
+}
 function SupportIconSvg(props: React.SVGProps<SVGSVGElement>) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" {...props}>
@@ -93,6 +106,7 @@ function SettingsIconSvg(props: React.SVGProps<SVGSVGElement>) {
 
 const iconMap: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {
   "/dashboard": DashboardIcon,
+  "/catalog": CatalogIcon,
   "/links": LinkIcon,
   "/codes": CodeIcon,
   "/wallet": WalletIcon2,

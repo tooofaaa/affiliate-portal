@@ -10,8 +10,9 @@ interface RouteContext {
  *
  * Affiliate referral redirect handler:
  * 1. Look up the affiliate_links row by slug.
- * 2. Increment the clicks counter atomically via a Postgres function call.
- * 3. Redirect to the link's destination URL.
+ * 2. Log a click event to affiliate_link_events (fire-and-forget).
+ * 3. Increment the clicks counter (fire-and-forget).
+ * 4. Redirect to the link's destination URL with ?aff={slug} appended.
  *
  * Uses the admin client so click counts update without requiring an
  * authenticated session — anonymous visitors follow referral links.
@@ -19,7 +20,7 @@ interface RouteContext {
  * Falls back to the customer portal homepage when the slug is unknown
  * or the link has been deactivated.
  */
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   const { slug } = await context.params;
   const customerPortalUrl =
     process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL ||
@@ -29,9 +30,9 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.redirect(new URL(customerPortalUrl));
   }
 
-  const supabase = createAdminClient();
+  const adminClient = createAdminClient();
 
-  const { data: link, error } = await supabase
+  const { data: link, error } = await adminClient
     .from("affiliate_links")
     .select("id, destination, full_url, is_active, clicks")
     .eq("slug", slug)
@@ -42,19 +43,37 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.redirect(new URL(customerPortalUrl));
   }
 
+  // Fire-and-forget: log click event
+  adminClient
+    .from("affiliate_link_events")
+    .insert({
+      link_id: link.id,
+      event_type: "click",
+      ip_address:
+        request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null,
+      user_agent: request.headers.get("user-agent") ?? null,
+    })
+    .then(() => {/* fire-and-forget */});
+
   // Increment click counter — race conditions here are acceptable for analytics.
-  // We don't await this so the redirect is not delayed by the DB write.
-  supabase
+  adminClient
     .from("affiliate_links")
     .update({ clicks: (link.clicks ?? 0) + 1 })
     .eq("id", link.id)
     .then(() => {/* fire-and-forget */});
 
-  // Prefer the stored destination URL; fall back to the generated full_url.
-  const target =
-    link.destination && link.destination.startsWith("http")
-      ? link.destination
-      : link.full_url ?? customerPortalUrl;
+  // Build redirect target — always append ?aff={slug} for attribution
+  let target =
+    (link.destination?.startsWith("http") ? link.destination : link.full_url) ??
+    customerPortalUrl;
+
+  try {
+    const url = new URL(target);
+    url.searchParams.set("aff", slug);
+    target = url.toString();
+  } catch {
+    target = customerPortalUrl;
+  }
 
   return NextResponse.redirect(new URL(target));
 }
