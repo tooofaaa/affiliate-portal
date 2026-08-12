@@ -71,7 +71,7 @@ export default function MembershipsContent({ memberships }: MembershipsContentPr
       "membership",
       membership.id,
       membership.level_name,
-      "/membership"
+      `/memberships/${membership.id}`
     );
 
     if (res.success && res.link) {

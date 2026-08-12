@@ -53,7 +53,7 @@ export default function PackagesContent({ packages }: PackagesContentProps) {
       "package",
       pkg.id,
       pkg.name,
-      "/membership"
+      `/packages/${pkg.id}`
     );
 
     if (res.success && res.link) {
