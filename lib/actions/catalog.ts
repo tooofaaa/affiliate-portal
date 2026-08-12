@@ -46,7 +46,7 @@ export async function getAffiliatableProducts() {
   const { data } = await adminClient
     .from("products")
     .select(
-      "id, product_name, product_category, sell_price, product_image, description, supplier_id, suppliers(id, company_name)"
+      "id, product_name, product_category, sell_price, product_image, description, supplier_id, suppliers(id, supplier_name)"
     )
     .eq("approval_status", "Approved")
     .eq("is_active", true)

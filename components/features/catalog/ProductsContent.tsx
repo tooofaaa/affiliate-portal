@@ -6,7 +6,7 @@ import { createCatalogLink } from "@/lib/actions/catalog";
 
 interface Supplier {
   id: number;
-  company_name: string;
+  supplier_name: string;
 }
 
 interface Product {
@@ -254,7 +254,7 @@ export default function ProductsContent({ products }: ProductsContentProps) {
                     <p className="text-xs" style={{ color: "#94a3b8" }}>
                       by{" "}
                       <span className="text-slate-600 font-medium">
-                        {supplier?.company_name ?? `Supplier #${product.supplier_id}`}
+                        {supplier?.supplier_name ?? `Supplier #${product.supplier_id}`}
                       </span>
                     </p>
                   )}

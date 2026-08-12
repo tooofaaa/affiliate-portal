@@ -48,8 +48,12 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/reset-password") ||
       pathname.startsWith("/auth/callback");
 
+    // Public routes that must be accessible to unauthenticated visitors
+    // (e.g. affiliate referral redirects — /r/[slug] is followed by end-customers)
+    const isPublicRoute = pathname.startsWith("/r/");
+
     // Redirect unauthenticated users to login (auth errors are treated as no session)
-    if ((authError || !user) && !isAuthRoute && pathname !== "/") {
+    if ((authError || !user) && !isAuthRoute && !isPublicRoute && pathname !== "/") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url);
@@ -101,7 +105,8 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/forgot-password") ||
       pathname.startsWith("/reset-password") ||
       pathname.startsWith("/auth/callback");
-    if (!isAuthRoute && pathname !== "/") {
+    const isPublicRouteCatch = pathname.startsWith("/r/");
+    if (!isAuthRoute && !isPublicRouteCatch && pathname !== "/") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url);
