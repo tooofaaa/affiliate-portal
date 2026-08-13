@@ -1,5 +1,2 @@
-// Demo mode: enabled only when NEXT_PUBLIC_DEMO_MODE=true AND not in production
-// To disable entirely: set NEXT_PUBLIC_DEMO_MODE=false
-export const DEMO_MODE =
-  process.env.NEXT_PUBLIC_DEMO_MODE === 'true' &&
-  process.env.NODE_ENV !== 'production';
+// Controlled entirely by env var — do not set in production deployments
+export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';

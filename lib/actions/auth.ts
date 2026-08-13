@@ -10,25 +10,27 @@ export async function loginAffiliate(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
+  // Demo mode: any non-empty credentials → sign in as demo affiliate immediately
+  if (DEMO_MODE) {
+    if (!email || !password) {
+      return { success: false, message: "Please enter any username and password." };
+    }
+    const { data: demoData, error: demoErr } = await supabase.auth.signInWithPassword({
+      email: 'demo.affiliate@portal.test',
+      password: 'Demo1234!',
+    });
+    if (!demoErr && demoData.user) {
+      return { success: true };
+    }
+    return { success: false, message: 'Demo account unavailable. Contact admin.' };
+  }
+
   const { error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
 
   if (error) {
-    if (DEMO_MODE) {
-      const { data: demoData, error: demoErr } = await supabase.auth.signInWithPassword({
-        email: 'demo.affiliate@portal.test',
-        password: 'Demo1234!',
-      });
-      if (!demoErr && demoData.user) {
-        const { data: demoAff } = await supabase.from('affiliates')
-          .select('status').eq('portal_user_id', demoData.user.id).maybeSingle();
-        if (demoAff?.status === 'active') {
-          return { success: true };
-        }
-      }
-    }
     return { success: false, message: error.message };
   }
 
