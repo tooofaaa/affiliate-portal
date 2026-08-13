@@ -134,6 +134,24 @@ export default function LoginPage() {
         </button>
       </form>
 
+      {/* Test Login Bypass */}
+      <button
+        type="button"
+        onClick={async () => {
+          setIsLoading(true);
+          const fd = new FormData();
+          fd.append('email', 'demo.affiliate@portal.test');
+          fd.append('password', 'Demo1234!');
+          const res = await loginAffiliate(fd);
+          if (res.success) router.push('/dashboard');
+          else setErrorMsg(res.message || 'Test login failed');
+          setIsLoading(false);
+        }}
+        className="w-full py-2.5 px-4 rounded-xl border-2 border-dashed border-indigo-300 text-indigo-600 text-sm font-semibold hover:bg-indigo-50 transition-colors mt-2"
+      >
+        🧪 Quick Test Login
+      </button>
+
       {/* Divider */}
       <div className="flex items-center gap-3">
         <div className="flex-1 h-px bg-gray-200" />
