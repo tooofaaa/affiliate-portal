@@ -3,6 +3,7 @@
 import { createClientServer, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
+import { DEMO_MODE } from "@/lib/demo";
 
 export async function loginAffiliate(formData: FormData) {
   const supabase = await createClientServer();
@@ -15,17 +16,17 @@ export async function loginAffiliate(formData: FormData) {
   });
 
   if (error) {
-    // DEV BYPASS: any credentials → auto-login as demo affiliate
-    const { data: demoData, error: demoErr } = await supabase.auth.signInWithPassword({
-      email: 'demo.affiliate@portal.test',
-      password: 'Demo1234!',
-    });
-    if (!demoErr && demoData.user) {
-      // verify demo affiliate record
-      const { data: demoAff } = await supabase.from('affiliates')
-        .select('status').eq('portal_user_id', demoData.user.id).maybeSingle();
-      if (demoAff?.status === 'active') {
-        return { success: true };
+    if (DEMO_MODE) {
+      const { data: demoData, error: demoErr } = await supabase.auth.signInWithPassword({
+        email: 'demo.affiliate@portal.test',
+        password: 'Demo1234!',
+      });
+      if (!demoErr && demoData.user) {
+        const { data: demoAff } = await supabase.from('affiliates')
+          .select('status').eq('portal_user_id', demoData.user.id).maybeSingle();
+        if (demoAff?.status === 'active') {
+          return { success: true };
+        }
       }
     }
     return { success: false, message: error.message };

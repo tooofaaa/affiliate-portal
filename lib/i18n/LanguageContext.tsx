@@ -358,6 +358,10 @@ const translations = {
       resetDefaults: "Reset to Defaults",
       savePreferences: "Save Preferences",
     },
+    demo: {
+      bannerLabel: "Demo Mode",
+      bannerDesc: "Testing environment — any credentials are accepted.",
+    },
   },
   ar: {
     brandName: "بوابة الشركاء",
@@ -704,6 +708,10 @@ const translations = {
       enableTfa: "تفعيل المصادقة الثنائية",
       resetDefaults: "إعادة التعيين للافتراضي",
       savePreferences: "حفظ التفضيلات",
+    },
+    demo: {
+      bannerLabel: "وضع العرض التجريبي",
+      bannerDesc: "بيئة اختبار — يتم قبول أي بيانات اعتماد.",
     },
   },
 };

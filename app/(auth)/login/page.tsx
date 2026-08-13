@@ -6,6 +6,8 @@ import { loginAffiliate } from "@/lib/actions/auth";
 import Link from "next/link";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
+const IS_DEMO = process.env.NEXT_PUBLIC_DEMO_MODE === 'true';
+
 export default function LoginPage() {
   const router = useRouter();
   const { t } = useLanguage();
@@ -27,7 +29,7 @@ export default function LoginPage() {
     if (res.success) {
       router.push("/dashboard");
     } else {
-      setErrorMsg(res.message);
+      setErrorMsg(res.message ?? "Login failed.");
     }
   };
 
@@ -62,7 +64,7 @@ export default function LoginPage() {
             {t.login.email}
           </label>
           <input
-            type="email"
+            type={IS_DEMO ? "text" : "email"}
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
@@ -134,23 +136,25 @@ export default function LoginPage() {
         </button>
       </form>
 
-      {/* Test Login Bypass */}
-      <button
-        type="button"
-        onClick={async () => {
-          setIsLoading(true);
-          const fd = new FormData();
-          fd.append('email', 'demo.affiliate@portal.test');
-          fd.append('password', 'Demo1234!');
-          const res = await loginAffiliate(fd);
-          if (res.success) router.push('/dashboard');
-          else setErrorMsg(res.message || 'Test login failed');
-          setIsLoading(false);
-        }}
-        className="w-full py-2.5 px-4 rounded-xl border-2 border-dashed border-indigo-300 text-indigo-600 text-sm font-semibold hover:bg-indigo-50 transition-colors mt-2"
-      >
-        🧪 Quick Test Login
-      </button>
+      {/* Test Login Bypass — only visible in demo mode */}
+      {IS_DEMO && (
+        <button
+          type="button"
+          onClick={async () => {
+            setIsLoading(true);
+            const fd = new FormData();
+            fd.append('email', 'demo.affiliate@portal.test');
+            fd.append('password', 'Demo1234!');
+            const res = await loginAffiliate(fd);
+            if (res.success) router.push('/dashboard');
+            else setErrorMsg(res.message || 'Test login failed');
+            setIsLoading(false);
+          }}
+          className="w-full py-2.5 px-4 rounded-xl border-2 border-dashed border-indigo-300 text-indigo-600 text-sm font-semibold hover:bg-indigo-50 transition-colors mt-2"
+        >
+          🧪 Quick Test Login
+        </button>
+      )}
 
       {/* Divider */}
       <div className="flex items-center gap-3">
