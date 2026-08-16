@@ -48,9 +48,9 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/reset-password") ||
       pathname.startsWith("/auth/callback");
 
-    // Public routes that must be accessible to unauthenticated visitors
-    // (e.g. affiliate referral redirects — /r/[slug] is followed by end-customers)
-    const isPublicRoute = pathname.startsWith("/r/");
+    // Public routes accessible without auth
+    // /r/[slug] → end-customer referral links; /api/ → T&C route needed before login
+    const isPublicRoute = pathname.startsWith("/r/") || pathname.startsWith("/api/");
 
     // Redirect unauthenticated users to login (auth errors are treated as no session)
     if ((authError || !user) && !isAuthRoute && !isPublicRoute && pathname !== "/") {
@@ -66,11 +66,11 @@ export async function proxy(request: NextRequest) {
         .select("status, onboarding_status")
         .eq("portal_user_id", user.id)
         .maybeSingle();
-      if (affiliate && affiliate.status !== "active") {
+      if (affiliate && affiliate.status === "suspended") {
         await supabase.auth.signOut();
         const url = request.nextUrl.clone();
         url.pathname = "/login";
-        url.searchParams.set("error", affiliate.status === "pending" ? "pending" : "suspended");
+        url.searchParams.set("error", "suspended");
         return NextResponse.redirect(url);
       }
       // Redirect to onboarding if not yet complete
@@ -105,7 +105,7 @@ export async function proxy(request: NextRequest) {
       pathname.startsWith("/forgot-password") ||
       pathname.startsWith("/reset-password") ||
       pathname.startsWith("/auth/callback");
-    const isPublicRouteCatch = pathname.startsWith("/r/");
+    const isPublicRouteCatch = pathname.startsWith("/r/") || pathname.startsWith("/api/");
     if (!isAuthRoute && !isPublicRouteCatch && pathname !== "/") {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
