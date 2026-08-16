@@ -18,12 +18,12 @@ export default function SignupPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
-  const [channel, setChannel] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [agreed, setAgreed] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [termsContent, setTermsContent] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [success, setSuccess] = useState(false);
 
@@ -39,6 +39,17 @@ export default function SignupPage() {
   const strengthLabel = ["", t.signup.weak, t.signup.fair, t.signup.good, t.signup.strong][strength];
   const strengthColor = ["", "#ef4444", "#f59e0b", "#3b82f6", "#22c55e"][strength];
 
+  const loadTerms = async () => {
+    try {
+      const res = await fetch("/api/terms?portal=affiliate");
+      if (res.ok) {
+        const data = await res.json();
+        setTermsContent(data.content_html || data.content_text || "");
+      }
+    } catch {}
+    setShowTerms(true);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (password !== confirm) return setErrorMsg(t.resetPassword.errorMismatch);
@@ -48,21 +59,14 @@ export default function SignupPage() {
     const formData = new FormData();
     formData.append("name", name);
     formData.append("email", email);
-    formData.append("phone", phone);
     formData.append("password", password);
-    formData.append("channel", channel);
+    formData.append("accept_terms", "true");
     const res = await signupAffiliate(formData);
     setIsLoading(false);
     if (res.success) {
-      if ((res as { onboarding?: boolean }).onboarding) {
-        router.push("/onboarding");
-      } else if ((res as { session?: boolean }).session) {
-        router.push("/dashboard");
-      } else {
-        setSuccess(true);
-      }
+      setSuccess(true);
     } else {
-      setErrorMsg(res.message);
+      setErrorMsg(res.message ?? "An error occurred. Please try again.");
     }
   };
 
@@ -116,25 +120,14 @@ export default function SignupPage() {
       )}
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-
-        {/* Name + Phone */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.name} *</label>
-            <input type="text" required value={name} onChange={e => setName(e.target.value)}
-              placeholder={t.signup.namePlaceholder} className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
-              style={inputStyle}
-              onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")} />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.phone}</label>
-            <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
-              placeholder="+966 5x xxx xxxx" className="w-full px-3 py-2.5 rounded-xl text-sm outline-none transition-all"
-              style={inputStyle}
-              onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
-              onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")} />
-          </div>
+        {/* Name */}
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.name} *</label>
+          <input type="text" required value={name} onChange={e => setName(e.target.value)}
+            placeholder={t.signup.namePlaceholder} className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
+            style={inputStyle}
+            onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
+            onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")} />
         </div>
 
         {/* Email */}
@@ -142,20 +135,6 @@ export default function SignupPage() {
           <label className="text-sm font-semibold" style={{ color: "#374151" }}>{t.signup.email} *</label>
           <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
             placeholder={t.signup.emailPlaceholder} className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
-            style={inputStyle}
-            onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
-            onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")} />
-        </div>
-
-        {/* Channel */}
-        <div className="flex flex-col gap-1.5">
-          <label className="text-sm font-semibold" style={{ color: "#374151" }}>
-            {t.signup.channel}
-            <span className="text-xs font-normal ms-1" style={{ color: "#9ca3af" }}>({t.signup.channelOptional})</span>
-          </label>
-          <input type="text" value={channel} onChange={e => setChannel(e.target.value)}
-            placeholder={t.signup.channelPlaceholder}
-            className="w-full px-4 py-3 rounded-xl text-sm outline-none transition-all"
             style={inputStyle}
             onFocus={e => (e.currentTarget.style.borderColor = "#a855f7")}
             onBlur={e => (e.currentTarget.style.borderColor = "#e5e7eb")} />
@@ -214,7 +193,10 @@ export default function SignupPage() {
             className="mt-0.5 cursor-pointer accent-purple-600" />
           <span className="text-xs leading-relaxed" style={{ color: "#6b7280" }}>
             {t.signup.agreePrefix}{" "}
-            <span className="font-semibold cursor-pointer hover:underline" style={{ color: "#a855f7" }}>{t.signup.termsLink}</span>
+            <button type="button" onClick={loadTerms}
+              className="font-semibold hover:underline cursor-pointer" style={{ color: "#a855f7" }}>
+              {t.signup.termsLink}
+            </button>
             {" "}{t.signup.agreeSuffix}
           </span>
         </label>
@@ -241,6 +223,31 @@ export default function SignupPage() {
           {t.login.signIn}
         </Link>
       </p>
+
+      {/* Terms Modal */}
+      {showTerms && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[80vh] flex flex-col">
+            <div className="flex items-center justify-between px-6 py-4 border-b">
+              <h3 className="font-bold text-lg" style={{ color: "#1e1b4b" }}>{t.signup.termsLink}</h3>
+              <button onClick={() => setShowTerms(false)} className="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+            </div>
+            <div className="overflow-y-auto px-6 py-4 text-sm text-gray-700 leading-relaxed flex-1"
+              dangerouslySetInnerHTML={{ __html: termsContent || "<p>Loading terms...</p>" }} />
+            <div className="px-6 py-4 border-t flex gap-3">
+              <button onClick={() => { setAgreed(true); setShowTerms(false); }}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold text-white"
+                style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}>
+                I Accept
+              </button>
+              <button onClick={() => setShowTerms(false)}
+                className="flex-1 py-2.5 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-gray-50">
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

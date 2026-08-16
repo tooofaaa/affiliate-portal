@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClientServer } from "@/lib/supabase/server";
+import { createClientServer, createAdminClient } from "@/lib/supabase/server";
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
@@ -11,9 +11,19 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClientServer();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { data: { user }, error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) {
       return NextResponse.redirect(new URL("/login?error=auth", requestUrl));
+    }
+
+    // After email confirmation: promote account_status from pending_email → beta
+    if (user && user.email_confirmed_at && safePath !== "/reset-password") {
+      const adminClient = createAdminClient();
+      await adminClient
+        .from("affiliates")
+        .update({ account_status: "beta" })
+        .eq("portal_user_id", user.id)
+        .eq("account_status", "pending_email");
     }
   }
 
