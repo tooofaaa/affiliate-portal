@@ -86,7 +86,7 @@ export interface CustomerBranch {
 export interface CustomerDocument {
   id: number;
   customer_id: number;
-  document_type: 'CommercialRegistration' | 'TaxCertificate' | 'License' | 'Other';
+  document_type: 'GovernmentID' | 'BankStatement' | 'SocialProof';
   document_name: string;
   file_url: string;
   expiry_date?: string;

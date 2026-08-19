@@ -96,21 +96,45 @@ export async function uploadAffiliateDocument(
     return { error: `Upload failed: ${uploadError.message}` };
   }
 
-  const publicUrl = adminClient.storage
+  // Bucket is private — use a signed URL valid for 7 days for affiliate self-view
+  const { data: signedData, error: signedError } = await adminClient.storage
     .from("documents")
-    .getPublicUrl(filePath).data.publicUrl;
+    .createSignedUrl(filePath, 7 * 24 * 3600)
+  const fileUrl = signedData?.signedUrl ?? filePath
+
+  if (signedError) {
+    console.error("Failed to create signed URL:", signedError.message)
+  }
+
+  await adminClient
+    .from("affiliate_documents")
+    .delete()
+    .eq("affiliate_id", affiliateId)
+    .eq("document_type", document_type);
 
   const { error: insertError } = await adminClient.from("affiliate_documents").insert({
     affiliate_id: affiliateId,
     document_type,
     document_name,
-    file_url: publicUrl,
+    file_url: fileUrl,
     file_path: filePath,
     status: "pending",
   });
 
   if (insertError) {
     return { error: `Database error: ${insertError.message}` };
+  }
+
+  const { data: aff } = await supabase
+    .from("affiliates")
+    .select("onboarding_status")
+    .eq("id", affiliateId)
+    .single();
+  if (aff?.onboarding_status === "declined") {
+    await supabase
+      .from("affiliates")
+      .update({ onboarding_status: "incomplete" })
+      .eq("id", affiliateId);
   }
 
   revalidatePath("/onboarding");
@@ -162,5 +186,6 @@ export async function submitAffiliateOnboarding(): Promise<{ error: string | nul
   }
 
   revalidatePath("/onboarding");
+  revalidatePath("/", "layout");
   return { error: null };
 }
