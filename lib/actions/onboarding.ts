@@ -165,7 +165,7 @@ export async function submitAffiliateOnboarding(): Promise<{ error: string | nul
 
   const { data: documents } = await supabase
     .from("affiliate_documents")
-    .select("document_type")
+    .select("document_type, status")
     .eq("affiliate_id", affiliateId);
 
   const docTypes = (documents || []).map((d) => d.document_type);
@@ -174,6 +174,16 @@ export async function submitAffiliateOnboarding(): Promise<{ error: string | nul
   }
   if (!docTypes.includes("BankStatement")) {
     return { error: "Please upload a Bank Statement / IBAN Letter before submitting." };
+  }
+
+  // Validate that required documents have not been declined
+  const requiredDocs = (documents || []).filter(
+    (d) => d.document_type === "GovernmentID" || d.document_type === "BankStatement"
+  );
+  const declinedDoc = requiredDocs.find((d) => d.status === "declined");
+  if (declinedDoc) {
+    const docLabel = declinedDoc.document_type === "GovernmentID" ? "Government ID" : "Bank Statement";
+    return { error: `Your ${docLabel} has been declined. Please re-upload the document before submitting.` };
   }
 
   const { error: updateError } = await supabase

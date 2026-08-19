@@ -5,7 +5,6 @@ import Link from "next/link";
 import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { AffiliateProvider } from "@/lib/context/AffiliateContext";
-import DemoModeBanner from "@/components/ui/DemoModeBanner";
 
 interface AppLayoutClientProps {
   children: React.ReactNode;
@@ -30,8 +29,6 @@ export default function AppLayoutClient({ children, onboardingStatus }: AppLayou
 
         <div className={mainContentClasses}>
           <Topbar onMenuClick={() => setIsMobileSidebarOpen(true)} />
-
-          {process.env.NEXT_PUBLIC_DEMO_MODE === 'true' && <DemoModeBanner />}
 
           {/* Onboarding status banners */}
           {onboardingStatus === "submitted" && (
