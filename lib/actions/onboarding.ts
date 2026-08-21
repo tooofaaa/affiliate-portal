@@ -83,7 +83,21 @@ export async function uploadAffiliateDocument(
   }
 
   const affiliateId = affiliate.id;
-  const filePath = `affiliates/${affiliateId}/${Date.now()}_${file.name}`;
+
+  // NEW-06: File size check
+  if (file.size > 10 * 1024 * 1024) {
+    return { error: 'File too large. Maximum 10 MB.' };
+  }
+
+  // NEW-07: MIME type check
+  const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'application/pdf'];
+  if (!ALLOWED_TYPES.includes(file.type)) {
+    return { error: 'Invalid file type. Only JPEG, PNG, WebP, and PDF are allowed.' };
+  }
+
+  // NEW-08: Filename sanitization
+  const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+  const filePath = `affiliates/${affiliateId}/${Date.now()}_${safeName}`;
 
   const adminClient = createAdminClient();
   const buffer = Buffer.from(await file.arrayBuffer());

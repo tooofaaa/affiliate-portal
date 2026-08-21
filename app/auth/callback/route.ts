@@ -4,10 +4,10 @@ import { createClientServer, createAdminClient } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") || "/dashboard";
+  const next = requestUrl.searchParams.get("next") || "/login";
 
   // Only allow relative paths to prevent open redirect
-  const safePath = next.startsWith("/") && !next.startsWith("//") ? next : "/dashboard";
+  const safePath = next.startsWith("/") && !next.startsWith("//") ? next : "/login";
 
   if (code) {
     const supabase = await createClientServer();
@@ -24,6 +24,17 @@ export async function GET(request: Request) {
         .update({ account_status: "beta" })
         .eq("portal_user_id", user.id)
         .eq("account_status", "pending_email");
+
+      // Redirect to onboarding if not yet approved
+      const { data: affiliate } = await adminClient
+        .from("affiliates")
+        .select("onboarding_status")
+        .eq("portal_user_id", user.id)
+        .single();
+
+      if (affiliate && affiliate.onboarding_status !== "approved") {
+        return NextResponse.redirect(new URL("/onboarding", requestUrl));
+      }
     }
   }
 
