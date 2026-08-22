@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { createCatalogLink } from "@/lib/actions/catalog";
+import { useVerification } from "@/lib/context/VerificationContext";
 import { formatCurrency } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -66,6 +67,7 @@ function PlaceholderImage({ name }: { name: string }) {
 
 export default function ProductsContent({ products }: ProductsContentProps) {
   const { language } = useLanguage();
+  const { isVerified, triggerVerificationModal } = useVerification();
   const [search, setSearch] = useState("");
   const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
   const [creating, setCreating] = useState<number | null>(null);
@@ -96,12 +98,21 @@ export default function ProductsContent({ products }: ProductsContentProps) {
       ? `/suppliers/${supplierId}?product=${product.id}`
       : `/products?product=${product.id}`;
 
+    // Beta mode: gate catalog link creation behind verification
+    if (!isVerified) { setCreating(null); triggerVerificationModal(); return; }
+
     const res = await createCatalogLink(
       "product",
       product.id,
       product.product_name,
       destinationPath
     );
+
+    if (res.message === "VERIFICATION_REQUIRED") {
+      triggerVerificationModal();
+      setCreating(null);
+      return;
+    }
 
     if (res.success && res.link) {
       setCreatedLinks((prev) => ({

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { createLink, deactivateLink } from "@/lib/actions/affiliate";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useVerification } from "@/lib/context/VerificationContext";
 
 interface AffiliateLink {
   id: number;
@@ -21,6 +22,7 @@ interface LinksContentProps {
 
 export default function LinksContent({ links: initialLinks }: LinksContentProps) {
   const { language } = useLanguage();
+  const { isVerified, triggerVerificationModal } = useVerification();
   const [links, setLinks] = useState<AffiliateLink[]>(initialLinks ?? []);
   const [destination, setDestination] = useState("");
   const [creating, setCreating] = useState(false);
@@ -35,11 +37,15 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Beta mode: gate link creation behind verification
+    if (!isVerified) { triggerVerificationModal(); return; }
     if (!destination.trim()) return;
     setCreating(true);
     setMessage(null);
 
     const res = await createLink(destination.trim());
+
+    if (res.message === "VERIFICATION_REQUIRED") { triggerVerificationModal(); setCreating(false); return; }
 
     if (res.success && res.link) {
       setLinks((prev) => [res.link as AffiliateLink, ...prev]);
@@ -52,6 +58,8 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
   };
 
   const handleDeactivate = async (id: number) => {
+    // Beta mode: gate deactivation behind verification
+    if (!isVerified) { triggerVerificationModal(); return; }
     await deactivateLink(id);
     setLinks((prev) =>
       prev.map((l) => (l.id === id ? { ...l, is_active: false } : l))

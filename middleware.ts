@@ -73,16 +73,9 @@ export default async function middleware(request: NextRequest) {
         url.searchParams.set("error", "suspended");
         return NextResponse.redirect(url);
       }
-      // Redirect to onboarding if not yet complete
-      if (
-        affiliate &&
-        affiliate.onboarding_status === "incomplete" &&
-        !pathname.startsWith("/onboarding")
-      ) {
-        const url = request.nextUrl.clone();
-        url.pathname = "/onboarding";
-        return NextResponse.redirect(url);
-      }
+      // Beta mode: unverified affiliates may explore the entire platform.
+      // Verification is enforced per-action (client modal + server-side guards),
+      // NOT by forcing a redirect to /onboarding. This mirrors customer portal UX.
     }
 
     // Redirect authenticated, active users away from auth routes to dashboard

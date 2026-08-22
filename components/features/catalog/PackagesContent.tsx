@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createCatalogLink } from "@/lib/actions/catalog";
+import { useVerification } from "@/lib/context/VerificationContext";
 import { formatCurrency } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
@@ -39,6 +40,7 @@ function legacyCopy(text: string) {
 
 export default function PackagesContent({ packages }: PackagesContentProps) {
   const { language } = useLanguage();
+  const { isVerified, triggerVerificationModal } = useVerification();
   const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
   const [creating, setCreating] = useState<number | null>(null);
   const [messages, setMessages] = useState<Record<number, { type: "success" | "error"; text: string }>>({});
@@ -52,12 +54,21 @@ export default function PackagesContent({ packages }: PackagesContentProps) {
       return next;
     });
 
+    // Beta mode: gate catalog link creation behind verification
+    if (!isVerified) { setCreating(null); triggerVerificationModal(); return; }
+
     const res = await createCatalogLink(
       "package",
       pkg.id,
       pkg.name,
       `/packages/${pkg.id}`
     );
+
+    if (res.message === "VERIFICATION_REQUIRED") {
+      triggerVerificationModal();
+      setCreating(null);
+      return;
+    }
 
     if (res.success && res.link) {
       setCreatedLinks((prev) => ({

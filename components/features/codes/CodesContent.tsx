@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createDiscountCode } from "@/lib/actions/affiliate";
 import { formatDate } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useVerification } from "@/lib/context/VerificationContext";
 
 interface DiscountCode {
   id: number;
@@ -24,6 +25,7 @@ interface CodesContentProps {
 
 export default function CodesContent({ activeCode: initialCode, history: initialHistory }: CodesContentProps) {
   const { language } = useLanguage();
+  const { isVerified, triggerVerificationModal } = useVerification();
   const [activeCode, setActiveCode] = useState<DiscountCode | null>(initialCode ?? null);
   const [history, setHistory] = useState<DiscountCode[]>(initialHistory ?? []);
   const [discountPct, setDiscountPct] = useState(10);
@@ -34,10 +36,14 @@ export default function CodesContent({ activeCode: initialCode, history: initial
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Beta mode: gate code creation behind verification
+    if (!isVerified) { triggerVerificationModal(); return; }
     setCreating(true);
     setMessage(null);
 
     const res = await createDiscountCode(discountPct, level);
+
+    if (res.message === "VERIFICATION_REQUIRED") { triggerVerificationModal(); setCreating(false); return; }
 
     if (res.success && res.code) {
       const newCode = res.code as DiscountCode;

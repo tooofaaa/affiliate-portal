@@ -29,6 +29,29 @@ async function getAffiliateContext() {
   };
 }
 
+const VERIFICATION_REQUIRED = "VERIFICATION_REQUIRED";
+
+// ── Verification guard (beta mode) ───────────────────────────────────────
+// Returns null when the affiliate is approved (action allowed),
+// otherwise returns VERIFICATION_REQUIRED sentinel.
+// Mirrors customer-portal server-side enforcement exactly.
+async function assertAffiliateVerified(): Promise<string | null> {
+  const supabase = await createClientServer();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return "Not authenticated";
+
+  const { data: affiliate } = await supabase
+    .from("affiliates")
+    .select("id, onboarding_status")
+    .eq("portal_user_id", user.id)
+    .maybeSingle();
+
+  if (!affiliate) return "Profile not found";
+  if (affiliate.onboarding_status !== "approved") return VERIFICATION_REQUIRED;
+
+  return null;
+}
+
 // ── Dashboard ─────────────────────────────────────────────────────────────
 export async function getDashboardStats() {
   const { supabase, affiliateId } = await getAffiliateContext();
@@ -90,6 +113,10 @@ export async function createLink(destination: string) {
   const { supabase, affiliateId } = await getAffiliateContext();
   if (!affiliateId) return { success: false, message: "Not authenticated" };
 
+  // Enforce server-side verification before any business logic (beta mode)
+  const verError = await assertAffiliateVerified();
+  if (verError) return { success: false, message: verError };
+
   // Validate destination URL
   if (!destination || destination.trim().length === 0) {
     return { success: false, message: "Destination URL is required." };
@@ -144,6 +171,10 @@ export async function deactivateLink(id: number) {
   const { supabase, affiliateId } = await getAffiliateContext();
   if (!affiliateId) return { success: false };
 
+  // Enforce server-side verification before any business logic (beta mode)
+  const verError = await assertAffiliateVerified();
+  if (verError) return { success: false };
+
   const { error } = await supabase
     .from("affiliate_links")
     .update({ is_active: false })
@@ -187,6 +218,10 @@ export async function getCodeHistory() {
 export async function createDiscountCode(discount_pct: number, level: 1 | 2) {
   const { supabase, affiliateId, affiliate } = await getAffiliateContext();
   if (!affiliateId || !affiliate) return { success: false, message: "Not authenticated" };
+
+  // Enforce server-side verification before any business logic (beta mode)
+  const verError = await assertAffiliateVerified();
+  if (verError) return { success: false, message: verError };
 
   if (discount_pct < 1 || discount_pct > 25) {
     return { success: false, message: "Discount percentage must be between 1 and 25" };
@@ -308,6 +343,10 @@ export async function requestAffiliateWithdrawal(
 ) {
   const { supabase, user, affiliateId } = await getAffiliateContext();
   if (!user || !affiliateId) return { success: false, message: "Not authenticated" };
+
+  // Enforce server-side verification before any business logic (beta mode)
+  const verError = await assertAffiliateVerified();
+  if (verError) return { success: false, message: verError };
 
   // Server-side input validation
   const MINIMUM_WITHDRAWAL_SAR = 100;
