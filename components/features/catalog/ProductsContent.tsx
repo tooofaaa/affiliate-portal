@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { createCatalogLink } from "@/lib/actions/catalog";
+import { formatCurrency } from "@/lib/utils/formatters";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Supplier {
   id: number;
@@ -63,6 +65,7 @@ function PlaceholderImage({ name }: { name: string }) {
 }
 
 export default function ProductsContent({ products }: ProductsContentProps) {
+  const { language } = useLanguage();
   const [search, setSearch] = useState("");
   const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
   const [creating, setCreating] = useState<number | null>(null);
@@ -245,7 +248,7 @@ export default function ProductsContent({ products }: ProductsContentProps) {
                       {product.product_name}
                     </h3>
                     <p className="mt-1 font-bold text-base" style={{ color: "#6366f1" }}>
-                      SAR {product.sell_price ?? 0}
+                      {formatCurrency(product.sell_price ?? 0, language)}
                     </p>
                   </div>
 

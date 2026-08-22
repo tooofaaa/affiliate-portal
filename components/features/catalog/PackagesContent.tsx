@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createCatalogLink } from "@/lib/actions/catalog";
+import { formatCurrency } from "@/lib/utils/formatters";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Package {
   id: number;
@@ -36,6 +38,7 @@ function legacyCopy(text: string) {
 }
 
 export default function PackagesContent({ packages }: PackagesContentProps) {
+  const { language } = useLanguage();
   const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
   const [creating, setCreating] = useState<number | null>(null);
   const [messages, setMessages] = useState<Record<number, { type: "success" | "error"; text: string }>>({});
@@ -155,7 +158,7 @@ export default function PackagesContent({ packages }: PackagesContentProps) {
                     className="text-lg font-bold"
                     style={{ color: "#10b981" }}
                   >
-                    SAR {pkg.price_sar ?? 0}
+                    {formatCurrency(pkg.price_sar ?? 0, language)}
                   </span>
                   {pkg.duration_days && (
                     <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium">

@@ -3,6 +3,8 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createCatalogLink } from "@/lib/actions/catalog";
+import { formatCurrency } from "@/lib/utils/formatters";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Membership {
   id: number;
@@ -54,6 +56,7 @@ function legacyCopy(text: string) {
 }
 
 export default function MembershipsContent({ memberships }: MembershipsContentProps) {
+  const { t, language } = useLanguage();
   const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
   const [creating, setCreating] = useState<number | null>(null);
   const [messages, setMessages] = useState<Record<number, { type: "success" | "error"; text: string }>>({});
@@ -167,8 +170,8 @@ export default function MembershipsContent({ memberships }: MembershipsContentPr
                     </span>
                     <p className="mt-2 font-bold text-base" style={{ color: "#0f172a" }}>
                       {(membership.price_sar ?? 0) > 0
-                        ? `SAR ${membership.price_sar}`
-                        : "Free tier — earned by spending"}
+                        ? formatCurrency(membership.price_sar ?? 0, language)
+                        : t.catalog.freeTierEarned}
                     </p>
                   </div>
                   {membership.tier_order != null && (

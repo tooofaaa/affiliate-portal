@@ -549,7 +549,7 @@ export default function AffiliateWalletContent({
                 style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)", color: "#92400e" }}
               >
                 <strong>Withdrawal SLA:</strong> All withdrawal requests are processed within 15 business days.
-                Minimum withdrawal amount is SAR 100.
+                Minimum withdrawal amount is {formatCurrency(100, language)}.
               </div>
             </div>
           )}
