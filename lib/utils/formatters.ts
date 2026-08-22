@@ -1,3 +1,5 @@
+import { formatCurrency, formatCurrencyShort } from "@sp-wms-crm/design-system";
+
 function getLocale(lang?: 'en' | 'ar'): string {
   if (lang) return lang === 'ar' ? 'ar-SA' : 'en-SA';
   if (typeof document !== 'undefined') {
@@ -7,15 +9,7 @@ function getLocale(lang?: 'en' | 'ar'): string {
   return 'en-SA';
 }
 
-export function formatCurrency(amount: number, lang?: 'en' | 'ar'): string {
-  const locale = getLocale(lang);
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency: "SAR",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2
-  }).format(amount);
-}
+export { formatCurrency, formatCurrencyShort } from "@sp-wms-crm/design-system";
 
 export function formatDate(dateStr: string | null | undefined, lang?: 'en' | 'ar'): string {
   if (!dateStr) return "-";
