@@ -4,11 +4,13 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Language = "en" | "ar";
 
+type TranslationObject = Record<string, any>;
+
 interface LanguageContextType {
   language: Language;
   toggleLanguage: () => void;
   isRTL: boolean;
-  t: typeof translations.en;
+  t: TranslationObject;
 }
 
 const translations = {
