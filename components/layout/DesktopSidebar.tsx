@@ -7,21 +7,19 @@ import { logoutAffiliate } from "@/lib/actions/auth";
 import Link from "next/link";
 
 const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard", labelAr: "لوحة القيادة" },
-  { href: "/catalog", label: "Affiliate Catalog", labelAr: "كتالوج التسويق" },
-  { href: "/links", label: "My Links", labelAr: "روابطي" },
-  { href: "/codes", label: "Discount Codes", labelAr: "رموز الخصم" },
-  { href: "/wallet", label: "Wallet", labelAr: "المحفظة" },
-  { href: "/performance", label: "Performance", labelAr: "الأداء" },
-  { href: "/support", label: "Support", labelAr: "الدعم" },
+  { href: "/dashboard", labelKey: "nav.dashboard" },
+  { href: "/catalog", labelKey: "nav.catalog" },
+  { href: "/links", labelKey: "nav.links" },
+  { href: "/codes", labelKey: "nav.codes" },
+  { href: "/wallet", labelKey: "nav.wallet" },
+  { href: "/performance", labelKey: "nav.performance" },
+  { href: "/support", labelKey: "nav.support" },
 ];
 
 const FOOTER_LINKS = [
-  { href: "/profile", label: "Profile", labelAr: "الملف الشخصي" },
-  { href: "/settings", label: "Settings", labelAr: "الإعدادات" },
+  { href: "/profile", labelKey: "nav.profile" },
+  { href: "/settings", labelKey: "nav.settings" },
 ];
-
-const NAV_ICONS: Record<string, React.FC<React.SVGProps<SVGSVGElement>>> = {};
 
 // Inline small icons for each section
 function DashboardIcon(props: React.SVGProps<SVGSVGElement>) {
@@ -147,19 +145,16 @@ export default function DesktopSidebar() {
           </div>
           <div>
             <p className="text-white text-sm font-bold leading-tight">
-              {isAr ? "بوابة الشركاء" : "Affiliate Portal"}
+              {t.nav.affiliatePortal}
             </p>
             <p className="text-xs leading-tight" style={{ color: "#6366f1" }}>
-              {isAr ? "شريك تسويقي" : "Marketing Partner"}
+              {t.nav.marketingPartner}
             </p>
           </div>
         </div>
 
         {/* Divider */}
-        <div
-          className="mx-2 mb-5"
-          style={{ height: "1px", background: "rgba(255,255,255,0.07)" }}
-        />
+        <div className="mx-2 mb-5 border-t" style={{ borderColor: "rgba(255,255,255,0.07)" }} />
 
         {/* Main nav */}
         <nav className="flex flex-col gap-1 overflow-y-auto flex-1">
@@ -169,7 +164,7 @@ export default function DesktopSidebar() {
               <NavItem
                 key={link.href}
                 href={link.href}
-                label={isAr ? link.labelAr : link.label}
+                label={t[link.labelKey]}
                 icon={<Icon className="w-5 h-5" />}
               />
             );
@@ -180,10 +175,7 @@ export default function DesktopSidebar() {
       {/* Bottom: Footer nav + logout */}
       <div className="flex flex-col gap-1">
         {/* Divider */}
-        <div
-          className="mx-2 mb-3"
-          style={{ height: "1px", background: "rgba(255,255,255,0.07)" }}
-        />
+        <div className="mx-2 mb-3 border-t" style={{ borderColor: "rgba(255,255,255,0.07)" }} />
 
         {FOOTER_LINKS.map((link) => {
           const Icon = iconMap[link.href] ?? DashboardIcon;
@@ -191,7 +183,7 @@ export default function DesktopSidebar() {
             <NavItem
               key={link.href}
               href={link.href}
-              label={isAr ? link.labelAr : link.label}
+              label={t[link.labelKey]}
               icon={<Icon className="w-5 h-5" />}
             />
           );
@@ -202,19 +194,11 @@ export default function DesktopSidebar() {
             await logoutAffiliate();
             window.location.href = '/login';
           }}
-          className="w-full cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+          className="w-full cursor-pointer flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-[background-color,color] duration-200 hover:bg-red-500/10 hover:text-red-500 focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:outline-none"
           style={{ color: "rgba(239,68,68,0.8)" }}
-          onMouseEnter={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "rgba(239,68,68,0.1)";
-            (e.currentTarget as HTMLButtonElement).style.color = "#ef4444";
-          }}
-          onMouseLeave={(e) => {
-            (e.currentTarget as HTMLButtonElement).style.background = "transparent";
-            (e.currentTarget as HTMLButtonElement).style.color = "rgba(239,68,68,0.8)";
-          }}
         >
           <LogOutIcon className="w-5 h-5 flex-shrink-0" />
-          <span>{isAr ? "تسجيل الخروج" : "Log Out"}</span>
+          <span>{t.nav.logOut}</span>
         </button>
       </div>
     </aside>

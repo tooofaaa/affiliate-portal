@@ -17,6 +17,7 @@ const translations = {
     brandTagline: "Earn with every referral",
     nav: {
       dashboard: "Dashboard",
+      catalog: "Affiliate Catalog",
       links: "Tracking Links",
       codes: "Discount Codes",
       wallet: "Wallet",
@@ -25,6 +26,8 @@ const translations = {
       profile: "Profile",
       settings: "Settings",
       logOut: "Log Out",
+      affiliatePortal: "Affiliate Portal",
+      marketingPartner: "Marketing Partner",
     },
     common: {
       search: "Search...",
@@ -364,6 +367,7 @@ const translations = {
     brandTagline: "اربح مع كل إحالة",
     nav: {
       dashboard: "لوحة التحكم",
+      catalog: "كتالوج التسويق",
       links: "روابط التتبع",
       codes: "أكواد الخصم",
       wallet: "المحفظة",
@@ -372,6 +376,8 @@ const translations = {
       profile: "الملف الشخصي",
       settings: "الإعدادات",
       logOut: "تسجيل الخروج",
+      affiliatePortal: "بوابة الشركاء",
+      marketingPartner: "شريك تسويقي",
     },
     common: {
       search: "بحث...",
