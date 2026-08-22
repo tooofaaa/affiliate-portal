@@ -1,4 +1,4 @@
-import { formatCurrency, formatCurrencyShort } from "@sp-wms-crm/design-system";
+import { formatCurrency, formatCurrencyShort } from "../../src/design-system";
 
 function getLocale(lang?: 'en' | 'ar'): string {
   if (lang) return lang === 'ar' ? 'ar-SA' : 'en-SA';
@@ -9,7 +9,7 @@ function getLocale(lang?: 'en' | 'ar'): string {
   return 'en-SA';
 }
 
-export { formatCurrency, formatCurrencyShort } from "@sp-wms-crm/design-system";
+export { formatCurrency, formatCurrencyShort } from "../../src/design-system";
 
 export function formatDate(dateStr: string | null | undefined, lang?: 'en' | 'ar'): string {
   if (!dateStr) return "-";
