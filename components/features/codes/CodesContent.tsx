@@ -149,7 +149,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
                 </div>
                 <div className="p-3 rounded-xl" style={{ background: "rgba(16,185,129,0.06)" }}>
                   <p className="text-lg font-bold" style={{ color: "#059669" }}>
-                    Level {activeCode.level}
+                    {t.codes.level} {activeCode.level}
                   </p>
                   <p className="text-xs text-slate-500 mt-0.5">Tier</p>
                 </div>
@@ -177,7 +177,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
             <div className="text-center py-8">
               <div className="mb-3 flex justify-center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
               <p className="text-sm text-slate-400 font-medium">{t.codes.noActiveCode}</p>
-              <p className="text-xs text-slate-400 mt-1">Create a new code using the form</p>
+              <p className="text-xs text-slate-400 mt-1">{t.codes.createCodeHint}</p>
             </div>
           )}
         </div>
@@ -255,9 +255,9 @@ export default function CodesContent({ activeCode: initialCode, history: initial
                           }
                     }
                   >
-                    Level {l}
+                    {t.codes.level} {l}
                     {l === 2 && (
-                      <span className="text-xs block mt-0.5 opacity-75">1.5x commission</span>
+                      <span className="text-xs block mt-0.5 opacity-75">{t.codes.level2Commission}</span>
                     )}
                   </button>
                 ))}
@@ -332,7 +332,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
                         className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
                         style={{ background: "rgba(99,102,241,0.1)", color: "#6366f1" }}
                       >
-                        Level {code.level}
+                        {t.codes.level} {code.level}
                       </span>
                     </td>
                     <td className="px-4 py-3 font-semibold text-slate-700">

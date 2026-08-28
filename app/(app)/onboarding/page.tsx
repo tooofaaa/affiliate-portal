@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import {
   uploadAffiliateDocument,
   submitAffiliateOnboarding,
@@ -29,31 +30,6 @@ interface UploadedDoc {
   created_at: string;
 }
 
-const DOC_SLOTS: DocSlot[] = [
-  {
-    type: "GovernmentID",
-    title: "Government ID",
-    description: "Upload your national ID card, passport, or Iqama",
-    required: true,
-    icon: "id",
-  },
-  {
-    type: "BankStatement",
-    title: "Bank Statement / IBAN Letter",
-    description: "Upload a recent bank statement or IBAN confirmation letter",
-    required: true,
-    icon: "bank",
-  },
-  {
-    type: "SocialProof",
-    title: "Social Media Proof",
-    description:
-      "Screenshot of your channel showing follower count and username (optional but helps)",
-    required: false,
-    icon: "social",
-  },
-];
-
 function getDocStatus(slot: DocSlot, documents: UploadedDoc[]): DocumentStatus {
   const doc = documents.find((d) => d.document_type === slot.type);
   if (!doc) return "not_uploaded";
@@ -63,13 +39,6 @@ function getDocStatus(slot: DocSlot, documents: UploadedDoc[]): DocumentStatus {
 function getDocRecord(slot: DocSlot, documents: UploadedDoc[]): UploadedDoc | undefined {
   return documents.find((d) => d.document_type === slot.type);
 }
-
-const statusBadge: Record<DocumentStatus, { label: string; color: string; bg: string }> = {
-  not_uploaded: { label: "Not Uploaded", color: "#6b7280", bg: "rgba(107,114,128,0.1)" },
-  pending: { label: "Pending Review", color: "#d97706", bg: "rgba(245,158,11,0.1)" },
-  approved: { label: "Approved", color: "#059669", bg: "rgba(16,185,129,0.1)" },
-  declined: { label: "Declined", color: "#dc2626", bg: "rgba(239,68,68,0.1)" },
-};
 
 function Spinner() {
   return (
@@ -85,7 +54,39 @@ function Spinner() {
 }
 
 export default function OnboardingPage() {
+  const { t } = useLanguage();
   const router = useRouter();
+
+  const DOC_SLOTS: DocSlot[] = [
+    {
+      type: "GovernmentID",
+      title: t.onboarding.govId,
+      description: t.onboarding.govIdDesc,
+      required: true,
+      icon: "id",
+    },
+    {
+      type: "BankStatement",
+      title: t.onboarding.bankStatement,
+      description: t.onboarding.bankStatementDesc,
+      required: true,
+      icon: "bank",
+    },
+    {
+      type: "SocialProof",
+      title: t.onboarding.socialProof,
+      description: t.onboarding.socialProofDesc,
+      required: false,
+      icon: "social",
+    },
+  ];
+
+  const statusBadge: Record<DocumentStatus, { label: string; color: string; bg: string }> = {
+    not_uploaded: { label: t.onboarding.notUploaded, color: "#6b7280", bg: "rgba(107,114,128,0.1)" },
+    pending: { label: t.onboarding.pendingReview, color: "#d97706", bg: "rgba(245,158,11,0.1)" },
+    approved: { label: t.onboarding.approved, color: "#059669", bg: "rgba(16,185,129,0.1)" },
+    declined: { label: t.onboarding.declined, color: "#dc2626", bg: "rgba(239,68,68,0.1)" },
+  };
   const [onboardingStatus, setOnboardingStatus] = useState<string>("incomplete");
   const [documents, setDocuments] = useState<UploadedDoc[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -177,7 +178,7 @@ export default function OnboardingPage() {
           <Spinner />
         </div>
         <p className="text-sm" style={{ color: "#9ca3af" }}>
-          Loading your onboarding...
+          {t.onboarding.loadingOnboarding}
         </p>
       </div>
     );
@@ -198,10 +199,10 @@ export default function OnboardingPage() {
         </div>
         <div className="text-center">
           <h1 className="text-2xl font-bold" style={{ color: "#1e1b4b" }}>
-            Documents Under Review
+            {t.onboarding.docsUnderReview}
           </h1>
           <p className="text-sm mt-3 leading-relaxed" style={{ color: "#6b7280" }}>
-            Your documents are under review. We&apos;ll notify you once approved.
+            {t.onboarding.docsUnderReviewDesc}
           </p>
         </div>
         <button
@@ -209,7 +210,7 @@ export default function OnboardingPage() {
           className="px-8 py-3 rounded-xl text-sm font-semibold text-white transition-opacity hover:opacity-90"
           style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}
         >
-          Go to Dashboard
+          {t.onboarding.goToDashboard}
         </button>
       </div>
     );
@@ -231,10 +232,10 @@ export default function OnboardingPage() {
             <span className="text-2xl">⚠️</span>
             <div>
               <h2 className="font-bold text-base" style={{ color: "#991b1b" }}>
-                Some documents were declined
+                {t.onboarding.someDeclined}
               </h2>
               <p className="text-sm mt-1" style={{ color: "#dc2626" }}>
-                Please re-upload the declined documents below:
+                {t.onboarding.reUploadDeclined}
               </p>
             </div>
           </div>
@@ -253,20 +254,20 @@ export default function OnboardingPage() {
             </p>
             {doc.admin_note && (
               <p className="text-xs mt-1 px-3 py-2 rounded-lg" style={{ background: "rgba(239,68,68,0.06)", color: "#dc2626" }}>
-                Admin note: {doc.admin_note}
+                {t.onboarding.adminNote} {doc.admin_note}
               </p>
             )}
           </div>
         ))}
         <p className="text-sm text-center" style={{ color: "#6b7280" }}>
-          Please go back to the full onboarding form to re-upload.
+          {t.onboarding.reUploadForm}
         </p>
         <button
           onClick={() => window.location.reload()}
           className="mx-auto px-8 py-3 rounded-xl text-sm font-semibold text-white"
           style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}
         >
-          Re-upload Documents
+          {t.onboarding.reUploadBtn}
         </button>
       </div>
     );
@@ -277,10 +278,10 @@ export default function OnboardingPage() {
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#1e1b4b" }}>
-          Complete Your Onboarding
+          {t.onboarding.title}
         </h1>
         <p className="text-sm mt-1.5" style={{ color: "#6b7280" }}>
-          Upload the required documents to verify your account and start earning.
+          {t.onboarding.subtitle}
         </p>
       </div>
 
@@ -300,7 +301,7 @@ export default function OnboardingPage() {
         </div>
         <div>
           <p className="text-sm font-semibold" style={{ color: "#1e1b4b" }}>
-            {canSubmit() ? "Ready to submit!" : "Upload required documents"}
+            {canSubmit() ? t.onboarding.readyToSubmit : t.onboarding.uploadRequired}
           </p>
           <p className="text-xs mt-0.5" style={{ color: "#9ca3af" }}>
             {documents.filter((d) => DOC_SLOTS.find((s) => s.type === d.document_type && s.required) && d.status !== "declined").length} of {DOC_SLOTS.filter((s) => s.required).length} required documents uploaded
@@ -344,7 +345,7 @@ export default function OnboardingPage() {
                       </h3>
                       {slot.required && (
                         <span className="text-xs font-medium px-1.5 py-0.5 rounded-full" style={{ background: "rgba(168,85,247,0.1)", color: "#a855f7" }}>
-                          Required
+                          {t.onboarding.required}
                         </span>
                       )}
                     </div>
@@ -367,7 +368,7 @@ export default function OnboardingPage() {
                   className="text-xs px-3 py-2 rounded-xl"
                   style={{ background: "rgba(239,68,68,0.06)", color: "#dc2626" }}
                 >
-                  Admin note: {docRecord.admin_note}
+                  {t.onboarding.adminNote} {docRecord.admin_note}
                 </div>
               )}
 
@@ -377,10 +378,10 @@ export default function OnboardingPage() {
                   className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
                   style={{ background: "rgba(16,185,129,0.06)", color: "#059669" }}
                 >
-                  <span>✓</span> Document approved
+                  <span>✓</span> {t.onboarding.docApproved}
                   {docRecord?.file_url && (
                     <a href={docRecord.file_url} target="_blank" rel="noopener noreferrer" className="underline ms-auto">
-                      View
+                      {t.onboarding.viewFile}
                     </a>
                   )}
                 </div>
@@ -392,10 +393,10 @@ export default function OnboardingPage() {
                   className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
                   style={{ background: "rgba(245,158,11,0.06)", color: "#d97706" }}
                 >
-                  <span>⏳</span> Awaiting review
+                  <span>⏳</span> {t.onboarding.awaitingReview}
                   {docRecord?.file_url && (
                     <a href={docRecord.file_url} target="_blank" rel="noopener noreferrer" className="underline ms-auto">
-                      View uploaded file
+                      {t.onboarding.viewUploadedFile}
                     </a>
                   )}
                 </div>
@@ -419,10 +420,10 @@ export default function OnboardingPage() {
                     />
                     {selectedFile ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>}
                     <span className="text-xs font-medium" style={{ color: "#6b7280" }}>
-                      {selectedFile ? selectedFile.name : "Click to select a file"}
+                      {selectedFile ? selectedFile.name : t.onboarding.clickToSelect}
                     </span>
                     <span className="text-xs" style={{ color: "#9ca3af" }}>
-                      PDF, JPG, PNG, WEBP accepted
+                      {t.onboarding.fileAccepted}
                     </span>
                   </label>
 
@@ -434,7 +435,7 @@ export default function OnboardingPage() {
 
                   {wasJustUploaded && (
                     <p className="text-xs text-green-600 flex items-center gap-1">
-                      <span>✓</span> Uploaded successfully
+                      <span>✓</span> {t.onboarding.uploadedSuccess}
                     </p>
                   )}
 
@@ -447,10 +448,10 @@ export default function OnboardingPage() {
                   >
                     {isUploading ? (
                       <>
-                        <Spinner /> Uploading...
+                        <Spinner /> {t.onboarding.uploading}
                       </>
                     ) : (
-                      "Upload"
+                      t.onboarding.upload
                     )}
                   </button>
                 </div>
@@ -472,12 +473,12 @@ export default function OnboardingPage() {
       >
         <div>
           <h3 className="font-semibold text-sm" style={{ color: "#111827" }}>
-            Submit for Review
+            {t.onboarding.submitForReview}
           </h3>
           <p className="text-xs mt-1" style={{ color: "#6b7280" }}>
             {canSubmit()
-              ? "All required documents uploaded. Submit when you're ready."
-              : "Upload Government ID and Bank Statement to enable submission."}
+              ? t.onboarding.uploadsComplete
+              : t.onboarding.uploadsIncomplete}
           </p>
         </div>
 
@@ -496,10 +497,10 @@ export default function OnboardingPage() {
         >
           {isSubmitting ? (
             <>
-              <Spinner /> Submitting...
+              <Spinner /> {t.onboarding.submitting}
             </>
           ) : (
-            "Submit Documents for Review"
+            t.onboarding.submitDocs
           )}
         </button>
       </div>

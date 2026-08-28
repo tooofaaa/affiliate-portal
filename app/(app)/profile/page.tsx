@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { getAffiliateProfile, updateAffiliateProfile, AffiliateProfile } from "@/lib/actions/profile";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { getAffiliateOnboardingData } from "@/lib/actions/onboarding";
 
 interface UploadedDoc {
@@ -23,6 +24,7 @@ const docStatusChip: Record<string, { label: string; color: string; bg: string }
 };
 
 export default function ProfilePage() {
+  const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
@@ -89,10 +91,10 @@ export default function ProfilePage() {
     <div className="flex flex-col gap-6 max-w-3xl pb-10 font-poppins">
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-          My Profile
+          {t.profile.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          Manage your affiliate account information
+          {t.profile.manageInfo}
         </p>
       </div>
 
@@ -159,12 +161,12 @@ export default function ProfilePage() {
               boxShadow: "0 2px 20px rgba(0,0,0,0.06)",
             }}
           >
-            <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3">Account Information</h3>
+            <h3 className="font-bold text-gray-900 border-b border-gray-100 pb-3">{t.profile.accountInfo}</h3>
 
             <form onSubmit={handleSave} className="flex flex-col gap-5">
               {/* Editable fields */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-500">Full Name</label>
+                <label className="text-xs font-semibold text-gray-500">{t.signup.name}</label>
                 <input
                   type="text"
                   required
@@ -175,7 +177,7 @@ export default function ProfilePage() {
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-500">Contact Number</label>
+                <label className="text-xs font-semibold text-gray-500">{t.profile.contactNumber}</label>
                 <input
                   type="tel"
                   value={contactNumber}
@@ -186,7 +188,7 @@ export default function ProfilePage() {
 
               {/* Read-only fields */}
               <div className="flex flex-col gap-1.5">
-                <label className="text-xs font-semibold text-gray-500">Email Address</label>
+                <label className="text-xs font-semibold text-gray-500">{t.login.email}</label>
                 <input
                   type="email"
                   value={profile?.email || ""}
@@ -197,7 +199,7 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-500">Commission Rate</label>
+                  <label className="text-xs font-semibold text-gray-500">{t.performance.commissionRate}</label>
                   <input
                     type="text"
                     value={profile ? `${profile.commission_pct}%` : ""}
@@ -206,7 +208,7 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <label className="text-xs font-semibold text-gray-500">Account Status</label>
+                  <label className="text-xs font-semibold text-gray-500">{t.profile.accountStatus}</label>
                   <input
                     type="text"
                     value={profile?.status || ""}
@@ -222,7 +224,7 @@ export default function ProfilePage() {
                   disabled={isSaving}
                   className="px-6 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 disabled:opacity-60 cursor-pointer transition-colors"
                 >
-                  {isSaving ? "Saving..." : "Save Changes"}
+                  {isSaving ? t.common.saving : t.profile.saveChanges}
                 </button>
               </div>
             </form>
@@ -235,10 +237,10 @@ export default function ProfilePage() {
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-base font-bold" style={{ color: "#0f172a" }}>
-              Verification Documents
+              {t.profile.verificationDocuments}
             </h3>
             <p className="text-xs mt-0.5" style={{ color: "#94a3b8" }}>
-              Documents submitted for account verification
+              {t.profile.verificationDocsSubtitle}
             </p>
           </div>
           <Link
@@ -246,7 +248,7 @@ export default function ProfilePage() {
             className="px-4 py-2 rounded-xl text-xs font-semibold text-white transition-opacity hover:opacity-90"
             style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}
           >
-            Upload More
+            {t.profile.uploadMore}
           </Link>
         </div>
 
@@ -260,14 +262,14 @@ export default function ProfilePage() {
           >
 <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
             <p className="text-sm" style={{ color: "#6b7280" }}>
-              No documents uploaded yet.
+              {t.profile.noDocuments}
             </p>
             <Link
               href="/onboarding"
               className="text-xs font-semibold underline"
               style={{ color: "#a855f7" }}
             >
-              Complete onboarding
+              {t.profile.completeOnboarding}
             </Link>
           </div>
         ) : (
