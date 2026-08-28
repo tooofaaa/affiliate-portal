@@ -160,32 +160,32 @@ export default function ResetPasswordPage() {
               <h4 className="font-bold text-slate-700">{l.requirements}</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-slate-500 font-medium">
                 <p className="flex items-center gap-2">
-                  <span className={hasMinLength ? "text-emerald-500" : "text-slate-350"}>
-                    {hasMinLength ? "✓" : "○"}
+                  <span className={hasMinLength ? "text-emerald-500" : "text-slate-300"}>
+                    {hasMinLength ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="8"/></svg>}
                   </span>
                   {l.reqMinLength}
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className={hasUpper ? "text-emerald-500" : "text-slate-350"}>
-                    {hasUpper ? "✓" : "○"}
+                  <span className={hasUpper ? "text-emerald-500" : "text-slate-300"}>
+                    {hasUpper ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="8"/></svg>}
                   </span>
                   {l.reqUppercase}
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className={hasLower ? "text-emerald-500" : "text-slate-350"}>
-                    {hasLower ? "✓" : "○"}
+                  <span className={hasLower ? "text-emerald-500" : "text-slate-300"}>
+                    {hasLower ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="8"/></svg>}
                   </span>
                   {l.reqLowercase}
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className={hasNumber ? "text-emerald-500" : "text-slate-350"}>
-                    {hasNumber ? "✓" : "○"}
+                  <span className={hasNumber ? "text-emerald-500" : "text-slate-300"}>
+                    {hasNumber ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="8"/></svg>}
                   </span>
                   {l.reqNumber}
                 </p>
                 <p className="flex items-center gap-2">
-                  <span className={hasSpecial ? "text-emerald-500" : "text-slate-350"}>
-                    {hasSpecial ? "✓" : "○"}
+                  <span className={hasSpecial ? "text-emerald-500" : "text-slate-300"}>
+                    {hasSpecial ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="12" cy="12" r="8"/></svg>}
                   </span>
                   {l.reqSpecial}
                 </p>

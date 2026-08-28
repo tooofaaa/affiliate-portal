@@ -1,15 +1,19 @@
+"use client";
+
 import Link from "next/link";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function CatalogPage() {
+  const { t } = useLanguage();
   return (
     <div className="flex flex-col gap-8 pb-8">
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-          Affiliate Catalog
+          {t.catalog.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          كتالوج التسويق — Choose a category to browse and create affiliate links
+          {t.catalog.subtitle}
         </p>
       </div>
 
@@ -41,13 +45,10 @@ export default function CatalogPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold" style={{ color: "#0f172a" }}>
-              Memberships
+              {t.catalog.memberships}
             </h2>
-            <p className="text-sm font-medium" style={{ color: "#6366f1" }}>
-              العضويات
-            </p>
             <p className="text-sm mt-2" style={{ color: "#64748b" }}>
-              Earn commission after customer membership is activated by admin
+              {t.catalog.membershipsDesc}
             </p>
           </div>
           <div className="mt-auto">
@@ -56,20 +57,8 @@ export default function CatalogPage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
             >
-              Browse
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
+              {t.catalog.browse}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
             </Link>
           </div>
         </div>
@@ -101,13 +90,10 @@ export default function CatalogPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold" style={{ color: "#0f172a" }}>
-              Packages
+              {t.catalog.packages}
             </h2>
-            <p className="text-sm font-medium" style={{ color: "#10b981" }}>
-              الباقات
-            </p>
             <p className="text-sm mt-2" style={{ color: "#64748b" }}>
-              Promote packages and earn commission after admin deposits funds
+              {t.catalog.packagesDesc}
             </p>
           </div>
           <div className="mt-auto">
@@ -116,20 +102,8 @@ export default function CatalogPage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: "linear-gradient(135deg, #10b981, #34d399)" }}
             >
-              Browse
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
+              {t.catalog.browse}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
             </Link>
           </div>
         </div>
@@ -160,13 +134,10 @@ export default function CatalogPage() {
           </div>
           <div>
             <h2 className="text-lg font-bold" style={{ color: "#0f172a" }}>
-              Products
+              {t.catalog.products}
             </h2>
-            <p className="text-sm font-medium" style={{ color: "#f59e0b" }}>
-              المنتجات
-            </p>
             <p className="text-sm mt-2" style={{ color: "#64748b" }}>
-              Earn commission after customer purchases a supplier product
+              {t.catalog.productsDesc}
             </p>
           </div>
           <div className="mt-auto">
@@ -175,20 +146,8 @@ export default function CatalogPage() {
               className="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold text-white transition-all"
               style={{ background: "linear-gradient(135deg, #f59e0b, #fbbf24)" }}
             >
-              Browse
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M5 12h14" />
-                <path d="M12 5l7 7-7 7" />
-              </svg>
+              {t.catalog.browse}
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14" /><path d="M12 5l7 7-7 7" /></svg>
             </Link>
           </div>
         </div>

@@ -23,7 +23,7 @@ interface CodesContentProps {
 }
 
 export default function CodesContent({ activeCode: initialCode, history: initialHistory }: CodesContentProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [activeCode, setActiveCode] = useState<DiscountCode | null>(initialCode ?? null);
   const [history, setHistory] = useState<DiscountCode[]>(initialHistory ?? []);
   const [discountPct, setDiscountPct] = useState(10);
@@ -96,10 +96,10 @@ export default function CodesContent({ activeCode: initialCode, history: initial
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-          Discount Codes
+          {t.codes.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          Create and manage your affiliate discount codes
+          {t.codes.subtitle}
         </p>
       </div>
 
@@ -114,7 +114,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
           }}
         >
           <h3 className="font-semibold text-base mb-4" style={{ color: "#0f172a" }}>
-            Active Code
+            {t.codes.activeCode}
           </h3>
 
           {activeCode ? (
@@ -164,14 +164,14 @@ export default function CodesContent({ activeCode: initialCode, history: initial
                   border: `1px solid ${copiedCode ? "rgba(16,185,129,0.2)" : "rgba(99,102,241,0.15)"}`,
                 }}
               >
-                {copiedCode ? "Copied to clipboard!" : "Copy Code"}
+                {copiedCode ? t.codes.copiedToClipboard : t.codes.copyCode}
               </button>
             </div>
           ) : (
             <div className="text-center py-8">
-              <p className="text-4xl mb-3">🎫</p>
-              <p className="text-sm text-slate-400 font-medium">No active code</p>
-              <p className="text-xs text-slate-400 mt-1">Create a new code using the form</p>
+<div className="mb-3 flex justify-center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+              <p className="text-sm text-slate-400 font-medium">{t.codes.noActiveCode}</p>
+              <p className="text-xs text-slate-400 mt-1">{t.codes.note}</p>
             </div>
           )}
         </div>
@@ -185,10 +185,10 @@ export default function CodesContent({ activeCode: initialCode, history: initial
           }}
         >
           <h3 className="font-semibold text-base mb-2" style={{ color: "#0f172a" }}>
-            Create New Code
+            {t.codes.createNewCode}
           </h3>
           <p className="text-xs text-slate-400 mb-4">
-            Creating a new code automatically deactivates your previous code.
+            {t.codes.note}
           </p>
 
           {message && (
@@ -206,7 +206,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
           <form onSubmit={handleCreate} className="flex flex-col gap-4">
             <div className="flex flex-col gap-1.5">
               <label className="text-xs font-semibold text-slate-500">
-                Discount Percentage (1–25%)
+                {t.codes.discountPct}
               </label>
               <div className="flex items-center gap-3">
                 <input
@@ -227,7 +227,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-500">Level</label>
+              <label className="text-xs font-semibold text-slate-500">{t.codes.level}</label>
               <div className="grid grid-cols-2 gap-3">
                 {([1, 2] as const).map((l) => (
                   <button
@@ -264,7 +264,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
               className="w-full py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 cursor-pointer mt-2"
               style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
             >
-              {creating ? "Creating..." : "Create Code"}
+              {creating ? t.codes.creating : t.codes.create}
             </button>
           </form>
         </div>
@@ -284,7 +284,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
           style={{ borderBottom: "1px solid rgba(99,102,241,0.08)" }}
         >
           <h3 className="font-semibold text-base" style={{ color: "#0f172a" }}>
-            Code History
+            {t.codes.codeHistory}
           </h3>
         </div>
 
@@ -292,7 +292,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "rgba(248,249,252,0.8)" }}>
-                {["Code", "Level", "Discount", "Status", "Uses", "Created"].map((h) => (
+                {[t.codes.code, t.codes.level, t.codes.discount, t.common.status, t.codes.uses, t.wallet.transDate].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide"
@@ -307,7 +307,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
               {history.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-slate-400 text-sm">
-                    No code history yet.
+                    {t.codes.noCodeHistory}
                   </td>
                 </tr>
               ) : (

@@ -73,9 +73,11 @@ export default function SignupPage() {
   if (success) {
     return (
       <div className="flex flex-col items-center gap-6 text-center animate-in fade-in duration-500">
-        <div className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
+        <div className="w-20 h-20 rounded-full flex items-center justify-center"
           style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)", boxShadow: "0 8px 30px rgba(168,85,247,0.4)" }}>
-          ✓
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
         </div>
         <div>
           <h2 className="text-2xl font-bold" style={{ color: "#1e1b4b" }}>{t.signup.successTitle}</h2>

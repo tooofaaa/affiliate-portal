@@ -16,7 +16,7 @@ export default function DemoModeBanner() {
       className="w-full bg-amber-500 text-white px-4 py-2 flex items-center justify-between gap-3 text-xs font-semibold flex-wrap"
     >
       <div className="flex items-center gap-2">
-        <span>🧪</span>
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 3h6l2 7H7L9 3z"/><path d="M7 10l-2 11h14L17 10"/><line x1="9" y1="3" x2="9" y2="10"/><line x1="15" y1="3" x2="15" y2="10"/></svg>
         <span>{td.bannerLabel ?? "Demo Mode"}</span>
         <span className="font-normal opacity-90">—</span>
         <span className="font-normal opacity-90">

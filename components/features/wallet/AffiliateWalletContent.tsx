@@ -44,7 +44,7 @@ export default function AffiliateWalletContent({
   transactions: initialTransactions,
   withdrawals: initialWithdrawals,
 }: AffiliateWalletContentProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
   const [activeTab, setActiveTab] = useState<TabType>("transactions");
   const [wallet, setWallet] = useState(initialWallet);
   const [transactions, setTransactions] = useState(initialTransactions);
@@ -185,10 +185,10 @@ export default function AffiliateWalletContent({
     }
   };
 
-  const tabs: { key: TabType; label: string }[] = [
-    { key: "transactions", label: "Transactions" },
-    { key: "withdrawals", label: "Withdrawals" },
-    { key: "how-to-earn", label: "How to Earn" },
+  const tabs = [
+    { key: "transactions" as TabType, label: t.wallet.transactions },
+    { key: "withdrawals" as TabType, label: t.wallet.withdrawals },
+    { key: "how-to-earn" as TabType, label: t.wallet.howToEarn },
   ];
 
   return (
@@ -196,10 +196,10 @@ export default function AffiliateWalletContent({
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-          My Wallet
+          {t.wallet.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          Track your earnings and request withdrawals
+          {t.wallet.subtitle}
         </p>
       </div>
 
@@ -213,9 +213,9 @@ export default function AffiliateWalletContent({
             boxShadow: "0 4px 20px rgba(99,102,241,0.3)",
           }}
         >
-          <p className="text-sm font-medium text-indigo-200 mb-2">Available Balance</p>
+          <p className="text-sm font-medium text-indigo-200 mb-2">{t.wallet.availableBalance}</p>
           <p className="text-4xl font-bold">{formatCurrency(available, language)}</p>
-          <p className="text-indigo-200 text-xs mt-2">Ready for withdrawal</p>
+          <p className="text-indigo-200 text-xs mt-2">{t.wallet.readyForWithdrawal}</p>
         </div>
 
         {/* Pending */}
@@ -226,11 +226,11 @@ export default function AffiliateWalletContent({
             boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
           }}
         >
-          <p className="text-sm font-medium text-slate-500 mb-2">Pending</p>
+          <p className="text-sm font-medium text-slate-500 mb-2">{t.wallet.pending}</p>
           <p className="text-4xl font-bold" style={{ color: "#d97706" }}>
             {formatCurrency(pending, language)}
           </p>
-          <p className="text-xs text-slate-400 mt-2">Withdrawal in progress</p>
+          <p className="text-xs text-slate-400 mt-2">{t.wallet.withdrawalInProgress}</p>
         </div>
       </div>
 
@@ -242,7 +242,7 @@ export default function AffiliateWalletContent({
             className="px-6 py-3 rounded-xl text-sm font-semibold text-white transition-all cursor-pointer"
             style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
           >
-            Request Withdrawal
+            {t.wallet.requestWithdrawal}
           </button>
         </div>
       )}
@@ -258,13 +258,13 @@ export default function AffiliateWalletContent({
         >
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold text-base" style={{ color: "#0f172a" }}>
-              Request Withdrawal
+              {t.wallet.requestWithdrawal}
             </h3>
             <button
               onClick={() => setShowForm(false)}
               className="text-xs text-slate-400 hover:text-slate-600 cursor-pointer"
             >
-              Cancel
+              {t.common.cancel}
             </button>
           </div>
 
@@ -272,7 +272,7 @@ export default function AffiliateWalletContent({
             className="mb-4 p-3 rounded-xl text-xs"
             style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)", color: "#92400e" }}
           >
-            15-day SLA for processing. Available balance: {formatCurrency(available, language)}
+            {t.wallet.slaNote} — {t.wallet.availableBalance}: {formatCurrency(available, language)}
           </div>
 
           {message && (
@@ -289,7 +289,7 @@ export default function AffiliateWalletContent({
 
           <form onSubmit={handleWithdrawal} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-500">Amount (SAR) *</label>
+              <label className="text-xs font-semibold text-slate-500">{t.wallet.withdrawAmountLabel.replace("{currency}", t.common.currency)}</label>
               <input
                 type="number"
                 required
@@ -302,7 +302,7 @@ export default function AffiliateWalletContent({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-500">Bank Name *</label>
+              <label className="text-xs font-semibold text-slate-500">{t.wallet.bankNameLabel}</label>
               <input
                 type="text"
                 required
@@ -313,7 +313,7 @@ export default function AffiliateWalletContent({
               />
             </div>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs font-semibold text-slate-500">Account Holder *</label>
+              <label className="text-xs font-semibold text-slate-500">{t.wallet.holderNameLabel}</label>
               <input
                 type="text"
                 required
@@ -324,7 +324,7 @@ export default function AffiliateWalletContent({
               />
             </div>
             <div className="flex flex-col gap-1.5 sm:col-span-2">
-              <label className="text-xs font-semibold text-slate-500">IBAN *</label>
+              <label className="text-xs font-semibold text-slate-500">{t.wallet.iban}</label>
               <input
                 type="text"
                 required
@@ -341,7 +341,7 @@ export default function AffiliateWalletContent({
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-slate-600 cursor-pointer transition-all"
                 style={{ background: "rgba(148,163,184,0.1)", border: "1px solid rgba(148,163,184,0.2)" }}
               >
-                Cancel
+                {t.common.cancel}
               </button>
               <button
                 type="submit"
@@ -349,7 +349,7 @@ export default function AffiliateWalletContent({
                 className="px-5 py-2 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 cursor-pointer"
                 style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
               >
-                {submitting ? "Submitting..." : "Submit Request"}
+                {submitting ? t.wallet.processing : t.wallet.submitRequest}
               </button>
             </div>
           </form>
@@ -401,7 +401,7 @@ export default function AffiliateWalletContent({
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    {["Date", "Type", "Description", "Amount"].map((h) => (
+                    {[t.wallet.transDate, t.wallet.transType, t.wallet.transDesc, t.wallet.transAmount].map((h) => (
                       <th
                         key={h}
                         className="pb-3 text-start text-xs font-semibold uppercase tracking-wide"
@@ -416,7 +416,7 @@ export default function AffiliateWalletContent({
                   {transactions.length === 0 ? (
                     <tr>
                       <td colSpan={4} className="py-8 text-center text-slate-400 text-sm">
-                        No transactions recorded.
+                        {t.wallet.noTransactions}
                       </td>
                     </tr>
                   ) : (
@@ -460,7 +460,7 @@ export default function AffiliateWalletContent({
               <table className="w-full text-sm">
                 <thead>
                   <tr>
-                    {["Date", "Amount", "Bank", "IBAN", "Status", "SLA Deadline"].map((h) => (
+                    {[t.wallet.transDate, t.wallet.transAmount, t.wallet.bank, t.wallet.iban, t.common.status, t.wallet.slaDeadline].map((h) => (
                       <th
                         key={h}
                         className="pb-3 text-start text-xs font-semibold uppercase tracking-wide"
@@ -475,7 +475,7 @@ export default function AffiliateWalletContent({
                   {withdrawals.length === 0 ? (
                     <tr>
                       <td colSpan={6} className="py-8 text-center text-slate-400 text-sm">
-                        No withdrawals found.
+                        {t.wallet.noWithdrawals}
                       </td>
                     </tr>
                   ) : (
@@ -520,17 +520,16 @@ export default function AffiliateWalletContent({
                 className="p-4 rounded-xl"
                 style={{ background: "linear-gradient(135deg, rgba(99,102,241,0.06), rgba(129,140,248,0.04))", border: "1px solid rgba(99,102,241,0.1)" }}
               >
-                <h4 className="font-semibold text-slate-800 mb-2">How Affiliate Commissions Work</h4>
+                <h4 className="font-semibold text-slate-800 mb-2">{t.wallet.howToEarnTitle}</h4>
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Every time a customer makes a purchase using your tracking link or discount code,
-                  you earn a commission based on your commission percentage.
+                  {t.wallet.howToEarnDesc}
                 </p>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 {[
-                  { step: "1", title: "Share Your Link", desc: "Share your unique tracking link on social media, blogs, or with contacts." },
-                  { step: "2", title: "Customer Buys", desc: "When someone clicks your link and makes a purchase, the sale is tracked." },
-                  { step: "3", title: "Earn Commission", desc: "Your commission is credited to your wallet automatically after order completion." },
+                  { step: "1", title: t.wallet.step1Title, desc: t.wallet.step1Desc },
+                  { step: "2", title: t.wallet.step2Title, desc: t.wallet.step2Desc },
+                  { step: "3", title: t.wallet.step3Title, desc: t.wallet.step3Desc },
                 ].map((item) => (
                   <div key={item.step} className="flex flex-col gap-2">
                     <div
@@ -548,8 +547,7 @@ export default function AffiliateWalletContent({
                 className="p-4 rounded-xl text-sm"
                 style={{ background: "rgba(245,158,11,0.06)", border: "1px solid rgba(245,158,11,0.15)", color: "#92400e" }}
               >
-                <strong>Withdrawal SLA:</strong> All withdrawal requests are processed within 15 business days.
-                Minimum withdrawal amount is SAR 100.
+                {t.wallet.slaDetails}
               </div>
             </div>
           )}

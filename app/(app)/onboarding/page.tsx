@@ -35,14 +35,14 @@ const DOC_SLOTS: DocSlot[] = [
     title: "Government ID",
     description: "Upload your national ID card, passport, or Iqama",
     required: true,
-    icon: "🪪",
+    icon: "id",
   },
   {
     type: "BankStatement",
     title: "Bank Statement / IBAN Letter",
     description: "Upload a recent bank statement or IBAN confirmation letter",
     required: true,
-    icon: "🏦",
+    icon: "bank",
   },
   {
     type: "SocialProof",
@@ -50,7 +50,7 @@ const DOC_SLOTS: DocSlot[] = [
     description:
       "Screenshot of your channel showing follower count and username (optional but helps)",
     required: false,
-    icon: "📱",
+    icon: "social",
   },
 ];
 
@@ -188,13 +188,13 @@ export default function OnboardingPage() {
     return (
       <div className="max-w-2xl mx-auto flex flex-col items-center gap-8 pt-8 pb-16">
         <div
-          className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
+          className="w-20 h-20 rounded-full flex items-center justify-center"
           style={{
             background: "linear-gradient(135deg, #a855f7, #ec4899)",
             boxShadow: "0 8px 30px rgba(168,85,247,0.4)",
           }}
         >
-          📋
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
         </div>
         <div className="text-center">
           <h1 className="text-2xl font-bold" style={{ color: "#1e1b4b" }}>
@@ -228,7 +228,7 @@ export default function OnboardingPage() {
           }}
         >
           <div className="flex items-start gap-3">
-            <span className="text-2xl">⚠️</span>
+<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#991b1b" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
             <div>
               <h2 className="font-bold text-base" style={{ color: "#991b1b" }}>
                 Some documents were declined
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
           className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0"
           style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}
         >
-          {canSubmit() ? "✓" : "1"}
+          {canSubmit() ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : "1"}
         </div>
         <div>
           <p className="text-sm font-semibold" style={{ color: "#1e1b4b" }}>
@@ -336,7 +336,7 @@ export default function OnboardingPage() {
               {/* Card header */}
               <div className="flex items-start justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <span className="text-2xl">{slot.icon}</span>
+<span className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{background:"rgba(168,85,247,0.1)"}}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a855f7" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></span>
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-semibold text-sm" style={{ color: "#111827" }}>
@@ -377,7 +377,7 @@ export default function OnboardingPage() {
                   className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
                   style={{ background: "rgba(16,185,129,0.06)", color: "#059669" }}
                 >
-                  <span>✓</span> Document approved
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Document approved
                   {docRecord?.file_url && (
                     <a href={docRecord.file_url} target="_blank" rel="noopener noreferrer" className="underline ms-auto">
                       View
@@ -392,7 +392,7 @@ export default function OnboardingPage() {
                   className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
                   style={{ background: "rgba(245,158,11,0.06)", color: "#d97706" }}
                 >
-                  <span>⏳</span> Awaiting review
+<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Awaiting review
                   {docRecord?.file_url && (
                     <a href={docRecord.file_url} target="_blank" rel="noopener noreferrer" className="underline ms-auto">
                       View uploaded file
@@ -417,7 +417,7 @@ export default function OnboardingPage() {
                       className="sr-only"
                       onChange={(e) => handleFileChange(slot.type, e.target.files?.[0] ?? null)}
                     />
-                    <span className="text-2xl">{selectedFile ? "📎" : "⬆️"}</span>
+                    {selectedFile ? <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg> : <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6b7280" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"/></svg>}
                     <span className="text-xs font-medium" style={{ color: "#6b7280" }}>
                       {selectedFile ? selectedFile.name : "Click to select a file"}
                     </span>
@@ -428,13 +428,13 @@ export default function OnboardingPage() {
 
                   {errMsg && (
                     <p className="text-xs text-red-500 flex items-center gap-1">
-                      <span>⚠</span> {errMsg}
+{errMsg}
                     </p>
                   )}
 
                   {wasJustUploaded && (
                     <p className="text-xs text-green-600 flex items-center gap-1">
-                      <span>✓</span> Uploaded successfully
+Uploaded successfully
                     </p>
                   )}
 

@@ -226,7 +226,7 @@ export default function SupportContent({ tickets: initialTickets, affiliateId }:
 
         {tickets.length === 0 ? (
           <div className="px-6 py-10 text-center">
-            <p className="text-4xl mb-3">🎫</p>
+<div className="mb-3 flex justify-center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
             <p className="text-sm text-slate-400">{t.support.noTickets}</p>
           </div>
         ) : (

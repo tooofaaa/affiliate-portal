@@ -60,13 +60,25 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
           {/* Feature list */}
           <div className="flex flex-col gap-5">
             {[
-              { icon: "🔗", title: "Trackable Links", desc: "Create unique links — every click and conversion tracked live." },
-              { icon: "🏷️", title: "Discount Codes", desc: "Give your audience exclusive discounts, you earn the margin." },
-              { icon: "💸", title: "Instant Earnings", desc: "Commissions credited automatically on every confirmed delivery." },
-              { icon: "📊", title: "Performance Dashboard", desc: "See exactly what's working with real-time analytics." },
+              {
+                icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>,
+                title: "Trackable Links", desc: "Create unique links — every click and conversion tracked live."
+              },
+              {
+                icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>,
+                title: "Discount Codes", desc: "Give your audience exclusive discounts, you earn the margin."
+              },
+              {
+                icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>,
+                title: "Instant Earnings", desc: "Commissions credited automatically on every confirmed delivery."
+              },
+              {
+                icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c084fc" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>,
+                title: "Performance Dashboard", desc: "See exactly what's working with real-time analytics."
+              },
             ].map((f, i) => (
               <div key={i} className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0"
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
                   style={{ background: "rgba(168,85,247,0.12)", border: "1px solid rgba(168,85,247,0.2)" }}>
                   {f.icon}
                 </div>

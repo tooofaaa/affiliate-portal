@@ -6,6 +6,7 @@ import Sidebar from "@/components/layout/Sidebar";
 import Topbar from "@/components/layout/Topbar";
 import { AffiliateProvider } from "@/lib/context/AffiliateContext";
 import DemoModeBanner from "@/components/ui/DemoModeBanner";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface AppLayoutClientProps {
   children: React.ReactNode;
@@ -14,6 +15,7 @@ interface AppLayoutClientProps {
 
 export default function AppLayoutClient({ children, onboardingStatus }: AppLayoutClientProps) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const { t } = useLanguage();
 
   const mainContentClasses = [
     "md:ms-60 w-full h-screen overflow-y-auto",
@@ -43,8 +45,8 @@ export default function AppLayoutClient({ children, onboardingStatus }: AppLayou
                 color: "#92400e",
               }}
             >
-              <span>⏳</span>
-              Your documents are under review. You&apos;ll be notified once approved.
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              {t.onboarding.submittedBanner}
             </div>
           )}
 
@@ -58,15 +60,15 @@ export default function AppLayoutClient({ children, onboardingStatus }: AppLayou
               }}
             >
               <span className="flex items-center gap-2">
-                <span>⚠️</span>
-                Some documents were declined. Please review and resubmit.
+<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                {t.onboarding.declinedBanner}
               </span>
               <Link
                 href="/onboarding"
                 className="text-xs font-bold underline flex-shrink-0"
                 style={{ color: "#dc2626" }}
               >
-                Go to Onboarding
+                {t.onboarding.goToOnboarding}
               </Link>
             </div>
           )}
