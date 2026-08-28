@@ -4,11 +4,13 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 type Language = "en" | "ar";
 
+type TranslationObject = Record<string, any>;
+
 interface LanguageContextType {
   language: Language;
   toggleLanguage: () => void;
   isRTL: boolean;
-  t: typeof translations.en;
+  t: TranslationObject;
 }
 
 const translations = {
@@ -17,6 +19,7 @@ const translations = {
     brandTagline: "Earn with every referral",
     nav: {
       dashboard: "Dashboard",
+      catalog: "Affiliate Catalog",
       links: "Tracking Links",
       codes: "Discount Codes",
       wallet: "Wallet",
@@ -25,6 +28,25 @@ const translations = {
       profile: "Profile",
       settings: "Settings",
       logOut: "Log Out",
+      affiliatePortal: "Affiliate Portal",
+      marketingPartner: "Marketing Partner",
+    },
+    verification: {
+      bannerBetaTitle: "Beta Mode",
+      bannerBetaDesc: "Your account is not yet verified. You can explore the platform freely. Verify your account to unlock real actions.",
+      bannerSubmittedTitle: "Verification Under Review",
+      bannerSubmittedDesc: "Your documents have been submitted. Continue exploring while we review your verification.",
+      bannerDeclinedTitle: "Verification Needs Attention",
+      bannerDeclinedDesc: "Some documents were declined. Please update your documents to unlock real actions.",
+      ctaVerify: "Verify Account",
+      ctaViewStatus: "View Status",
+      ctaComplete: "Complete Verification",
+      modalTitle: "Verification Required",
+      modalDesc: "This action requires a verified account. You can freely explore the platform in beta mode, but verification is required to complete this action.",
+      modalCtaVerify: "Verify Now",
+      modalCtaCancel: "Continue Exploring",
+      actionBlocked: "Verification required to complete this action",
+      errorVerificationRequired: "Your account must be verified to perform this action. Please complete the verification process.",
     },
     common: {
       search: "Search...",
@@ -237,6 +259,7 @@ const translations = {
       requestId: "Request ID",
       requestedOn: "Requested On",
       noWithdrawals: "No withdrawals found.",
+      freeTierEarned: "Free tier — earned by spending",
       validAmountError: "Please enter a valid amount.",
       selectBankError: "Please select a bank account.",
       exceedBalanceError: "Amount exceeds available balance.",
@@ -372,32 +395,13 @@ const translations = {
       resetDefaults: "Reset to Defaults",
       savePreferences: "Save Preferences",
     },
-    demo: {
-      bannerLabel: "Demo Mode",
-      bannerDesc: "Testing environment — any credentials are accepted.",
-    },
-    onboarding: {
-      submittedBanner: "Your documents are under review. You'll be notified once approved.",
-      declinedBanner: "Some documents were declined. Please review and resubmit.",
-      goToOnboarding: "Go to Onboarding",
-    },
-    catalog: {
-      title: "Affiliate Catalog",
-      subtitle: "Choose a category to browse and create affiliate links",
-      memberships: "Memberships",
-      membershipsDesc: "Earn commission after customer membership is activated by admin",
-      packages: "Packages",
-      packagesDesc: "Promote packages and earn commission after admin deposits funds",
-      products: "Products",
-      productsDesc: "Earn commission after customer purchases a supplier product",
-      browse: "Browse",
-    },
   },
   ar: {
     brandName: "بوابة الشركاء",
     brandTagline: "اربح مع كل إحالة",
     nav: {
       dashboard: "لوحة التحكم",
+      catalog: "كتالوج التسويق",
       links: "روابط التتبع",
       codes: "أكواد الخصم",
       wallet: "المحفظة",
@@ -406,6 +410,25 @@ const translations = {
       profile: "الملف الشخصي",
       settings: "الإعدادات",
       logOut: "تسجيل الخروج",
+      affiliatePortal: "بوابة الشركاء",
+      marketingPartner: "شريك تسويقي",
+    },
+    verification: {
+      bannerBetaTitle: "وضع التجربة",
+      bannerBetaDesc: "لم يتم التحقق من حسابك بعد. يمكنك استكشاف المنصة بحرية. قم بالتحقق من حسابك لفتح الإجراءات الحقيقية.",
+      bannerSubmittedTitle: "التحقق قيد المراجعة",
+      bannerSubmittedDesc: "تم إرسال مستنداتك. تابع الاستكشاف بينما نراجع عملية التحقق الخاصة بك.",
+      bannerDeclinedTitle: "التحقق يحتاج إلى انتباه",
+      bannerDeclinedDesc: "تم رفض بعض المستندات. يرجى تحديث مستنداتك لفتح الإجراءات الحقيقية.",
+      ctaVerify: "تحقق من الحساب",
+      ctaViewStatus: "عرض الحالة",
+      ctaComplete: "إكمال التحقق",
+      modalTitle: "التحقق مطلوب",
+      modalDesc: "يتطلب هذا الإجراء حساباً موثقاً. يمكنك استكشاف المنصة بحرية في وضع التجربة، ولكن التحقق مطلوب لإكمال هذا الإجراء.",
+      modalCtaVerify: "تحقق الآن",
+      modalCtaCancel: "متابعة الاستكشاف",
+      actionBlocked: "التحقق مطلوب لإكمال هذا الإجراء",
+      errorVerificationRequired: "يجب التحقق من حسابك لتنفيذ هذا الإجراء. يرجى إكمال عملية التحقق.",
     },
     common: {
       search: "بحث...",
@@ -415,7 +438,7 @@ const translations = {
       saving: "جاري الحفظ...",
       success: "نجاح",
       failed: "فشل",
-      currency: "ر.س",
+      currency: "﷼",
       delete: "حذف",
       cancel: "إلغاء",
       active: "نشط",
@@ -618,6 +641,7 @@ const translations = {
       requestId: "معرف الطلب",
       requestedOn: "تاريخ الطلب",
       noWithdrawals: "لم يتم العثور على عمليات سحب.",
+      freeTierEarned: "مستوى مجاني — يُكتسب بالإنفاق",
       validAmountError: "يرجى إدخال مبلغ صحيح.",
       selectBankError: "يرجى اختيار حساب بنكي.",
       exceedBalanceError: "المبلغ يتجاوز الرصيد المتاح.",
@@ -752,10 +776,6 @@ const translations = {
       enableTfa: "تفعيل المصادقة الثنائية",
       resetDefaults: "إعادة التعيين للافتراضي",
       savePreferences: "حفظ التفضيلات",
-    },
-    demo: {
-      bannerLabel: "وضع العرض التجريبي",
-      bannerDesc: "بيئة اختبار — يتم قبول أي بيانات اعتماد.",
     },
     onboarding: {
       submittedBanner: "مستنداتك قيد المراجعة. سيتم إشعارك بالموافقة.",

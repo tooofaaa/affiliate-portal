@@ -3,6 +3,9 @@
 import { useState } from "react";
 import Link from "next/link";
 import { createCatalogLink } from "@/lib/actions/catalog";
+import { useVerification } from "@/lib/context/VerificationContext";
+import { formatCurrency } from "@/lib/utils/formatters";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface Membership {
   id: number;
@@ -54,6 +57,8 @@ function legacyCopy(text: string) {
 }
 
 export default function MembershipsContent({ memberships }: MembershipsContentProps) {
+  const { t, language } = useLanguage();
+  const { isVerified, triggerVerificationModal } = useVerification();
   const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
   const [creating, setCreating] = useState<number | null>(null);
   const [messages, setMessages] = useState<Record<number, { type: "success" | "error"; text: string }>>({});
@@ -67,12 +72,21 @@ export default function MembershipsContent({ memberships }: MembershipsContentPr
       return next;
     });
 
+    // Beta mode: gate catalog link creation behind verification
+    if (!isVerified) { setCreating(null); triggerVerificationModal(); return; }
+
     const res = await createCatalogLink(
       "membership",
       membership.id,
       membership.level_name,
       `/memberships/${membership.id}`
     );
+
+    if (res.message === "VERIFICATION_REQUIRED") {
+      triggerVerificationModal();
+      setCreating(null);
+      return;
+    }
 
     if (res.success && res.link) {
       setCreatedLinks((prev) => ({
@@ -167,8 +181,8 @@ export default function MembershipsContent({ memberships }: MembershipsContentPr
                     </span>
                     <p className="mt-2 font-bold text-base" style={{ color: "#0f172a" }}>
                       {(membership.price_sar ?? 0) > 0
-                        ? `SAR ${membership.price_sar}`
-                        : "Free tier — earned by spending"}
+                        ? formatCurrency(membership.price_sar ?? 0, language)
+                        : t.catalog.freeTierEarned}
                     </p>
                   </div>
                   {membership.tier_order != null && (

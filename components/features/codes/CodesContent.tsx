@@ -4,6 +4,7 @@ import { useState } from "react";
 import { createDiscountCode } from "@/lib/actions/affiliate";
 import { formatDate } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useVerification } from "@/lib/context/VerificationContext";
 
 interface DiscountCode {
   id: number;
@@ -24,6 +25,7 @@ interface CodesContentProps {
 
 export default function CodesContent({ activeCode: initialCode, history: initialHistory }: CodesContentProps) {
   const { language, t } = useLanguage();
+  const { isVerified, triggerVerificationModal } = useVerification();
   const [activeCode, setActiveCode] = useState<DiscountCode | null>(initialCode ?? null);
   const [history, setHistory] = useState<DiscountCode[]>(initialHistory ?? []);
   const [discountPct, setDiscountPct] = useState(10);
@@ -34,10 +36,14 @@ export default function CodesContent({ activeCode: initialCode, history: initial
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Beta mode: gate code creation behind verification
+    if (!isVerified) { triggerVerificationModal(); return; }
     setCreating(true);
     setMessage(null);
 
     const res = await createDiscountCode(discountPct, level);
+
+    if (res.message === "VERIFICATION_REQUIRED") { triggerVerificationModal(); setCreating(false); return; }
 
     if (res.success && res.code) {
       const newCode = res.code as DiscountCode;
@@ -169,9 +175,9 @@ export default function CodesContent({ activeCode: initialCode, history: initial
             </div>
           ) : (
             <div className="text-center py-8">
-<div className="mb-3 flex justify-center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
+              <div className="mb-3 flex justify-center"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M20 12v10H4V12"/><path d="M22 7H2v5h20V7z"/><path d="M12 22V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg></div>
               <p className="text-sm text-slate-400 font-medium">{t.codes.noActiveCode}</p>
-              <p className="text-xs text-slate-400 mt-1">{t.codes.note}</p>
+              <p className="text-xs text-slate-400 mt-1">Create a new code using the form</p>
             </div>
           )}
         </div>

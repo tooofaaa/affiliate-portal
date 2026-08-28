@@ -132,6 +132,7 @@ export async function signupAffiliate(formData: FormData) {
     email,
     status: "pending",
     account_status: "pending_email",
+    onboarding_status: "incomplete",
     commission_pct: 0,
   });
 

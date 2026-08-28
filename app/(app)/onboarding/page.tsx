@@ -188,7 +188,7 @@ export default function OnboardingPage() {
     return (
       <div className="max-w-2xl mx-auto flex flex-col items-center gap-8 pt-8 pb-16">
         <div
-          className="w-20 h-20 rounded-full flex items-center justify-center"
+          className="w-20 h-20 rounded-full flex items-center justify-center text-4xl"
           style={{
             background: "linear-gradient(135deg, #a855f7, #ec4899)",
             boxShadow: "0 8px 30px rgba(168,85,247,0.4)",
@@ -228,7 +228,7 @@ export default function OnboardingPage() {
           }}
         >
           <div className="flex items-start gap-3">
-<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#991b1b" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            <span className="text-2xl">⚠️</span>
             <div>
               <h2 className="font-bold text-base" style={{ color: "#991b1b" }}>
                 Some documents were declined
@@ -296,7 +296,7 @@ export default function OnboardingPage() {
           className="w-10 h-10 rounded-full flex items-center justify-center text-white text-lg font-bold flex-shrink-0"
           style={{ background: "linear-gradient(135deg, #a855f7, #ec4899)" }}
         >
-          {canSubmit() ? <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> : "1"}
+          {canSubmit() ? "✓" : "1"}
         </div>
         <div>
           <p className="text-sm font-semibold" style={{ color: "#1e1b4b" }}>
@@ -377,7 +377,7 @@ export default function OnboardingPage() {
                   className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
                   style={{ background: "rgba(16,185,129,0.06)", color: "#059669" }}
                 >
-<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Document approved
+                  <span>✓</span> Document approved
                   {docRecord?.file_url && (
                     <a href={docRecord.file_url} target="_blank" rel="noopener noreferrer" className="underline ms-auto">
                       View
@@ -392,7 +392,7 @@ export default function OnboardingPage() {
                   className="text-xs px-3 py-2 rounded-xl flex items-center gap-2"
                   style={{ background: "rgba(245,158,11,0.06)", color: "#d97706" }}
                 >
-<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Awaiting review
+                  <span>⏳</span> Awaiting review
                   {docRecord?.file_url && (
                     <a href={docRecord.file_url} target="_blank" rel="noopener noreferrer" className="underline ms-auto">
                       View uploaded file
@@ -428,13 +428,13 @@ export default function OnboardingPage() {
 
                   {errMsg && (
                     <p className="text-xs text-red-500 flex items-center gap-1">
-{errMsg}
+                      <span>⚠</span> {errMsg}
                     </p>
                   )}
 
                   {wasJustUploaded && (
                     <p className="text-xs text-green-600 flex items-center gap-1">
-Uploaded successfully
+                      <span>✓</span> Uploaded successfully
                     </p>
                   )}
 

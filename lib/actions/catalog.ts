@@ -78,6 +78,16 @@ export async function createCatalogLink(
   const ctx = await getAffCtx();
   if (!ctx) return { success: false, message: "Not authenticated" };
 
+  // Enforce server-side verification before any business logic (beta mode)
+  const { data: verRow } = await ctx.supabase
+    .from("affiliates")
+    .select("onboarding_status")
+    .eq("id", ctx.affiliateId)
+    .maybeSingle();
+  if (!verRow || verRow.onboarding_status !== "approved") {
+    return { success: false, message: "VERIFICATION_REQUIRED" };
+  }
+
   const CUSTOMER_URL =
     process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL ||
     "https://customer-portal-five-gamma.vercel.app";

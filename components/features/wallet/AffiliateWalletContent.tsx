@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { requestAffiliateWithdrawal } from "@/lib/actions/affiliate";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
+import { useVerification } from "@/lib/context/VerificationContext";
 
 interface WalletData {
   id: number;
@@ -45,6 +46,7 @@ export default function AffiliateWalletContent({
   withdrawals: initialWithdrawals,
 }: AffiliateWalletContentProps) {
   const { language, t } = useLanguage();
+  const { isVerified, triggerVerificationModal } = useVerification();
   const [activeTab, setActiveTab] = useState<TabType>("transactions");
   const [wallet, setWallet] = useState(initialWallet);
   const [transactions, setTransactions] = useState(initialTransactions);
@@ -134,6 +136,8 @@ export default function AffiliateWalletContent({
 
   const handleWithdrawal = async (e: React.FormEvent) => {
     e.preventDefault();
+    // Beta mode: gate withdrawals behind verification
+    if (!isVerified) { triggerVerificationModal(); return; }
     setSubmitting(true);
     setMessage(null);
 
@@ -145,6 +149,8 @@ export default function AffiliateWalletContent({
     }
 
     const res = await requestAffiliateWithdrawal(numAmount, bankName, accountHolder, iban);
+
+    if (res.message === "VERIFICATION_REQUIRED") { triggerVerificationModal(); setSubmitting(false); return; }
 
     if (res.success) {
       setMessage({ type: "success", text: res.message });
