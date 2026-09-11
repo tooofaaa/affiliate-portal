@@ -50,7 +50,7 @@ export default function ProfilePage() {
       }
       setDocuments(onboardingRes.documents || []);
     } catch (err) {
-      console.error(err);
+      console.error("Failed to load affiliate profile:", err);
     } finally {
       setIsLoading(false);
     }

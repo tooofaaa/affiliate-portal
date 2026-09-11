@@ -229,7 +229,7 @@ export default function OnboardingPage() {
           }}
         >
           <div className="flex items-start gap-3">
-            <span className="text-2xl">⚠️</span>
+            <span className="text-2xl font-bold text-amber-500">!</span>
             <div>
               <h2 className="font-bold text-base" style={{ color: "#991b1b" }}>
                 {t.onboarding.someDeclined}

@@ -58,59 +58,6 @@ export interface OrderItem {
   subtotal: number;
 }
 
-export interface CustomerProfile {
-  id: number;
-  portal_user_id: string;
-  company_name: string;
-  tax_number?: string;
-  commercial_register?: string;
-  contact_email?: string;
-  contact_phone?: string;
-  website?: string;
-  logo_url?: string;
-  is_verified: boolean;
-  created_at?: string;
-}
-
-export interface CustomerBranch {
-  id: number;
-  customer_id: number;
-  branch_name: string;
-  address: string;
-  city: string;
-  country: string;
-  is_primary: boolean;
-  contact_phone?: string;
-}
-
-export interface CustomerDocument {
-  id: number;
-  customer_id: number;
-  document_type: 'GovernmentID' | 'BankStatement' | 'SocialProof';
-  document_name: string;
-  file_url: string;
-  expiry_date?: string;
-  is_verified: boolean;
-}
-
-export interface MembershipLevel {
-  id: number;
-  level_name: 'Bronze' | 'Silver' | 'Gold' | 'Platinum';
-  min_spent_sar: number;
-  discount_percentage: number;
-  benefits: string[];
-}
-
-export interface CustomerMembership {
-  id: number;
-  customer_id: number;
-  level_id: number;
-  total_spent_sar: number;
-  joined_at: string;
-  expires_at?: string;
-  level?: MembershipLevel;
-}
-
 export interface CustomerWallet {
   id: number;
   customer_id: number;
