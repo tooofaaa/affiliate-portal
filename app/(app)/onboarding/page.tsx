@@ -429,7 +429,7 @@ export default function OnboardingPage() {
 
                   {errMsg && (
                     <p className="text-xs text-red-500 flex items-center gap-1">
-                      <span>⚠</span> {errMsg}
+                      <span aria-hidden="true">!</span> {errMsg}
                     </p>
                   )}
 
