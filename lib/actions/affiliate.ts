@@ -130,14 +130,14 @@ export async function createLink(destination: string) {
     return { success: false, message: "Destination must be a valid URL." };
   }
 
-  const customerPortalUrl = process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "https://customer.product-service.net";
+  const affiliatePortalUrl = process.env.NEXT_PUBLIC_AFFILIATE_PORTAL_URL || "https://affiliate.product-service.net";
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
   // Retry up to 3 times on slug uniqueness collision
   for (let attempt = 0; attempt < 3; attempt++) {
     const rand4 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
     const slug = `${Date.now().toString(36)}${rand4}`;
-    const full_url = `${customerPortalUrl}/products?aff=${slug}`;
+    const full_url = `${affiliatePortalUrl}/r/${slug}`;
 
     const { data, error } = await supabase
       .from("affiliate_links")
@@ -146,6 +146,8 @@ export async function createLink(destination: string) {
         slug,
         full_url,
         destination: destination.trim(),
+        item_type: 'general',
+        item_name: destination.trim(),
         clicks: 0,
         conversions: 0,
         is_active: true,

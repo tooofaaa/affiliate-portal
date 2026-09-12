@@ -12,7 +12,7 @@ interface RouteContext {
  * 1. Look up the affiliate_links row by slug.
  * 2. Log a click event to affiliate_link_events (fire-and-forget).
  * 3. Increment the clicks counter (fire-and-forget).
- * 4. Redirect to the link's destination URL with ?aff={slug} appended.
+ * 4. Redirect to the link's destination URL with ?ref={slug} appended.
  *
  * Uses the admin client so click counts update without requiring an
  * authenticated session — anonymous visitors follow referral links.
@@ -62,14 +62,14 @@ export async function GET(request: Request, context: RouteContext) {
     .eq("id", link.id)
     .then(() => {/* fire-and-forget */});
 
-  // Build redirect target — always append ?aff={slug} for attribution
+  // Build redirect target — always append ?ref={slug} for attribution
   let target =
     (link.destination?.startsWith("http") ? link.destination : link.full_url) ??
     customerPortalUrl;
 
   try {
     const url = new URL(target);
-    url.searchParams.set("aff", slug);
+    url.searchParams.set("ref", slug);
     target = url.toString();
   } catch {
     target = customerPortalUrl;
