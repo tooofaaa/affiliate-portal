@@ -183,7 +183,7 @@ export default function MembershipsContent({ memberships, initialLinks = {} }: M
                     <p className="mt-2 font-bold text-base" style={{ color: "#0f172a" }}>
                       {(membership.price_sar ?? 0) > 0
                         ? formatCurrency(membership.price_sar ?? 0, language)
-                        : t.catalog.freeTierEarned}
+                        : t.wallet.freeTierEarned}
                     </p>
                   </div>
                   {membership.tier_order != null && (

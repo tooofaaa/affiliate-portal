@@ -62,14 +62,14 @@ export async function GET(request: Request, context: RouteContext) {
     .eq("id", link.id)
     .then(() => {/* fire-and-forget */});
 
-  // Build redirect target — always append ?ref={slug} for attribution
+  // Build redirect target — always append ?aff={slug} for attribution
   let target =
     (link.destination?.startsWith("http") ? link.destination : link.full_url) ??
     customerPortalUrl;
 
   try {
     const url = new URL(target);
-    url.searchParams.set("ref", slug);
+    url.searchParams.set("aff", slug);
     target = url.toString();
   } catch {
     target = customerPortalUrl;
