@@ -25,6 +25,7 @@ interface CreatedLink {
 
 interface PackagesContentProps {
   packages: Package[];
+  initialLinks?: Record<number, CreatedLink>;
 }
 
 function legacyCopy(text: string) {
@@ -38,10 +39,10 @@ function legacyCopy(text: string) {
   document.body.removeChild(el);
 }
 
-export default function PackagesContent({ packages }: PackagesContentProps) {
+export default function PackagesContent({ packages, initialLinks = {} }: PackagesContentProps) {
   const { language } = useLanguage();
   const { isVerified, triggerVerificationModal } = useVerification();
-  const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
+  const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>(initialLinks);
   const [creating, setCreating] = useState<number | null>(null);
   const [messages, setMessages] = useState<Record<number, { type: "success" | "error"; text: string }>>({});
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
@@ -228,7 +229,7 @@ export default function PackagesContent({ packages }: PackagesContentProps) {
                       onClick={() => handleCopy(link.slug, link.full_url)}
                       className="flex-shrink-0 px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer"
                       style={{
-                        background: copiedSlug === link.slug ? "rgba(16,185,129,0.1)" : "rgba(16,185,129,0.1)",
+                        background: copiedSlug === link.slug ? "rgba(16,185,129,0.2)" : "rgba(16,185,129,0.07)",
                         color: copiedSlug === link.slug ? "#059669" : "#10b981",
                       }}
                     >

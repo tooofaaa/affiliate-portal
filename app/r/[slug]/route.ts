@@ -24,7 +24,7 @@ export async function GET(request: Request, context: RouteContext) {
   const { slug } = await context.params;
   const customerPortalUrl =
     process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL ||
-    "https://customer-portal-five-gamma.vercel.app";
+    "https://customer.product-service.net";
 
   if (!slug) {
     return NextResponse.redirect(new URL(customerPortalUrl));

@@ -69,6 +69,29 @@ export async function getMyLinksForItem(item_type: string, item_id: number) {
   return data ?? [];
 }
 
+export async function getMyLinksMap(item_type: string, item_ids: number[]): Promise<Record<number, { slug: string; full_url: string }>> {
+  if (item_ids.length === 0) return {};
+  const ctx = await getAffCtx();
+  if (!ctx) return {};
+  const { data } = await ctx.supabase
+    .from("affiliate_links")
+    .select("id, slug, full_url, item_id")
+    .eq("affiliate_id", ctx.affiliateId)
+    .eq("item_type", item_type)
+    .in("item_id", item_ids)
+    .eq("is_active", true)
+    .order("created_at", { ascending: false });
+  if (!data) return {};
+  // Return the most-recent link per item_id
+  const map: Record<number, { slug: string; full_url: string }> = {};
+  for (const row of data) {
+    if (row.item_id != null && !(row.item_id in map)) {
+      map[row.item_id] = { slug: row.slug, full_url: row.full_url };
+    }
+  }
+  return map;
+}
+
 export async function createCatalogLink(
   item_type: "membership" | "package" | "product",
   item_id: number,
@@ -90,7 +113,10 @@ export async function createCatalogLink(
 
   const CUSTOMER_URL =
     process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL ||
-    "https://customer-portal-five-gamma.vercel.app";
+    "https://customer.product-service.net";
+  const AFFILIATE_URL =
+    process.env.NEXT_PUBLIC_AFFILIATE_URL ||
+    "https://affiliate.product-service.net";
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
   for (let attempt = 0; attempt < 3; attempt++) {
@@ -101,9 +127,6 @@ export async function createCatalogLink(
 
     // full_url routes through the affiliate portal's /r/[slug] handler which
     // increments clicks and then redirects to destination with ?ref= attribution.
-    const AFFILIATE_URL =
-      process.env.NEXT_PUBLIC_AFFILIATE_URL ||
-      "https://affiliate.product-service.net";
     const full_url = AFFILIATE_URL + "/r/" + slug;
     const destination = CUSTOMER_URL + destination_path;
 

@@ -25,6 +25,7 @@ interface CreatedLink {
 
 interface MembershipsContentProps {
   memberships: Membership[];
+  initialLinks?: Record<number, CreatedLink>;
 }
 
 const LEVEL_COLORS: Record<string, { bg: string; text: string; border: string }> = {
@@ -56,10 +57,10 @@ function legacyCopy(text: string) {
   document.body.removeChild(el);
 }
 
-export default function MembershipsContent({ memberships }: MembershipsContentProps) {
+export default function MembershipsContent({ memberships, initialLinks = {} }: MembershipsContentProps) {
   const { t, language } = useLanguage();
   const { isVerified, triggerVerificationModal } = useVerification();
-  const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
+  const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>(initialLinks);
   const [creating, setCreating] = useState<number | null>(null);
   const [messages, setMessages] = useState<Record<number, { type: "success" | "error"; text: string }>>({});
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);

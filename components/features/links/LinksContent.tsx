@@ -21,7 +21,6 @@ interface LinksContentProps {
 }
 
 export default function LinksContent({ links: initialLinks }: LinksContentProps) {
-  const { language } = useLanguage();
   const { isVerified, triggerVerificationModal } = useVerification();
   const [links, setLinks] = useState<AffiliateLink[]>(initialLinks ?? []);
   const [destination, setDestination] = useState("");

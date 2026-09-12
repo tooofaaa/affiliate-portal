@@ -25,11 +25,44 @@ interface PerformanceStats {
   links: PerformanceLink[];
 }
 
-interface PerformanceContentProps {
-  stats: PerformanceStats | null;
+interface AffiliateLink {
+  slug: string | null;
+  item_name: string | null;
+  full_url: string | null;
 }
 
-export default function PerformanceContent({ stats: rawStats }: PerformanceContentProps) {
+interface ConversionRow {
+  id: number;
+  item_type: string | null;
+  item_id: number | null;
+  sale_amount: number | null;
+  commission_pct: number | null;
+  commission_amount: number | null;
+  status: string | null;
+  confirmed_at: string | null;
+  created_at: string;
+  affiliate_links?: AffiliateLink | AffiliateLink[] | null;
+}
+
+interface PerformanceContentProps {
+  stats: PerformanceStats | null;
+  conversions?: ConversionRow[];
+}
+
+function statusStyle(status: string | null) {
+  switch ((status ?? "").toLowerCase()) {
+    case "confirmed":
+      return { background: "rgba(16,185,129,0.1)", color: "#059669" };
+    case "pending":
+      return { background: "rgba(245,158,11,0.1)", color: "#d97706" };
+    case "rejected":
+      return { background: "rgba(239,68,68,0.1)", color: "#dc2626" };
+    default:
+      return { background: "rgba(148,163,184,0.1)", color: "#64748b" };
+  }
+}
+
+export default function PerformanceContent({ stats: rawStats, conversions = [] }: PerformanceContentProps) {
   const { language } = useLanguage();
 
   // Provide safe defaults so no .toFixed() / .toLocaleString() call can crash on null/undefined.
@@ -200,6 +233,93 @@ export default function PerformanceContent({ stats: rawStats }: PerformanceConte
                           {link.is_active ? "Active" : "Inactive"}
                         </span>
                       </td>
+                    </tr>
+                  );
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* Conversion History Table */}
+      <div
+        className="bg-white rounded-2xl overflow-hidden"
+        style={{
+          border: "1px solid rgba(16,185,129,0.15)",
+          boxShadow: "0 2px 12px rgba(0,0,0,0.05)",
+        }}
+      >
+        <div
+          className="px-6 py-4"
+          style={{ borderBottom: "1px solid rgba(16,185,129,0.08)" }}
+        >
+          <h3 className="font-semibold text-base" style={{ color: "#0f172a" }}>
+            Conversion History
+          </h3>
+          <p className="text-xs text-slate-400 mt-0.5">Recent sales attributed to your links (last 50)</p>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr style={{ background: "rgba(248,249,252,0.8)" }}>
+                {["Item", "Type", "Sale Amount", "Commission", "Status", "Date"].map((h) => (
+                  <th
+                    key={h}
+                    className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide"
+                    style={{ color: "#94a3b8" }}
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {conversions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="px-6 py-10 text-center text-slate-400 text-sm">
+                    No conversions yet. Share your affiliate links to start earning commissions.
+                  </td>
+                </tr>
+              ) : (
+                conversions.map((conv, i) => {
+                  const linkData = Array.isArray(conv.affiliate_links) ? conv.affiliate_links[0] : conv.affiliate_links;
+                  const itemName = linkData?.item_name ?? `${conv.item_type} #${conv.item_id}`;
+                  const date = new Date(conv.created_at).toLocaleDateString();
+                  return (
+                    <tr
+                      key={conv.id}
+                      style={{
+                        borderTop: i > 0 ? "1px solid rgba(16,185,129,0.06)" : undefined,
+                      }}
+                    >
+                      <td className="px-4 py-3 text-xs font-medium text-slate-700 max-w-[160px] truncate">
+                        {itemName}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
+                          style={{ background: "rgba(99,102,241,0.08)", color: "#6366f1" }}
+                        >
+                          {conv.item_type ?? "-"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-slate-700 text-xs">
+                        {formatCurrency(conv.sale_amount ?? 0, language)}
+                      </td>
+                      <td className="px-4 py-3 font-semibold text-xs" style={{ color: "#10b981" }}>
+                        {formatCurrency(conv.commission_amount ?? 0, language)}
+                      </td>
+                      <td className="px-4 py-3">
+                        <span
+                          className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
+                          style={statusStyle(conv.status)}
+                        >
+                          {conv.status ?? "pending"}
+                        </span>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-500">{date}</td>
                     </tr>
                   );
                 })

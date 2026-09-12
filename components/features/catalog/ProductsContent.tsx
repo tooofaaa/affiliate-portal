@@ -30,6 +30,7 @@ interface CreatedLink {
 
 interface ProductsContentProps {
   products: Product[];
+  initialLinks?: Record<number, CreatedLink>;
 }
 
 function getSupplier(product: Product): Supplier | null {
@@ -65,11 +66,11 @@ function PlaceholderImage({ name }: { name: string }) {
   );
 }
 
-export default function ProductsContent({ products }: ProductsContentProps) {
+export default function ProductsContent({ products, initialLinks = {} }: ProductsContentProps) {
   const { language } = useLanguage();
   const { isVerified, triggerVerificationModal } = useVerification();
   const [search, setSearch] = useState("");
-  const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>({});
+  const [createdLinks, setCreatedLinks] = useState<Record<number, CreatedLink>>(initialLinks);
   const [creating, setCreating] = useState<number | null>(null);
   const [messages, setMessages] = useState<Record<number, { type: "success" | "error"; text: string }>>({});
   const [copiedSlug, setCopiedSlug] = useState<string | null>(null);

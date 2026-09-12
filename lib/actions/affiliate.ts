@@ -130,14 +130,14 @@ export async function createLink(destination: string) {
     return { success: false, message: "Destination must be a valid URL." };
   }
 
-  const customerPortalUrl = process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "https://customer-portal-five-gamma.vercel.app";
+  const customerPortalUrl = process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "https://customer.product-service.net";
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
   // Retry up to 3 times on slug uniqueness collision
   for (let attempt = 0; attempt < 3; attempt++) {
     const rand4 = Array.from({ length: 4 }, () => chars[Math.floor(Math.random() * chars.length)]).join("");
     const slug = `${Date.now().toString(36)}${rand4}`;
-    const full_url = `${customerPortalUrl}/products?ref=${slug}`;
+    const full_url = `${customerPortalUrl}/products?aff=${slug}`;
 
     const { data, error } = await supabase
       .from("affiliate_links")
@@ -476,6 +476,21 @@ export async function getPerformanceStats() {
     links_count: links.length,
     links,
   };
+}
+
+// ── Conversions ──────────────────────────────────────────────────────────────
+export async function getMyConversions() {
+  const { supabase, affiliateId } = await getAffiliateContext();
+  if (!affiliateId) return { data: [], error: "Not authenticated" };
+
+  const { data, error } = await supabase
+    .from("affiliate_conversions")
+    .select("id, item_type, item_id, sale_amount, commission_pct, commission_amount, status, confirmed_at, created_at, affiliate_links(slug, item_name, full_url)")
+    .eq("affiliate_id", affiliateId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  return { data: data ?? [], error: error?.message ?? null };
 }
 
 // ── Support ───────────────────────────────────────────────────────────────
