@@ -64,15 +64,15 @@ function formatSAR(value: number | null): string {
 export default async function ConversionsPage() {
   const { data: conversions, error } = await getMyConversions();
 
-  const pending = (conversions as Conversion[]).reduce(
+  const pending = (conversions as unknown as Conversion[]).reduce(
     (sum, c) => sum + (c.status?.toLowerCase() === "pending" ? (c.commission_amount ?? 0) : 0),
     0
   );
-  const confirmed = (conversions as Conversion[]).reduce(
+  const confirmed = (conversions as unknown as Conversion[]).reduce(
     (sum, c) => sum + (c.status?.toLowerCase() === "confirmed" ? (c.commission_amount ?? 0) : 0),
     0
   );
-  const paid = (conversions as Conversion[]).reduce(
+  const paid = (conversions as unknown as Conversion[]).reduce(
     (sum, c) => sum + (c.status?.toLowerCase() === "paid" ? (c.commission_amount ?? 0) : 0),
     0
   );
@@ -145,7 +145,7 @@ export default async function ConversionsPage() {
           <h2 className="text-sm font-semibold text-white">
             All Conversions
             <span className="ml-2 text-xs font-normal text-slate-500">
-              ({(conversions as Conversion[]).length} records)
+              ({(conversions as unknown as Conversion[]).length} records)
             </span>
           </h2>
         </div>
@@ -154,7 +154,7 @@ export default async function ConversionsPage() {
           <div className="px-5 py-8 text-center text-sm text-red-400">
             Failed to load conversions. Please refresh the page.
           </div>
-        ) : (conversions as Conversion[]).length === 0 ? (
+        ) : (conversions as unknown as Conversion[]).length === 0 ? (
           <div className="px-5 py-12 text-center">
             <p className="text-slate-400 text-sm">No conversions recorded yet.</p>
             <p className="text-slate-600 text-xs mt-1">
@@ -187,11 +187,11 @@ export default async function ConversionsPage() {
                 </tr>
               </thead>
               <tbody>
-                {(conversions as Conversion[]).map((conv, idx) => (
+                {(conversions as unknown as Conversion[]).map((conv, idx) => (
                   <tr
                     key={conv.id}
                     style={{
-                      borderBottom: idx < (conversions as Conversion[]).length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
+                      borderBottom: idx < (conversions as unknown as Conversion[]).length - 1 ? "1px solid rgba(255,255,255,0.04)" : "none",
                     }}
                   >
                     <td className="px-5 py-3.5 text-slate-400 whitespace-nowrap">
@@ -227,7 +227,7 @@ export default async function ConversionsPage() {
         )}
 
         {/* Totals footer */}
-        {(conversions as Conversion[]).length > 0 && (
+        {(conversions as unknown as Conversion[]).length > 0 && (
           <div
             className="px-5 py-4 flex flex-wrap items-center justify-between gap-3"
             style={{ borderTop: "1px solid rgba(99,102,241,0.1)" }}
