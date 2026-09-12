@@ -12,7 +12,7 @@ interface RouteContext {
  * 1. Look up the affiliate_links row by slug.
  * 2. Log a click event to affiliate_link_events (fire-and-forget).
  * 3. Increment the clicks counter (fire-and-forget).
- * 4. Redirect to the link's destination URL with ?ref={slug} appended.
+ * 4. Redirect to the link's destination URL with ?aff={slug} appended.
  *
  * Uses the admin client so click counts update without requiring an
  * authenticated session — anonymous visitors follow referral links.
