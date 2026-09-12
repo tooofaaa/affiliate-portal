@@ -99,9 +99,12 @@ export async function createCatalogLink(
     ).join("");
     const slug = Date.now().toString(36) + rand4;
 
-    // Build full_url with ?aff= already embedded so /r/[slug] redirect lands with attribution
-    const sep = destination_path.includes("?") ? "&" : "?";
-    const full_url = CUSTOMER_URL + destination_path + sep + "aff=" + slug;
+    // full_url routes through the affiliate portal's /r/[slug] handler which
+    // increments clicks and then redirects to destination with ?ref= attribution.
+    const AFFILIATE_URL =
+      process.env.NEXT_PUBLIC_AFFILIATE_URL ||
+      "https://affiliate.product-service.net";
+    const full_url = AFFILIATE_URL + "/r/" + slug;
     const destination = CUSTOMER_URL + destination_path;
 
     const { data, error } = await ctx.supabase
