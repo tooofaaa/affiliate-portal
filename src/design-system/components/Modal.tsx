@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
+import React, { useEffect, useRef, useState, useImperativeHandle, forwardRef } from "react";
 import { createPortal } from "react-dom";
 import { tokens } from "../tokens";
 

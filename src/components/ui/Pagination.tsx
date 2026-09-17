@@ -1,0 +1,1 @@
+export { Pagination, DEFAULT_PAGE_SIZE_OPTIONS as pageSizeOptionsDefault } from "../../design-system/components/Pagination";
