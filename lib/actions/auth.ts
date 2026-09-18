@@ -192,7 +192,8 @@ export async function requestPasswordReset(email: string) {
   const forwardedProto = headersList.get("x-forwarded-proto") || "https";
   const host = forwardedHost || headersList.get("host") || "localhost:3003";
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
-  const resetUrl = `${protocol}://${host}/auth/callback?next=/reset-password`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "https://affiliate.product-service.net";
+  const resetUrl = `${siteUrl}/auth/callback?next=/reset-password`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: resetUrl,
