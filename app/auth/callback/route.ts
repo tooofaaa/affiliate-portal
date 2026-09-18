@@ -17,7 +17,8 @@ export async function GET(request: Request) {
     }
 
     // After email confirmation: promote account_status from pending_email → beta
-    if (user && user.email_confirmed_at && safePath !== "/reset-password") {
+    // but don't redirect to onboarding if they're in the middle of password reset
+    if (user && user.email_confirmed_at && !safePath.includes("reset-password") && !safePath.includes("update-password")) {
       const adminClient = createAdminClient();
       await adminClient
         .from("affiliates")
