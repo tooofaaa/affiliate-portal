@@ -1,6 +1,6 @@
-import { formatCurrency, formatCurrencyShort } from "../../src/design-system";
+import { formatCurrency, formatCurrencyShort } from "@/src/design-system";
 
-function getLocale(lang?: 'en' | 'ar'): string {
+export function getLocale(lang?: 'en' | 'ar'): "en-SA" | "ar-SA" {
   if (lang) return lang === 'ar' ? 'ar-SA' : 'en-SA';
   if (typeof document !== 'undefined') {
     const match = document.cookie.match(/(?:^|;\s*)portal-lang=([^;]+)/);
@@ -9,7 +9,7 @@ function getLocale(lang?: 'en' | 'ar'): string {
   return 'en-SA';
 }
 
-export { formatCurrency, formatCurrencyShort } from "../../src/design-system";
+export { formatCurrency, formatCurrencyShort };
 
 export function formatDate(dateStr: string | null | undefined, lang?: 'en' | 'ar'): string {
   if (!dateStr) return "-";

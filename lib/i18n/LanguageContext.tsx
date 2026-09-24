@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-type Language = "en" | "ar";
+export type Language = "en" | "ar";
 
 type TranslationObject = Record<string, any>;
 

@@ -483,7 +483,10 @@ export async function getPerformanceStats() {
 // ── Conversions ──────────────────────────────────────────────────────────────
 export async function getMyConversions() {
   const { supabase, affiliateId } = await getAffiliateContext();
-  if (!affiliateId) return { data: [], error: "Not authenticated" };
+  // Pending/unverified affiliates get the empty state, consistent with the
+  // dashboard/links/wallet pages — a hard error here would misreport a normal
+  // new-account state as a load failure.
+  if (!affiliateId) return { data: [], error: null };
 
   const { data, error } = await supabase
     .from("affiliate_conversions")

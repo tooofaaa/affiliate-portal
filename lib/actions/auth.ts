@@ -108,12 +108,17 @@ export async function signupAffiliate(formData: FormData) {
     return { success: false, message: "An account with this email already exists. Please log in." };
   }
 
-  // Create auth user — Supabase sends confirmation email
+  // Create auth user — Supabase sends confirmation email.
+  // emailRedirectTo must point at THIS portal's auth callback. Without it,
+  // Supabase falls back to the project-level Site URL (admin portal) and new
+  // affiliates land on the wrong product after confirming their email.
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://affiliate.product-service.net";
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
       data: { role: "affiliate", name: name.trim() },
+      emailRedirectTo: `${siteUrl}/auth/callback`,
     },
   });
 

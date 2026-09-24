@@ -19,7 +19,8 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./*"],
+      "@/design-system/*": ["./src/design-system/*"]
     }
   },
   "include": [
