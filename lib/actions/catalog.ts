@@ -115,7 +115,9 @@ export async function createCatalogLink(
     process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL ||
     "https://customer.product-service.net";
   const AFFILIATE_URL =
+    process.env.NEXT_PUBLIC_AFFILIATE_PORTAL_URL ||
     process.env.NEXT_PUBLIC_AFFILIATE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
     "https://affiliate.product-service.net";
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 

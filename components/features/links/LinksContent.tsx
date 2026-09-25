@@ -21,6 +21,7 @@ interface LinksContentProps {
 }
 
 export default function LinksContent({ links: initialLinks }: LinksContentProps) {
+  const { t } = useLanguage();
   const { isVerified, triggerVerificationModal } = useVerification();
   const [links, setLinks] = useState<AffiliateLink[]>(initialLinks ?? []);
   const [destination, setDestination] = useState("");
@@ -99,20 +100,20 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-          My Tracking Links
+          {t.links.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          Generate and manage your affiliate tracking links
+          {t.links.subtitle}
         </p>
       </div>
 
       {/* Stats Row */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          { label: "Total Links", value: totalLinks },
-          { label: "Total Clicks", value: totalClicks.toLocaleString() },
-          { label: "Total Conversions", value: totalConversions.toLocaleString() },
-          { label: "Avg Conv. Rate", value: `${avgConvRate}%` },
+          { label: t.links.totalLinks, value: totalLinks },
+          { label: t.links.totalClicks, value: totalClicks.toLocaleString() },
+          { label: t.links.totalConversions, value: totalConversions.toLocaleString() },
+          { label: t.links.avgConvRate, value: `${avgConvRate}%` },
         ].map((stat) => (
           <div
             key={stat.label}
@@ -139,7 +140,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
         }}
       >
         <h3 className="font-semibold text-base mb-4" style={{ color: "#0f172a" }}>
-          Create New Link
+          {t.links.createLink}
         </h3>
 
         {message && (
@@ -169,7 +170,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
             className="px-5 py-3 rounded-xl text-sm font-semibold text-white transition-all disabled:opacity-50 cursor-pointer"
             style={{ background: "linear-gradient(135deg, #6366f1, #818cf8)" }}
           >
-            {creating ? "Generating..." : "Generate Link"}
+            {creating ? t.links.generating : t.links.generate}
           </button>
         </form>
       </div>
@@ -187,7 +188,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
           style={{ borderBottom: "1px solid rgba(99,102,241,0.08)" }}
         >
           <h3 className="font-semibold text-base" style={{ color: "#0f172a" }}>
-            All Links
+            {t.links.allLinks}
           </h3>
         </div>
 
@@ -195,7 +196,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "rgba(248,249,252,0.8)" }}>
-                {["Slug", "Full URL", "Destination", "Clicks", "Conv.", "Status", "Actions"].map((h) => (
+                {[t.links.slug, t.links.fullUrl, t.links.destination, t.links.clicks, t.links.conversions, t.links.status, t.links.actions].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide"
@@ -210,7 +211,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
               {links.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-10 text-center text-slate-400 text-sm">
-                    No links yet. Create your first tracking link above.
+                    {t.links.noLinks}
                   </td>
                 </tr>
               ) : (
@@ -235,7 +236,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
                             color: copiedId === link.id ? "#059669" : "#6366f1",
                           }}
                         >
-                          {copiedId === link.id ? "Copied!" : "Copy"}
+                          {copiedId === link.id ? t.links.copied : t.links.copy}
                         </button>
                       </div>
                     </td>
@@ -257,7 +258,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
                             : { background: "rgba(148,163,184,0.1)", color: "#64748b" }
                         }
                       >
-                        {link.is_active ? "Active" : "Inactive"}
+                        {link.is_active ? t.links.active : t.links.inactive}
                       </span>
                     </td>
                     <td className="px-4 py-3">
@@ -271,7 +272,7 @@ export default function LinksContent({ links: initialLinks }: LinksContentProps)
                             border: "1px solid rgba(239,68,68,0.15)",
                           }}
                         >
-                          Deactivate
+                          {t.links.deactivate}
                         </button>
                       )}
                     </td>

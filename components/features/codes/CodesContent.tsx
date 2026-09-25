@@ -136,7 +136,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
                   {activeCode.code}
                 </p>
                 <p className="text-indigo-200 text-sm">
-                  {activeCode.discount_pct}% discount for customers
+                  {activeCode.discount_pct}% {t.codes.discountForCustomers}
                 </p>
               </div>
 
@@ -145,19 +145,19 @@ export default function CodesContent({ activeCode: initialCode, history: initial
                   <p className="text-lg font-bold" style={{ color: "#6366f1" }}>
                     {activeCode.discount_pct}%
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Discount</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.codes.discount}</p>
                 </div>
                 <div className="p-3 rounded-xl" style={{ background: "rgba(16,185,129,0.06)" }}>
                   <p className="text-lg font-bold" style={{ color: "#059669" }}>
                     {t.codes.level} {activeCode.level}
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Tier</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.codes.tier}</p>
                 </div>
                 <div className="p-3 rounded-xl" style={{ background: "rgba(245,158,11,0.06)" }}>
                   <p className="text-lg font-bold" style={{ color: "#d97706" }}>
                     {activeCode.uses_count ?? 0}
                   </p>
-                  <p className="text-xs text-slate-500 mt-0.5">Uses</p>
+                  <p className="text-xs text-slate-500 mt-0.5">{t.codes.uses}</p>
                 </div>
               </div>
 
@@ -343,7 +343,7 @@ export default function CodesContent({ activeCode: initialCode, history: initial
                         className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
                         style={statusStyle(code.status)}
                       >
-                        {code.status}
+                        {(t.common as Record<string, string>)[code.status] ?? code.status}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-slate-700">{code.uses_count ?? 0}</td>

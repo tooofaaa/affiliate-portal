@@ -144,14 +144,14 @@ export default function DashboardContent({ stats, activeCode }: DashboardContent
                     className="px-2 py-0.5 rounded-full text-xs font-semibold"
                     style={{ background: "rgba(99,102,241,0.1)", color: "#6366f1" }}
                   >
-                    Level {activeCode.level}
+                    {t.codes.level} {activeCode.level}
                   </span>
                   <span className="font-semibold text-slate-700">
-                    {activeCode.discount_pct}% off
+                    {activeCode.discount_pct}% {t.codes.discountForCustomers}
                   </span>
                 </div>
                 <span className="text-xs text-slate-400">
-                  {activeCode.uses_count} uses
+                  {activeCode.uses_count} {t.codes.uses}
                 </span>
               </div>
             </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import { formatCurrency } from "@/lib/utils/formatters";
+import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import StatCard from "@/components/ui/StatCard";
 import { ActivityIcon, OrdersIcon, WalletIcon, ProductsIcon, CheckCircleIcon } from "@/lib/icons";
 
@@ -63,7 +63,7 @@ function statusStyle(status: string | null) {
 }
 
 export default function PerformanceContent({ stats: rawStats, conversions = [] }: PerformanceContentProps) {
-  const { language } = useLanguage();
+  const { language, t } = useLanguage();
 
   // Provide safe defaults so no .toFixed() / .toLocaleString() call can crash on null/undefined.
   const stats: PerformanceStats = {
@@ -78,39 +78,39 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
 
   const statCards = [
     {
-      title: "Total Clicks",
+      title: t.performance.totalClicks,
       value: stats.total_clicks.toLocaleString(),
       accent: "#6366f1",
       icon: <ActivityIcon className="w-4 h-4" />,
-      description: "All-time link clicks",
+      description: t.performance.descTotalClicks,
     },
     {
-      title: "Total Conversions",
+      title: t.performance.totalConversions,
       value: stats.total_conversions.toLocaleString(),
       accent: "#10b981",
       icon: <CheckCircleIcon className="w-4 h-4" />,
-      description: "Completed purchases",
+      description: t.performance.descTotalConversions,
     },
     {
-      title: "Conversion Rate",
+      title: t.performance.conversionRate,
       value: `${stats.conversion_rate.toFixed(1)}%`,
       accent: "#f59e0b",
       icon: <OrdersIcon className="w-4 h-4" />,
-      description: "Conversions / clicks",
+      description: t.performance.descConversionRate,
     },
     {
-      title: "Total Earned",
+      title: t.performance.totalEarned,
       value: formatCurrency(stats.total_earned, language),
       accent: "#ec4899",
       icon: <WalletIcon className="w-4 h-4" />,
-      description: "Balance + pending",
+      description: t.performance.descTotalEarned,
     },
     {
-      title: "Active Links",
+      title: t.performance.activeLinks,
       value: stats.links.filter((l) => l.is_active).length,
       accent: "#8b5cf6",
       icon: <ProductsIcon className="w-4 h-4" />,
-      description: "Currently active",
+      description: t.performance.descActiveLinks,
     },
   ];
 
@@ -119,10 +119,10 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold" style={{ color: "#0f172a" }}>
-          Performance
+          {t.performance.title}
         </h1>
         <p className="text-sm mt-1" style={{ color: "#94a3b8" }}>
-          Track your affiliate performance metrics
+          {t.performance.subtitle}
         </p>
       </div>
 
@@ -153,16 +153,16 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
           style={{ borderBottom: "1px solid rgba(99,102,241,0.08)" }}
         >
           <h3 className="font-semibold text-base" style={{ color: "#0f172a" }}>
-            Links Performance
+            {t.performance.linksPerformance}
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">Sorted by conversions (highest first)</p>
+          <p className="text-xs text-slate-400 mt-0.5">{t.performance.sortedByConversions}</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "rgba(248,249,252,0.8)" }}>
-                {["Slug", "Destination", "Clicks", "Conv.", "Conv. Rate", "Status"].map((h) => (
+                {[t.links.slug, t.links.destination, t.links.clicks, t.dashboard.conv, t.performance.convRate, t.links.status].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide"
@@ -177,7 +177,7 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
               {stats.links.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-slate-400 text-sm">
-                    No links found. Create tracking links to see performance data.
+                    {t.performance.noLinksFound}
                   </td>
                 </tr>
               ) : (
@@ -230,7 +230,7 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
                               : { background: "rgba(148,163,184,0.1)", color: "#64748b" }
                           }
                         >
-                          {link.is_active ? "Active" : "Inactive"}
+                          {link.is_active ? t.performance.active : t.performance.inactive}
                         </span>
                       </td>
                     </tr>
@@ -255,16 +255,16 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
           style={{ borderBottom: "1px solid rgba(16,185,129,0.08)" }}
         >
           <h3 className="font-semibold text-base" style={{ color: "#0f172a" }}>
-            Conversion History
+            {t.performance.conversionHistory}
           </h3>
-          <p className="text-xs text-slate-400 mt-0.5">Recent sales attributed to your links (last 50)</p>
+          <p className="text-xs text-slate-400 mt-0.5">{t.performance.conversionHistoryDesc}</p>
         </div>
 
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr style={{ background: "rgba(248,249,252,0.8)" }}>
-                {["Item", "Type", "Sale Amount", "Commission", "Status", "Date"].map((h) => (
+                {[t.performance.item, t.performance.type, t.performance.saleAmount, t.performance.commission, t.links.status, t.wallet.transDate].map((h) => (
                   <th
                     key={h}
                     className="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wide"
@@ -279,14 +279,14 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
               {conversions.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="px-6 py-10 text-center text-slate-400 text-sm">
-                    No conversions yet. Share your affiliate links to start earning commissions.
+                    {t.performance.noConversions}
                   </td>
                 </tr>
               ) : (
                 conversions.map((conv, i) => {
                   const linkData = Array.isArray(conv.affiliate_links) ? conv.affiliate_links[0] : conv.affiliate_links;
                   const itemName = linkData?.item_name ?? `${conv.item_type} #${conv.item_id}`;
-                  const date = new Date(conv.created_at).toLocaleDateString();
+                  const date = formatDate(conv.created_at, language);
                   return (
                     <tr
                       key={conv.id}
@@ -312,12 +312,12 @@ export default function PerformanceContent({ stats: rawStats, conversions = [] }
                         {formatCurrency(conv.commission_amount ?? 0, language)}
                       </td>
                       <td className="px-4 py-3">
-                        <span
-                          className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
-                          style={statusStyle(conv.status)}
-                        >
-                          {conv.status ?? "pending"}
-                        </span>
+                          <span
+                            className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
+                            style={statusStyle(conv.status)}
+                          >
+                            {t.performance.convStatus[(conv.status ?? "pending").toLowerCase()] ?? conv.status}
+                          </span>
                       </td>
                       <td className="px-4 py-3 text-xs text-slate-500">{date}</td>
                     </tr>

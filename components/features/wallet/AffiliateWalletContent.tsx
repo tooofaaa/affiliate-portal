@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { requestAffiliateWithdrawal } from "@/lib/actions/affiliate";
+import { requestAffiliateWithdrawal, getAffiliateWallet, getAffiliateTransactions } from "@/lib/actions/affiliate";
 import { formatCurrency, formatDate } from "@/lib/utils/formatters";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { useVerification } from "@/lib/context/VerificationContext";
@@ -65,30 +65,15 @@ export default function AffiliateWalletContent({
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        // Fetch fresh wallet data
+        // Fetch fresh wallet data via server actions — the browser client has no
+        // RLS access to wallet_transactions, and wallet rows may be lazily created.
         const refreshWallet = async () => {
-          const { data: aff } = await supabase
-            .from("affiliates")
-            .select("id")
-            .eq("portal_user_id", user.id)
-            .maybeSingle();
-          if (!aff) return;
-
-          const { data: w } = await supabase
-            .from("affiliate_wallets")
-            .select("id, balance, pending, currency")
-            .eq("affiliate_id", aff.id)
-            .maybeSingle();
-          if (w) setWallet(w);
-
-          const { data: txs } = await supabase
-            .from("wallet_transactions")
-            .select("id, type, amount, description, created_at")
-            .eq("wallet_type", "affiliate")
-            .eq("wallet_id", w?.id ?? 0)
-            .order("created_at", { ascending: false })
-            .limit(50);
-          if (txs) setTransactions(txs);
+          const [walletRes, txRes] = await Promise.all([
+            getAffiliateWallet(),
+            getAffiliateTransactions(),
+          ]);
+          if (walletRes.data) setWallet(walletRes.data);
+          if (txRes.data) setTransactions(txRes.data);
         };
 
         channelRef = supabase
@@ -143,7 +128,7 @@ export default function AffiliateWalletContent({
 
     const numAmount = parseFloat(amount);
     if (!numAmount || numAmount <= 0) {
-      setMessage({ type: "error", text: "Please enter a valid amount." });
+      setMessage({ type: "error", text: t.wallet.validAmountError });
       setSubmitting(false);
       return;
     }
@@ -169,7 +154,7 @@ export default function AffiliateWalletContent({
           bank_name: bankName,
           account_holder: accountHolder,
           iban,
-          status: "Pending",
+          status: "pending",
           sla_deadline: sla.toISOString().split("T")[0],
           created_at: new Date().toISOString(),
         },
@@ -181,15 +166,37 @@ export default function AffiliateWalletContent({
     setSubmitting(false);
   };
 
+  // withdrawal_requests.status is lowercase per the table CHECK constraint —
+  // normalize before styling/labeling.
+  const statusKey = (status: string) => status.toLowerCase();
+
   const statusStyle = (status: string) => {
-    switch (status) {
-      case "Pending": return { background: "rgba(245,158,11,0.1)", color: "#d97706" };
-      case "Processing": return { background: "rgba(59,130,246,0.1)", color: "#2563eb" };
-      case "Completed": return { background: "rgba(16,185,129,0.1)", color: "#059669" };
-      case "Rejected": return { background: "rgba(239,68,68,0.1)", color: "#ef4444" };
+    switch (statusKey(status)) {
+      case "pending": return { background: "rgba(245,158,11,0.1)", color: "#d97706" };
+      case "processing": return { background: "rgba(59,130,246,0.1)", color: "#2563eb" };
+      case "completed": return { background: "rgba(16,185,129,0.1)", color: "#059669" };
+      case "rejected": return { background: "rgba(239,68,68,0.1)", color: "#ef4444" };
       default: return { background: "rgba(148,163,184,0.1)", color: "#64748b" };
     }
   };
+
+  const wdStatusLabel = (status: string) => {
+    const key = statusKey(status);
+    const map: Record<string, string> = t.wallet.wdStatusMap ?? {};
+    return map[key.charAt(0).toUpperCase() + key.slice(1)] ?? status;
+  };
+
+  // wallet_transactions.type values from the admin ledger (e.g. "commission")
+  // are lowercase free-text — classify them into credit/debit for display.
+  const isCreditType = (type: string) =>
+    ["credit", "commission", "deposit", "refund", "bonus"].includes(type.toLowerCase());
+
+  const txTypeLabel = (type: string) =>
+    isCreditType(type)
+      ? t.wallet.credit
+      : ["debit", "charge", "payment", "withdrawal"].includes(type.toLowerCase())
+        ? t.wallet.debit
+        : type;
 
   const tabs = [
     { key: "transactions" as TabType, label: t.wallet.transactions },
@@ -314,7 +321,7 @@ export default function AffiliateWalletContent({
                 required
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
-                placeholder="e.g. Al Rajhi Bank"
+                placeholder={t.wallet.bankNamePlaceholder}
                 className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
               />
             </div>
@@ -325,7 +332,7 @@ export default function AffiliateWalletContent({
                 required
                 value={accountHolder}
                 onChange={(e) => setAccountHolder(e.target.value)}
-                placeholder="Name as on account"
+                placeholder={t.wallet.holderNamePlaceholder}
                 className="px-3 py-2 rounded-xl border border-gray-200 text-sm focus:outline-none focus:border-indigo-500"
               />
             </div>
@@ -440,12 +447,12 @@ export default function AffiliateWalletContent({
                           <span
                             className="px-2 py-0.5 rounded-full text-[10px] font-semibold capitalize"
                             style={
-                              tx.type === "CREDIT" || tx.type === "credit"
+                              isCreditType(tx.type)
                                 ? { background: "rgba(16,185,129,0.1)", color: "#059669" }
                                 : { background: "rgba(239,68,68,0.1)", color: "#ef4444" }
                             }
                           >
-                            {tx.type}
+                            {txTypeLabel(tx.type)}
                           </span>
                         </td>
                         <td className="py-3 text-slate-600 text-xs">{tx.description || "-"}</td>
@@ -505,7 +512,7 @@ export default function AffiliateWalletContent({
                             className="px-2 py-0.5 rounded-full text-[10px] font-semibold"
                             style={statusStyle(w.status)}
                           >
-                            {w.status}
+                            {wdStatusLabel(w.status)}
                           </span>
                         </td>
                         <td className="py-3 text-slate-500 text-xs">

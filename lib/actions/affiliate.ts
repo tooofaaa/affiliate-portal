@@ -1,6 +1,6 @@
 "use server";
 
-import { createClientServer } from "@/lib/supabase/server";
+import { createClientServer, createAdminClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
 // ── Context helper ────────────────────────────────────────────────────────
@@ -130,7 +130,13 @@ export async function createLink(destination: string) {
     return { success: false, message: "Destination must be a valid URL." };
   }
 
-  const affiliatePortalUrl = process.env.NEXT_PUBLIC_AFFILIATE_PORTAL_URL || "https://affiliate.product-service.net";
+  // NEXT_PUBLIC_SITE_URL is the env var actually defined in .env.local; keep the
+  // older names as aliases so staging/prod configs that use them still work.
+  const affiliatePortalUrl =
+    process.env.NEXT_PUBLIC_AFFILIATE_PORTAL_URL ||
+    process.env.NEXT_PUBLIC_AFFILIATE_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    "https://affiliate.product-service.net";
   const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
 
   // Retry up to 3 times on slug uniqueness collision
@@ -275,45 +281,62 @@ export async function createDiscountCode(discount_pct: number, level: 1 | 2) {
 }
 
 // ── Wallet ────────────────────────────────────────────────────────────────
-export async function getAffiliateWallet() {
-  const { supabase, affiliateId } = await getAffiliateContext();
-  if (!affiliateId) return { data: null, error: "Not authenticated" };
+// Ensures an affiliate_wallets row exists for the affiliate. The admin app only
+// credits commissions when a wallet row is present, and there is no portal-side
+// creation path otherwise — mirrors the customer-portal lazy wallet creation.
+// Uses the admin client because RLS grants affiliates SELECT only on
+// affiliate_wallets (inserts/updates are admin-only).
+async function ensureAffiliateWallet(affiliateId: number) {
+  const adminClient = createAdminClient();
 
-  const { data, error } = await supabase
-    .from("affiliate_wallets")
-    .select("id, balance, pending, currency")
-    .eq("affiliate_id", affiliateId)
-    .maybeSingle();
+  const selectWallet = () =>
+    adminClient
+      .from("affiliate_wallets")
+      .select("id, balance, pending, currency")
+      .eq("affiliate_id", affiliateId)
+      .maybeSingle();
 
-  if (data) {
-    // Never surface negative values to the UI — guard against stale/inconsistent DB state.
-    return {
-      data: {
-        ...data,
-        balance: Math.max(0, data.balance ?? 0),
-        pending: Math.max(0, data.pending ?? 0),
-      },
-      error: null,
-    };
+  let { data: wallet } = await selectWallet();
+
+  if (!wallet) {
+    const { error: createError } = await adminClient
+      .from("affiliate_wallets")
+      .insert({ affiliate_id: affiliateId });
+    if (createError && createError.code !== "23505") {
+      console.error("affiliate_wallets creation failed:", createError.message);
+    }
+    // Re-read regardless: on unique violation a concurrent request already created it.
+    ({ data: wallet } = await selectWallet());
   }
 
-  return { data: null, error: error?.message ?? null };
+  if (!wallet) return null;
+  // Never surface negative values to the UI — guard against stale/inconsistent DB state.
+  return {
+    ...wallet,
+    balance: Math.max(0, wallet.balance ?? 0),
+    pending: Math.max(0, wallet.pending ?? 0),
+  };
+}
+
+export async function getAffiliateWallet() {
+  const { affiliateId } = await getAffiliateContext();
+  if (!affiliateId) return { data: null, error: "Not authenticated" };
+
+  const wallet = await ensureAffiliateWallet(affiliateId);
+  return { data: wallet, error: wallet ? null : "Wallet not found" };
 }
 
 export async function getAffiliateTransactions() {
-  const { supabase, affiliateId } = await getAffiliateContext();
+  const { affiliateId } = await getAffiliateContext();
   if (!affiliateId) return { data: [], error: "Not authenticated" };
 
-  // Get wallet id first
-  const { data: wallet } = await supabase
-    .from("affiliate_wallets")
-    .select("id")
-    .eq("affiliate_id", affiliateId)
-    .maybeSingle();
-
+  const wallet = await ensureAffiliateWallet(affiliateId);
   if (!wallet) return { data: [], error: null };
 
-  const { data, error } = await supabase
+  // Admin client: wallet_transactions has no portal-user SELECT RLS policy
+  // (admin-only), so a user-scoped query would silently return zero rows.
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
     .from("wallet_transactions")
     .select("*")
     .eq("wallet_type", "affiliate")
@@ -343,7 +366,7 @@ export async function requestAffiliateWithdrawal(
   account_holder: string,
   iban: string
 ) {
-  const { supabase, user, affiliateId } = await getAffiliateContext();
+  const { user, affiliateId } = await getAffiliateContext();
   if (!user || !affiliateId) return { success: false, message: "Not authenticated" };
 
   // Enforce server-side verification before any business logic (beta mode)
@@ -365,12 +388,9 @@ export async function requestAffiliateWithdrawal(
     return { success: false, message: "IBAN is required." };
   }
 
-  const { data: wallet } = await supabase
-    .from("affiliate_wallets")
-    .select("id, balance, pending")
-    .eq("affiliate_id", affiliateId)
-    .maybeSingle();
-
+  // Lazily create the wallet row if the admin app hasn't created one yet
+  // (admin commission credit is a silent no-op without a wallet row).
+  const wallet = await ensureAffiliateWallet(affiliateId);
   if (!wallet) return { success: false, message: "Wallet not found" };
 
   const currentPending = wallet.pending ?? 0;
@@ -384,14 +404,22 @@ export async function requestAffiliateWithdrawal(
   const sla_deadline = new Date();
   sla_deadline.setDate(sla_deadline.getDate() + 15);
 
-  const { error: insertError } = await supabase.from("withdrawal_requests").insert({
+  // All three writes below go through the service-role client: RLS on
+  // withdrawal_requests and affiliate_wallets only grants portal users SELECT,
+  // and there is no owner INSERT policy — a user-scoped insert would fail with
+  // 42501. Mirrors the partner flow (request_partner_withdrawal RPC, also
+  // service-role). Note: withdrawal_requests.status uses lowercase values per
+  // the table CHECK constraint ('pending','processing','completed','rejected').
+  const adminClient = createAdminClient();
+
+  const { error: insertError } = await adminClient.from("withdrawal_requests").insert({
     wallet_type: "affiliate",
     owner_portal_user_id: user.id,
     amount,
     bank_name: bank_name.trim(),
     account_holder: account_holder.trim(),
     iban: iban.trim(),
-    status: "Pending",
+    status: "pending",
     sla_deadline: sla_deadline.toISOString().split("T")[0],
   });
 
@@ -399,21 +427,23 @@ export async function requestAffiliateWithdrawal(
 
   // Atomic conditional pending update — only applies if `pending` has not changed since
   // the read above, preventing TOCTOU double-spend from concurrent requests.
-  const { error: walletError } = await supabase
+  const { data: locked, error: walletError } = await adminClient
     .from("affiliate_wallets")
     .update({ pending: currentPending + amount })
     .eq("affiliate_id", affiliateId)
-    .eq("pending", currentPending); // optimistic-lock: only update if pending is still what we read
+    .eq("pending", currentPending) // optimistic-lock: only update if pending is still what we read
+    .select("id");
 
-  if (walletError) {
-    // The lock failed — another concurrent request changed pending between our read and write.
+  if (walletError || !locked || locked.length === 0) {
+    // The lock failed — another concurrent request changed pending between our read and write
+    // (PostgREST returns 0 rows, not an error, on lock mismatch — hence the row-count check).
     // The withdrawal_requests row is already inserted; log it but don't fail the whole request
     // since an admin can reconcile. Surface a warning without exposing internal error details.
-    console.error("Wallet pending update failed (possible concurrent withdrawal):", walletError.message);
+    console.error("Wallet pending update failed (possible concurrent withdrawal):", walletError?.message ?? "optimistic lock mismatch");
   }
 
   // Notify the affiliate that their withdrawal request has been received.
-  await supabase.from("notifications").insert({
+  await adminClient.from("notifications").insert({
     user_id: user.id,
     is_admin: false,
     title: "Withdrawal Request Received",
