@@ -46,6 +46,7 @@ export default async function middleware(request: NextRequest) {
       pathname.startsWith("/confirm") ||
       pathname.startsWith("/forgot-password") ||
       pathname.startsWith("/reset-password") ||
+      pathname.startsWith("/update-password") ||
       pathname.startsWith("/auth/callback");
 
     // Public routes accessible without auth

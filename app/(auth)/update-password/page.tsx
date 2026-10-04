@@ -4,7 +4,9 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/Button";
+import { createClient } from "@/lib/supabase/client";
 import { updatePasswordAction } from "@/lib/actions/auth";
+import Link from "next/link";
 
 export default function UpdatePasswordPage() {
   const { t } = useLanguage();
@@ -45,6 +47,32 @@ export default function UpdatePasswordPage() {
     return "bg-emerald-500";
   };
 
+  // The recovery email link carries its one-time token in the URL hash
+  // (#access_token=...&type=recovery). The browser client hydrates it from the
+  // hash into a cookie session that server actions can see; without a session
+  // the link is expired/spent and the user needs a new one.
+  const [sessionState, setSessionState] = useState<"checking" | "valid" | "invalid">("checking");
+  useEffect(() => {
+    // The recovery email link delivers the one-time token in the URL hash
+    // (#access_token=...&refresh_token=...). The browser client (PKCE) will
+    // NOT parse hash fragments — hydrate the session explicitly.
+    const hydrate = async () => {
+      try {
+        const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
+        const accessToken = hash.get("access_token");
+        const refreshToken = hash.get("refresh_token") || "";
+        if (!accessToken) { setSessionState("invalid"); return; }
+        const supabase = createClient();
+        const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
+        window.history.replaceState({}, document.title, window.location.pathname);
+        setSessionState(error ? "invalid" : "valid");
+      } catch {
+        setSessionState("invalid");
+      }
+    };
+    hydrate();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg("");
@@ -70,6 +98,26 @@ export default function UpdatePasswordPage() {
   };
 
   const router = useRouter();
+
+  if (sessionState === "checking") {
+    return <div className="h-10" />;
+  }
+
+  if (sessionState === "invalid") {
+    return (
+      <div className="flex flex-col items-center gap-5 py-6 text-center animate-in fade-in duration-500">
+        <div className="w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center">
+          <svg className="w-8 h-8" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        <h3 className="text-lg font-bold text-gray-900">{t.authErrors.linkInvalid}</h3>
+        <Link href="/forgot-password">
+          <Button variant="primary" className="px-6 py-2.5 text-sm">{t.forgotPassword.title}</Button>
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-8 duration-700 font-poppins">

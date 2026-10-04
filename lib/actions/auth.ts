@@ -213,7 +213,7 @@ export async function requestPasswordReset(email: string) {
   const host = forwardedHost || headersList.get("host") || "localhost:3003";
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://affiliate.product-service.net";
-  const resetUrl = `${siteUrl}/auth/callback?next=/reset-password`;
+  const resetUrl = `${siteUrl}/auth/callback?next=/update-password`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: resetUrl,
@@ -261,7 +261,7 @@ export async function updatePasswordAction(password: string) {
     return { success: false, message: "No active session found. The reset link may have expired." };
   }
 
-  const passwordPolicyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+  const passwordPolicyRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[\s\S]{8,}$/;
   if (!passwordPolicyRegex.test(password)) {
     return { success: false, message: "Password does not meet complexity requirements." };
   }
