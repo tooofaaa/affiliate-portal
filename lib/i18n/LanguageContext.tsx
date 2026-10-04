@@ -109,6 +109,9 @@ const translations = {
       newToProgram: "New to the program?",
       createAccount: "Create Affiliate Account",
     },
+    authErrors: {
+      linkInvalid: "This link is invalid or has expired. Please request a new one.",
+    },
     forgotPassword: {
       title: "Password Recovery",
       subtitle: "Enter your email address to receive a secure reset link",
@@ -608,6 +611,9 @@ const translations = {
       forgotPassword: "هل نسيت كلمة المرور؟",
       newToProgram: "جديد في البرنامج؟",
       createAccount: "إنشاء حساب مسوّق",
+    },
+    authErrors: {
+      linkInvalid: "هذا الرابط غير صالح أو منتهي الصلاحية. يرجى طلب رابط جديد.",
     },
     forgotPassword: {
       title: "استعادة كلمة المرور",

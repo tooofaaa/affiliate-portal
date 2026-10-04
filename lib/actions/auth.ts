@@ -123,7 +123,22 @@ export async function signupAffiliate(formData: FormData) {
   });
 
   if (error) {
-    return { success: false, message: error.message };
+    const msg = error.message.toLowerCase();
+    if (msg.includes("already registered") || msg.includes("already exists")) {
+      return { success: false, message: "An account with this email already exists. Please log in." };
+    }
+    if (msg.includes("password") && (msg.includes("at least") || msg.includes("characters") || msg.includes("requirements"))) {
+      return { success: false, message: "Password must be at least 8 characters." };
+    }
+    return { success: false, message: "Account creation failed. Please try again." };
+  }
+
+
+  if (data.user && (!data.user.identities || data.user.identities.length === 0)) {
+    // GoTrue returns a shadow user (no identity) when the email is already
+    // registered on another account — treat as duplicate and clean it up.
+    await adminClient.auth.admin.deleteUser(data.user.id).catch(() => {});
+    return { success: false, message: "An account with this email already exists. Please log in." };
   }
 
   if (!data.user) {
@@ -197,7 +212,7 @@ export async function requestPasswordReset(email: string) {
   const forwardedProto = headersList.get("x-forwarded-proto") || "https";
   const host = forwardedHost || headersList.get("host") || "localhost:3003";
   const protocol = host.startsWith("localhost") || host.startsWith("127.0.0.1") ? "http" : forwardedProto;
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || process.env.NEXT_PUBLIC_CUSTOMER_PORTAL_URL || "https://affiliate.product-service.net";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://affiliate.product-service.net";
   const resetUrl = `${siteUrl}/auth/callback?next=/reset-password`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {

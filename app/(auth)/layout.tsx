@@ -3,7 +3,7 @@
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
-  const { t, isRTL } = useLanguage();
+  const { t, isRTL, language, toggleLanguage } = useLanguage();
 
   return (
     <div className="flex min-h-screen bg-white" dir={isRTL ? "rtl" : "ltr"}>
@@ -105,11 +105,36 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
             </div>
           ))}
         </div>
+
+        {/* Language toggle (desktop, branding panel) */}
+        <button
+          onClick={toggleLanguage}
+          className="absolute bottom-8 right-8 z-20 flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-300 hover:scale-105 cursor-pointer"
+          style={{
+            background: "rgba(168,85,247,0.15)",
+            border: "1px solid rgba(168,85,247,0.3)",
+            color: "#c084fc",
+          }}
+        >
+          {language === "en" ? "🇸🇦 عربي" : "🇬🇧 English"}
+        </button>
       </div>
 
       {/* Right Panel — Form */}
-      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16"
+      <div className="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-16 relative"
         style={{ background: "#f5f3ff" }}>
+        {/* Language toggle (mobile) */}
+        <button
+          onClick={toggleLanguage}
+          className="lg:hidden absolute top-6 right-6 z-20 flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold cursor-pointer"
+          style={{
+            background: "rgba(168,85,247,0.1)",
+            border: "1px solid rgba(168,85,247,0.2)",
+            color: "#a855f7",
+          }}
+        >
+          {language === "en" ? "عربي" : "English"}
+        </button>
         <div className="w-full max-w-md">
           {/* Mobile logo */}
           <div className="lg:hidden flex flex-col items-center gap-3 mb-10 text-center">

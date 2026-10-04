@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { loginAffiliate } from "@/lib/actions/auth";
 import Link from "next/link";
@@ -14,6 +14,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
+
+  // Failed/expired email links land here with ?error=auth — show a message.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error") === "auth") {
+      setErrorMsg(t.authErrors.linkInvalid);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

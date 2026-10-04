@@ -79,7 +79,13 @@ export default async function middleware(request: NextRequest) {
     }
 
     // Redirect authenticated, active users away from auth routes to dashboard
-    if (user && (isAuthRoute || pathname === "/")) {
+    // Password-recovery pages must stay reachable WITH a session — the reset
+    // callback creates the recovery session right before redirecting to them.
+    const isRecoveryPath =
+      pathname.startsWith("/reset-password") ||
+      pathname.startsWith("/update-password");
+
+    if (user && (isAuthRoute || pathname === "/") && !isRecoveryPath) {
       const url = request.nextUrl.clone();
       url.pathname = "/dashboard";
       return NextResponse.redirect(url);
