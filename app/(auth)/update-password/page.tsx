@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/Button";
@@ -52,17 +52,23 @@ export default function UpdatePasswordPage() {
   // hash into a cookie session that server actions can see; without a session
   // the link is expired/spent and the user needs a new one.
   const [sessionState, setSessionState] = useState<"checking" | "valid" | "invalid">("checking");
+  const supabase = useMemo(() => createClient(), []);
   useEffect(() => {
-    // The recovery email link delivers the one-time token in the URL hash
-    // (#access_token=...&refresh_token=...). The browser client (PKCE) will
-    // NOT parse hash fragments — hydrate the session explicitly.
-    const hydrate = async () => {
+    // Two ways a valid session reaches this page:
+    //  1. URL hash (#access_token=...) from a recovery email link — must be
+    //     hydrated via setSession (PKCE clients do not parse fragments).
+    //  2. Cookies exchanged by /auth/callback (PKCE code flow).
+    // Cookie sessions are the happy path; hash tokens cover direct deep links.
+    const resolve = async () => {
       try {
+        const { data } = await supabase.auth.getSession();
+        if (data?.session) { window.history.replaceState({}, document.title, window.location.pathname); setSessionState("valid"); return; }
+
         const hash = new URLSearchParams(window.location.hash.replace(/^#/, ""));
         const accessToken = hash.get("access_token");
         const refreshToken = hash.get("refresh_token") || "";
         if (!accessToken) { setSessionState("invalid"); return; }
-        const supabase = createClient();
+
         const { error } = await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
         window.history.replaceState({}, document.title, window.location.pathname);
         setSessionState(error ? "invalid" : "valid");
@@ -70,7 +76,7 @@ export default function UpdatePasswordPage() {
         setSessionState("invalid");
       }
     };
-    hydrate();
+    resolve();
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
